@@ -43,12 +43,11 @@ class Otto:
                 ffmpeg.input(
                     download(i),
                     loop=1,
-                    framerate=30
-                )
+                    framerate=30)
                 .zoompan(s='hd1080')
                 .filter('setsar', sar=1)
-            )
-        c = ffmpeg.concat(*[clip.trim(start_frame=0, end_frame=150) for clip in p] )
+                .trim(start_frame=0, end_frame=30))
+        c = ffmpeg.concat(*p)
         print('rendering', c)
         out = ffmpeg.output(c, 'out.mp4')
         out.run()
