@@ -40,24 +40,31 @@ class Otto:
         self.bathrooms = int(self.data['bathrooms_normalized_count']) or f"{self.data['bathrooms_normalized_count_range_max']}"
         self.sqft = int(self.data['size_square_footage']) or f"{self.data['size_square_footage_range_min']}-{self.data['size_square_footage_range_max']}"
 
-    def getMusic(self, song=None):
-        download(song)
+    def addOverlay(self, text):
+        return {
+            'title': text,
+            'font': 'Bauhaus 93',
+            'font_size': 200,
+            'duration': 2,
+            'transition_x': 'left-in',
+        }
 
     def render(self):
-        p = []
-        for i in self.photos:
-            p.append(
-                ffmpeg.input(
-                    download(i),
-                    loop=1,
-                    framerate=30)
-                .zoompan(s='hd1080')
-                .filter('setsar', sar=1)
-                .trim(start_frame=0, end_frame=30))
-        c = ffmpeg.concat(*p)
-        print('rendering', c)
-        out = ffmpeg.output(c, 'out.mp4')
-        out.run()
+        self.config = loads(open('example.json', 'r').read())
+        self.config['slides'] = []
+        for p in self.photos:
+            self.config['slides'].append({
+                'file': p,
+                'slide_duration': 5,
+            })
+        self.config['slides'][0]['overlay'] = self.addOverlay(self.address)
+        self.config['slides'][1]['overlay'] = self.addOverlay(f'{self.bedrooms} bedrooms')
+        self.config['slides'][2]['overlay'] = self.addOverlay(f'{self.bathrooms} bathrooms')
+        self.config['slides'][3]['overlay'] = self.addOverlay(f'{self.sqft} sqft')
+        with open('export.json', 'w') as f:
+            f.write(dumps(self.config))
+        run(['kburns', 'out.mp4', '-f', 'export.json'])
+
 
 if __name__ == '__main__':
     v = Otto()
