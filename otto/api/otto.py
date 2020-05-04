@@ -2,8 +2,8 @@ import ffmpeg
 import numpy as np
 from subprocess import run
 from typing import List
-from seed import photoSeed
 from os import path
+from json import loads, dumps
 
 def download(url):
     filename = url.split('/')[-1]
@@ -28,21 +28,17 @@ class Otto:
             p = self.data[ 'photo' + str(i) ]
             if p:
                 self.photos.append(p)
-        # assert len(self.photos), '# WARNING: no photos found'
+        assert len(self.photos), '# WARNING: no photos found'
         # self.logo = logo
         # self.music = music
         self.address = self.data['addrdisplay']
         self.city = self.data['addrcity']
         self.state = self.data['addrstate']
         self.zip = self.data['addrzip']
-        self.price = int(self.data['price']) or \
-            f"{self.data['price_range_min']-{self.data['price_range_max']}}"
-        self.bedrooms = int(self.data['bedrooms_normalized_count']) or \
-            f"{self.data['bedrooms_normalized_count_range_min']}-{self.data['bedrooms_normalized_count_range_max']}"
-        self.bathrooms = int(self.data['bathrooms_normalized_count']) or \
-            f"{self.data['bathrooms_normalized_count_range_max']}"
-        self.sqft = int(self.data['size_square_footage']) or \
-            f"{self.data['size_square_footage_range_min']}-{self.data['size_square_footage_range_max']}"
+        self.price = int(self.data['price']) or f"{self.data['price_range_min']} - {self.data['price_range_max']}"
+        self.bedrooms = int(self.data['bedrooms_normalized_count']) or f"{self.data['bedrooms_normalized_count_range_min']}-{self.data['bedrooms_normalized_count_range_max']}"
+        self.bathrooms = int(self.data['bathrooms_normalized_count']) or f"{self.data['bathrooms_normalized_count_range_max']}"
+        self.sqft = int(self.data['size_square_footage']) or f"{self.data['size_square_footage_range_min']}-{self.data['size_square_footage_range_max']}"
 
     def getMusic(self, song=None):
         download(song)
