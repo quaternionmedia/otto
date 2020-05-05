@@ -71,7 +71,6 @@ class Otto:
         self.config['slides'][7]['overlay'] = self.addOverlay(textEsc(self.data['OPTIONAL']), font_size=70, transition='center')
         self.config['slides'][-1]['overlay'] = self.addOverlay(textEsc(self.data['NAME']), font_size=200, transition='center')
 
-
         with open('export.json', 'w') as f:
             f.write(dumps(self.config))
         run(['kburns', 'kbout.mp4', '-f', 'export.json'])
@@ -79,12 +78,16 @@ class Otto:
         im = Image.open('data/steves.png')
         w, h = im.size
 
+        bw = self.config['config']['output_width']/10
+        bh = self.config['config']['output_height']
+
         main = ffmpeg.input('kbout.mp4')
-        logo = ffmpeg.input('data/' + self.data["LOGO"])
+        logo = ffmpeg.input('data/' + self.data['LOGO'])
         (
             ffmpeg
             # .overlay(overlay_file)
             .filter([main, logo], 'overlay', self.config['config']['output_width']-w, self.config['config']['output_height']-h)
+            .drawbox(0,0,bw,bh, color='0x'+self.data['COLOR'][1:]+'77', thickness=self.config['config']['output_width']/20)
             .output('logoout.mp4')
             .run()
         )
