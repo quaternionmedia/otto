@@ -5,6 +5,7 @@ from typing import List
 from os import path
 from json import loads, dumps
 from random import choice
+from PIL import Image
 
 def download(url, location=None):
     filename = path.join(location, url.split('/')[-1]) if location else url.split('/')[-1]
@@ -25,7 +26,8 @@ def openCsv(path):
     return d
 
 def textEsc(cmd):
-    return cmd.replace("'", r"\'").replace(',', '\\,')#.replace(' ', '\\ ')
+    # return cmd.replace("'", r"\'").replace(',', '\\,')#.replace(' ', '\\ ')\
+    return cmd
 
 transitions = ['left-in', 'right-in', 'center']
 
@@ -47,8 +49,11 @@ class Otto:
         }
 
     def render(self):
+        #TODO rename config so its not a duplicate key!
         self.config = loads(open('example.json', 'r').read())
         self.config['slides'] = []
+
+
         for p in self.photos:
             self.config['slides'].append({
                 'file': p,
@@ -67,7 +72,20 @@ class Otto:
 
         with open('export.json', 'w') as f:
             f.write(dumps(self.config))
-        run(['kburns', 'out.mp4', '-f', 'export.json'])
+        run(['kburns', 'kbout.mp4', '-f', 'export.json'])
+
+        im = Image.open('data/steves.png')
+        w, h = im.size
+
+        main = ffmpeg.input('kbout.mp4')
+        logo = ffmpeg.input('data/steves.png')
+        (
+            ffmpeg
+            # .overlay(overlay_file)
+            .filter([main, logo], 'overlay', self.config['config']['output_width']-w, self.config['config']['output_height']-h)
+            .output('logoout.mp4')
+            .run()
+        )
 
 
 if __name__ == '__main__':
