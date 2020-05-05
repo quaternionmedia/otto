@@ -5,10 +5,13 @@ from typing import List
 from os import path
 from json import loads, dumps
 
-def download(url):
-    filename = url.split('/')[-1]
+def download(url, location=None):
+    filename = path.join(location, url.split('/')[-1]) if location else url.split('/')[-1]
     if not path.isfile(filename):
-        run(["wget", "-N", url])
+        if location:
+            run(['wget', '-N', '-O', filename, url])
+        else:
+            run(["wget", "-N", url])
     return filename
 
 def openCsv(path):
