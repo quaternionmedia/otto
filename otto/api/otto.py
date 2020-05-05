@@ -27,21 +27,8 @@ class Otto:
     def __init__(self, data: str):
         self.data = openCsv(data)
         self.photos = []
-        for i in range(1, 17):
-            p = self.data[ 'photo' + str(i) ]
-            if p:
-                self.photos.append(p)
-        assert len(self.photos), '# WARNING: no photos found'
-        # self.logo = logo
-        # self.music = music
-        self.address = self.data['addrdisplay']
-        self.city = self.data['addrcity']
-        self.state = self.data['addrstate']
-        self.zip = self.data['addrzip']
-        self.price = int(self.data['price']) or f"{self.data['price_range_min']} - {self.data['price_range_max']}"
-        self.bedrooms = int(self.data['bedrooms_normalized_count']) or f"{self.data['bedrooms_normalized_count_range_min']}-{self.data['bedrooms_normalized_count_range_max']}"
-        self.bathrooms = int(self.data['bathrooms_normalized_count']) or f"{self.data['bathrooms_normalized_count_range_max']}"
-        self.sqft = int(self.data['size_square_footage']) or f"{self.data['size_square_footage_range_min']}-{self.data['size_square_footage_range_max']}"
+        for i in range(1,11):
+            self.photos.append(download(self.data['MEDIA' + str(i)], location='data'))
 
 
     def addOverlay(self, text, font_size=150, transition=None):
@@ -71,26 +58,5 @@ class Otto:
 
 
 if __name__ == '__main__':
-    v = Otto()
+    v = Otto('data.csv')
     v.render()
-
-# get template from xml or csv
-
-# get photos from links from xml (max 20)
-
-# get logo and display watermarked/ghosted to entire video
-
-# get music
-
-# add text at 5 seconds with address, city, price
-
-# add text from 10 seconds, each entry for 5 seconds
-    # number of bedrooms
-    # number of bathrooms
-    # square footage
-
-# rotate photos for 60/(number of photos) seconds each
-
-# add text at 50 seconds with address, city price
-
-# add text at 55 seconds with name, phone number, email, website
