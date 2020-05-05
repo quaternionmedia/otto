@@ -26,8 +26,7 @@ def openCsv(path):
     return d
 
 def textEsc(cmd):
-    # return cmd.replace("'", r"\'").replace(',', '\\,')#.replace(' ', '\\ ')\
-    return cmd
+    return cmd.replace("'", r"\\\'").replace(',', r'\,')
 
 transitions = ['left-in', 'right-in', 'center']
 
