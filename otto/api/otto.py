@@ -4,6 +4,7 @@ from subprocess import run
 from typing import List
 from os import path
 from json import loads, dumps
+from random import choice
 
 def download(url, location=None):
     filename = path.join(location, url.split('/')[-1]) if location else url.split('/')[-1]
@@ -22,6 +23,11 @@ def openCsv(path):
        k, v = row
        d[k] = v
     return d
+
+def textEsc(cmd):
+    return cmd.replace("'", r"\'").replace(',', '\\,')#.replace(' ', '\\ ')
+
+transitions = ['left-in', 'right-in', 'center']
 
 class Otto:
     def __init__(self, data: str):
@@ -48,10 +54,17 @@ class Otto:
                 'file': p,
                 'slide_duration': 5,
             })
-        self.config['slides'][0]['overlay'] = self.addOverlay(self.address)
-        self.config['slides'][1]['overlay'] = self.addOverlay(f'{self.bedrooms} bedrooms')
-        self.config['slides'][2]['overlay'] = self.addOverlay(f'{self.bathrooms} bathrooms')
-        self.config['slides'][3]['overlay'] = self.addOverlay(f'{self.sqft} sqft')
+        self.config['slides'][0]['overlay'] = self.addOverlay(textEsc(self.data['NAME']), font_size=200, transition='center')
+        self.config['slides'][1]['overlay'] = self.addOverlay(textEsc(self.data['ADDRESS']), font_size=150, transition='center')
+        self.config['slides'][2]['overlay'] = self.addOverlay(textEsc(self.data['INITIAL']), font_size=70, transition='center')
+        self.config['slides'][3]['overlay'] = self.addOverlay(textEsc(self.data['BULLET1']))
+        self.config['slides'][4]['overlay'] = self.addOverlay(textEsc(self.data['BULLET2']))
+        self.config['slides'][5]['overlay'] = self.addOverlay(textEsc(self.data['BULLET3']))
+        self.config['slides'][6]['overlay'] = self.addOverlay(textEsc(self.data['BULLET4']))
+        self.config['slides'][7]['overlay'] = self.addOverlay(textEsc(self.data['OPTIONAL']), font_size=70, transition='center')
+        self.config['slides'][-1]['overlay'] = self.addOverlay(textEsc(self.data['NAME']), font_size=200, transition='center')
+
+
         with open('export.json', 'w') as f:
             f.write(dumps(self.config))
         run(['kburns', 'out.mp4', '-f', 'export.json'])
