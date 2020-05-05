@@ -31,12 +31,15 @@ def textEsc(cmd):
 
 transitions = ['left-in', 'right-in', 'center']
 
+
+##Assumes all media files are in a folder called data, and linked properly in the csv
 class Otto:
     def __init__(self, data: str):
         self.data = openCsv(data)
         self.photos = []
         for i in range(1,11):
             self.photos.append(download(self.data['MEDIA' + str(i)], location='data'))
+
 
 
     def addOverlay(self, text, font_size=150, transition=None):
@@ -78,7 +81,7 @@ class Otto:
         w, h = im.size
 
         main = ffmpeg.input('kbout.mp4')
-        logo = ffmpeg.input('data/steves.png')
+        logo = ffmpeg.input('data/' + self.data["LOGO"])
         (
             ffmpeg
             # .overlay(overlay_file)
