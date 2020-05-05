@@ -43,13 +43,14 @@ class Otto:
         self.bathrooms = int(self.data['bathrooms_normalized_count']) or f"{self.data['bathrooms_normalized_count_range_max']}"
         self.sqft = int(self.data['size_square_footage']) or f"{self.data['size_square_footage_range_min']}-{self.data['size_square_footage_range_max']}"
 
-    def addOverlay(self, text):
+
+    def addOverlay(self, text, font_size=150, transition=None):
         return {
             'title': text,
             'font': 'Bauhaus 93',
-            'font_size': 200,
-            'duration': 2,
-            'transition_x': 'left-in',
+            'font_size': font_size,
+            'duration': 5,
+            'transition_x': transition or choice(transitions),
         }
 
     def render(self):
