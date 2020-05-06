@@ -31,7 +31,10 @@ def textEsc(cmd):
 transitions = ['left-in', 'right-in', 'center']
 
 
-##Assumes all media files are in a folder called data, and linked properly in the csv
+## Assumes all media files are in a folder called data, and linked properly in the csv
+## commas escaped by '\' (single backslash)
+## apostrophes escaped by '\\\' (triple backslash)
+
 class Otto:
     def __init__(self, data: str):
         self.data = openCsv(data)
@@ -76,7 +79,7 @@ class Otto:
         run(['kburns', 'kbout.mp4', '-f', 'export.json'])
 
         im = Image.open('data/steves.png')
-        w, h = im.size
+        iw, ih = im.size
 
         bw = self.config['config']['output_width']/10
         bh = self.config['config']['output_height']
@@ -85,8 +88,7 @@ class Otto:
         logo = ffmpeg.input('data/' + self.data['LOGO'])
         (
             ffmpeg
-            # .overlay(overlay_file)
-            .filter([main, logo], 'overlay', self.config['config']['output_width']-w, self.config['config']['output_height']-h)
+            .filter([main, logo], 'overlay', self.config['config']['output_width']-iw, self.config['config']['output_height']-ih)
             .drawbox(0,0,bw,bh, color='0x'+self.data['COLOR'][1:]+'77', thickness=self.config['config']['output_width']/20)
             .output('logoout.mp4')
             .run()
