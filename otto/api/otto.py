@@ -6,6 +6,8 @@ from os import path
 from json import loads, dumps
 from random import choice
 from PIL import Image
+from moviepy.editor import TextClip, CompositeVideoClip
+
 
 def download(url, location=None):
     filename = path.join(location, url.split('/')[-1]) if location else url.split('/')[-1]
@@ -29,7 +31,7 @@ def textEsc(cmd):
     return cmd.replace("'", r"\\\'").replace(',', r'\,')
 
 transitions = ['left-in', 'right-in', 'center']
-
+moviesize = (1920,1080)
 
 ## Assumes all media files are in a folder called data, and linked properly in the csv
 ## commas escaped by '\' (single backslash)
@@ -42,41 +44,40 @@ class Otto:
         for i in range(1,11):
             self.photos.append(download(self.data['MEDIA' + str(i)], location='data'))
 
-
-
-    def addOverlay(self, text, font_size=150, transition=None):
-        return {
-            'title': text,
-            'font': 'Bauhaus 93',
-            'font_size': font_size,
-            'duration': 5,
-            'transition_x': transition or choice(transitions),
-        }
+    def makeText(self,
+            txt,
+            color=None,
+            fontsize=None,
+            size=(1920,1080),
+            font='Yrsa-Bold',
+            method='caption',
+            duration=5,
+            start=0,
+            position='center'):
+        if not color:
+            color = self.data['COLOR']
+        return (TextClip(txt,
+            color=color,
+            fontsize=fontsize,
+            size=size,
+            font=font,
+            method=method).set_duration(duration)
+                .set_start(start)
+                .set_position(position))
 
     def render(self):
         #TODO rename config so its not a duplicate key!
         self.config = loads(open('example.json', 'r').read())
         self.config['slides'] = []
 
-
         for p in self.photos:
             self.config['slides'].append({
                 'file': p,
                 'slide_duration': 5,
             })
-        self.config['slides'][0]['overlay'] = self.addOverlay(textEsc(self.data['NAME']), font_size=200, transition='center')
-        self.config['slides'][1]['overlay'] = self.addOverlay(textEsc(self.data['ADDRESS']), font_size=150, transition='center')
-        self.config['slides'][2]['overlay'] = self.addOverlay(textEsc(self.data['INITIAL']), font_size=70, transition='center')
-        self.config['slides'][3]['overlay'] = self.addOverlay(textEsc(self.data['BULLET1']))
-        self.config['slides'][4]['overlay'] = self.addOverlay(textEsc(self.data['BULLET2']))
-        self.config['slides'][5]['overlay'] = self.addOverlay(textEsc(self.data['BULLET3']))
-        self.config['slides'][6]['overlay'] = self.addOverlay(textEsc(self.data['BULLET4']))
-        self.config['slides'][7]['overlay'] = self.addOverlay(textEsc(self.data['OPTIONAL']), font_size=70, transition='center')
-        self.config['slides'][-1]['overlay'] = self.addOverlay(textEsc(self.data['NAME']), font_size=200, transition='center')
-
         with open('export.json', 'w') as f:
             f.write(dumps(self.config))
-        run(['kburns', 'kbout.mp4', '-f', 'export.json'])
+        # run(['kburns', 'kbout.mp4', '-f', 'export.json'])
 
         im = Image.open('data/steves.png')
         iw, ih = im.size
@@ -91,9 +92,43 @@ class Otto:
             .filter([main, logo], 'overlay', self.config['config']['output_width']-iw, self.config['config']['output_height']-ih)
             .drawbox(0,0,bw,bh, color='0x'+self.data['COLOR'][1:]+'77', thickness=self.config['config']['output_width']/20)
             .output('logoout.mp4')
-            .run()
+            # .run()
         )
 
+        # logoout.mp4 becomes input to text generation
+        t = 0
+        texts = [
+            # text1: NAME
+            self.makeText(self.data['NAME']),
+            # text2: ADDRESS, PHONE, HOURS, WEBSITE
+            self.makeText('\n\n'.join([
+                self.data['ADDRESS'],
+                self.data['PHONE'],
+                self.data['HOURS'],
+                self.data['WEBSITE']]), start=5),
+            # text3: INITIAL (drop character)
+            self.makeText(self.data['INITIAL'], start=10),
+            # text4: BULLETS
+            self.makeText(self.data['BULLET1'], start=15),
+            self.makeText(self.data['BULLET2'], start=20),
+            self.makeText(self.data['BULLET3'], start=25),
+            self.makeText(self.data['BULLET4'], start=30),
+            # text5: OPTIONAL
+            self.makeText(self.data['OPTIONAL'], start=35),
+            # text6: CALL
+            self.makeText(self.data['CALL'], start=40),
+            # text7: NAME, PHONE, ADDRESS, WEBSITE
+            self.makeText('\n\n'.join([
+                self.data['NAME'],
+                self.data['PHONE'],
+                self.data['ADDRESS'],
+                self.data['WEBSITE']
+            ]), start=45)
+        ]
+        final_clip = CompositeVideoClip([
+            clip.crossfadein(1).crossfadeout(1) for clip in texts],
+            size = moviesize)
+        final_clip.write_videofile("ottotxt.mp4", fps=30)
 
 if __name__ == '__main__':
     v = Otto('data.csv')
