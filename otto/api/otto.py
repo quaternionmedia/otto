@@ -1,12 +1,10 @@
 import ffmpeg
 import numpy as np
 from subprocess import run
-from typing import List
 from os import path
 from json import loads, dumps
 from random import choice
-from PIL import Image
-from moviepy.editor import TextClip#, CompositeVideoClip
+from moviepy.editor import TextClip, ColorClip, ImageClip#, CompositeVideoClip
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 
@@ -72,8 +70,28 @@ class Otto:
                 .crossfadeout(1)
                 )
 
+    def makeColor(self,
+            size, #tuple (x,y)
+            color=(1,1,1), #tuple (r,g,b)
+            position=(0,0), #tuple (x,y) from top left
+            opacity=0.5,
+            start=0,
+            duration=5
+            ):
+            return (ColorClip(size,color=color)
+                        .set_position(position)
+                        .set_opacity(opacity)
+                        .set_start(start)
+                        .set_duration(duration)
+                        .set_fps(30)
+                        .crossfadein(1)
+                        .crossfadeout(1)
+                        # .on_color(moviesize,color=(0,0,0),col_opacity=0))
+                        )
+
     def render(self):
         #TODO rename config so its not a duplicate key!
+
         self.config = loads(open('example.json', 'r').read())
         self.config['slides'] = []
 
@@ -86,21 +104,7 @@ class Otto:
             f.write(dumps(self.config))
         run(['kburns', 'kbout.mp4', '-f', 'export.json'])
 
-        im = Image.open('data/steves.png')
-        iw, ih = im.size
 
-        bw = self.config['config']['output_width']/10
-        bh = self.config['config']['output_height']
-
-        main = ffmpeg.input('kbout.mp4')
-        logo = ffmpeg.input('data/' + self.data['LOGO'])
-        (
-            ffmpeg
-            .filter([main, logo], 'overlay', self.config['config']['output_width']-iw, self.config['config']['output_height']-ih)
-            .drawbox(0,0,bw,bh, color='0x'+self.data['COLOR'][1:]+'77', thickness=self.config['config']['output_width']/20)
-            .output('logoout.mp4')
-            .run()
-        )
 
         # logoout.mp4 becomes input to text generation
         slides = VideoFileClip('logoout.mp4')
@@ -132,7 +136,20 @@ class Otto:
                 self.data['WEBSITE']
             ]), start=45)
         ]
-        final_clip = CompositeVideoClip([slides, *texts], size = moviesize)
+
+        colors = [
+            self.makeColor((100,200)),
+            self.makeColor((200,400), position=(100,200), start=5),
+            self.makeColor((400,200), position=(100,200), start=10),
+        ]
+
+        logo = (ImageClip("data/steves.png")
+                  .set_duration(slides.duration)
+                  # .resize(height=50) # if you need to resize...
+                  .margin(right=8, top=8, opacity=0) # (optional) logo-border padding
+                  .set_position(("right","bottom")))
+
+        final_clip = CompositeVideoClip([slides, logo, *colors, *texts], size = moviesize)
         final_clip.write_videofile("ottotxt.mp4", fps=30)
 
 if __name__ == '__main__':
