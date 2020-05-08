@@ -6,7 +6,9 @@ from os import path
 from json import loads, dumps
 from random import choice
 from PIL import Image
-from moviepy.editor import TextClip, CompositeVideoClip
+from moviepy.editor import TextClip#, CompositeVideoClip
+from moviepy.video.io.VideoFileClip import VideoFileClip
+from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 
 
 def download(url, location=None):
@@ -61,9 +63,14 @@ class Otto:
             fontsize=fontsize,
             size=size,
             font=font,
-            method=method).set_duration(duration)
+            method=method)
+                .set_fps(30)
+                .set_duration(duration)
                 .set_start(start)
-                .set_position(position))
+                .set_position(position)
+                .crossfadein(1)
+                .crossfadeout(1)
+                )
 
     def render(self):
         #TODO rename config so its not a duplicate key!
@@ -77,7 +84,7 @@ class Otto:
             })
         with open('export.json', 'w') as f:
             f.write(dumps(self.config))
-        # run(['kburns', 'kbout.mp4', '-f', 'export.json'])
+        run(['kburns', 'kbout.mp4', '-f', 'export.json'])
 
         im = Image.open('data/steves.png')
         iw, ih = im.size
@@ -92,11 +99,11 @@ class Otto:
             .filter([main, logo], 'overlay', self.config['config']['output_width']-iw, self.config['config']['output_height']-ih)
             .drawbox(0,0,bw,bh, color='0x'+self.data['COLOR'][1:]+'77', thickness=self.config['config']['output_width']/20)
             .output('logoout.mp4')
-            # .run()
+            .run()
         )
 
         # logoout.mp4 becomes input to text generation
-        t = 0
+        slides = VideoFileClip('logoout.mp4')
         texts = [
             # text1: NAME
             self.makeText(self.data['NAME']),
@@ -125,9 +132,7 @@ class Otto:
                 self.data['WEBSITE']
             ]), start=45)
         ]
-        final_clip = CompositeVideoClip([
-            clip.crossfadein(1).crossfadeout(1) for clip in texts],
-            size = moviesize)
+        final_clip = CompositeVideoClip([slides, *texts], size = moviesize)
         final_clip.write_videofile("ottotxt.mp4", fps=30)
 
 if __name__ == '__main__':
