@@ -2,9 +2,10 @@ import ffmpeg
 import numpy as np
 from subprocess import run
 from os import path
+from glob import glob
 from json import loads, dumps
 from random import choice
-from moviepy.editor import TextClip, ColorClip, ImageClip#, CompositeVideoClip
+from moviepy.editor import TextClip, ColorClip, ImageClip, concatenate_videoclips#, CompositeVideoClip
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
@@ -31,6 +32,14 @@ def openCsv(path):
 def textEsc(cmd):
     return cmd.replace("'", r"\\\'").replace(',', r'\,')
 
+def resize_func(t, duration=5):
+    if t < 4:
+        return 1 + 0.2*t  # Zoom-in.
+    elif 4 <= t <= 6:
+        return 1 + 0.2*4  # Stay.
+    else: # 6 < t
+        return 1 + 0.2*(duration-t)  # Zoom-out.
+
 transitions = ['left-in', 'right-in', 'center']
 moviesize = (1920,1080)
 
@@ -42,7 +51,7 @@ class Otto:
     def __init__(self, data: str):
         self.data = openCsv(data)
         self.photos = []
-        for i in range(1,11):
+        for i in range(1,10):
             self.photos.append(download(self.data['MEDIA' + str(i)], location='data'))
 
     def makeText(self,
@@ -89,6 +98,11 @@ class Otto:
                         .crossfadeout(1)
                         )
 
+    # def makeImage(self,
+    #         size,
+    #
+    #         )
+
     def render(self):
         #TODO rename config so its not a duplicate key!
 
@@ -107,7 +121,15 @@ class Otto:
 
 
         # logoout.mp4 becomes input to text generation
-        slides = VideoFileClip('logoout.mp4')
+        # slides = VideoFileClip('kbout.mp4')
+
+
+        imgs = [ImageClip(m).set_duration(5).resize(moviesize).resize(lambda t : 1+0.02*t)
+            for m in self.photos]
+
+        slides = concatenate_videoclips(imgs, method="compose")
+        # # concat_clip.write_videofile("slides.mp4", fps=30)
+
         texts = [
             # text1: NAME
             self.makeText(self.data['NAME']),
@@ -137,10 +159,10 @@ class Otto:
             ]), start=45)
         ]
 
-        colors = [self.makeColor((slides.w//10,slides.h),color=(0,0.7,0.1))]
+        colors = [self.makeColor((slides.w//10,slides.h),color=(0,0.7,0.1),opacity=0.9)]
 
         for txt in texts:
-            colors.append(self.makeColor(txt.size, position=txt.pos, start=txt.start))
+            colors.append(self.makeColor(txt.size, position=txt.pos, start=txt.start, opacity=0.7))
 
         logobg = self.makeColor(moviesize,color=(0,0,0),opacity=0)
         logoimg = (ImageClip("data/steves.png")
