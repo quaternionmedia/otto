@@ -7,6 +7,7 @@ from random import choice
 from moviepy.editor import TextClip, ColorClip, ImageClip#, CompositeVideoClip
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+from moviepy.video.compositing.transitions import slide_in
 
 
 def download(url, location=None):
@@ -48,7 +49,7 @@ class Otto:
             txt,
             color=None,
             fontsize=None,
-            size=(1920,1080),
+            size=(1920/2,1080/2),
             font='Yrsa-Bold',
             method='caption',
             duration=5,
@@ -86,23 +87,22 @@ class Otto:
                         .set_fps(30)
                         .crossfadein(1)
                         .crossfadeout(1)
-                        # .on_color(moviesize,color=(0,0,0),col_opacity=0))
                         )
 
     def render(self):
         #TODO rename config so its not a duplicate key!
 
-        self.config = loads(open('example.json', 'r').read())
-        self.config['slides'] = []
-
-        for p in self.photos:
-            self.config['slides'].append({
-                'file': p,
-                'slide_duration': 5,
-            })
-        with open('export.json', 'w') as f:
-            f.write(dumps(self.config))
-        run(['kburns', 'kbout.mp4', '-f', 'export.json'])
+        # self.config = loads(open('example.json', 'r').read())
+        # self.config['slides'] = []
+        #
+        # for p in self.photos:
+        #     self.config['slides'].append({
+        #         'file': p,
+        #         'slide_duration': 5,
+        #     })
+        # with open('export.json', 'w') as f:
+        #     f.write(dumps(self.config))
+        # run(['kburns', 'kbout.mp4', '-f', 'export.json'])
 
 
 
@@ -137,17 +137,19 @@ class Otto:
             ]), start=45)
         ]
 
-        colors = [
-            self.makeColor((100,200)),
-            self.makeColor((200,400), position=(100,200), start=5),
-            self.makeColor((400,200), position=(100,200), start=10),
-        ]
+        colors = [self.makeColor((slides.w//10,slides.h),color=(0,0.7,0.1))]
 
-        logo = (ImageClip("data/steves.png")
+        for txt in texts:
+            colors.append(self.makeColor(txt.size, position=txt.pos, start=txt.start))
+
+        logobg = self.makeColor(moviesize,color=(0,0,0),opacity=0)
+        logoimg = (ImageClip("data/steves.png")
                   .set_duration(slides.duration)
                   # .resize(height=50) # if you need to resize...
                   .margin(right=8, top=8, opacity=0) # (optional) logo-border padding
-                  .set_position(("right","bottom")))
+                  .set_position(("right","bottom"))
+                  )
+        logo = CompositeVideoClip([logobg,logoimg],size=moviesize).fx(slide_in, 1,'left')
 
         final_clip = CompositeVideoClip([slides, logo, *colors, *texts], size = moviesize)
         final_clip.write_videofile("ottotxt.mp4", fps=30)
