@@ -122,11 +122,11 @@ def initial(text,
                 .set_start(i*duration)
                 for i, t in enumerate(texts)]
     return (CompositeVideoClip([*bkgs, *texts], size=moviesize)
-            .set_position(position))
+            .set_position(position)
             .set_fps(30)
             .set_duration(duration)
             .crossfadein(1)
-            .crossfadeout(1)
+            .crossfadeout(1))
 
 class Otto:
     def __init__(self, data: str):
