@@ -75,7 +75,7 @@ def title(text,
             fps=30):
     if not color:
         color = data['COLOR']
-    t = (TextClip(text,
+    t = (TextClip(text.rstrip().lstrip(),
         color=color,
         fontsize=fontsize,
         size=size,
@@ -108,7 +108,7 @@ def initial(text,
     if not color:
         color = data['COLOR']
     text = text.split('.')
-    texts = [TextClip(t,
+    texts = [TextClip(t.rstrip().lstrip(),
                 color=color,
                 fontsize=fontsize,
                 size=size,
