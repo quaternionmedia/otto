@@ -60,6 +60,74 @@ def kburns(clips, padding=1):
 
 ## Assumes all media files are in a folder called data, and linked properly in the csv
 
+
+def title(text,
+            data=None,
+            color=None,
+            fontsize=None,
+            size=(1920,1080),
+            font='Yrsa-Bold',
+            method='label',
+            start=0,
+            duration=5,
+            position='center',
+            opacity=.4,
+            fps=30):
+    if not color:
+        color = data['COLOR']
+    t = (TextClip(text,
+        color=color,
+        fontsize=fontsize,
+        size=size,
+        font=font,
+        method=method)
+            .set_position(position)
+    )
+    bkg = (ColorClip((t.w, t.h),color=(1,1,1))
+            .set_position(t.pos)
+            .set_opacity(opacity)
+            )
+    return (CompositeVideoClip([bkg, t], size=moviesize)
+            .set_fps(fps)
+            .set_duration(duration)
+            .crossfadein(1)
+            .crossfadeout(1))
+
+def initial(text,
+            data=None,
+            color=None,
+            fontsize=None,
+            size=(1920,1080),
+            font='Yrsa-Bold',
+            method='caption',
+            start=0,
+            duration=5,
+            position='center',
+            opacity=.4,
+            fps=30,):
+    if not color:
+        color = data['COLOR']
+    text = text.split('.')
+    texts = [TextClip(t,
+                color=color,
+                fontsize=fontsize,
+                size=size,
+                font=font,
+                method=method,
+                ).set_start(i*duration)
+                .set_position(position) for i, t in enumerate(text) if t]
+    bkgs = [ColorClip((t.w, t.h),color=(1,1,1))
+                .set_position(t.pos)
+                .set_opacity(opacity)
+                .set_start(i*duration)
+                for i, t in enumerate(texts)]
+    return (CompositeVideoClip([*bkgs, *texts], size=moviesize)
+            .set_position(position))
+            .set_fps(30)
+            .set_duration(duration)
+            .crossfadein(1)
+            .crossfadeout(1)
+
 class Otto:
     def __init__(self, data: str):
         self.data = openJson(data)
@@ -121,7 +189,12 @@ class Otto:
                   )
         logo = CompositeVideoClip([logobg,logoimg],size=moviesize).fx(slide_in, 1,'left')
 
-        final_clip = CompositeVideoClip([slides, logo, *colors, *texts], size = moviesize)
+        titles = concatenate_videoclips([
+            title(text=self.data['NAME'], data=self.data, size=scale(2)),
+            initial(text=self.data['INITIAL'], data=self.data, size=scale(1.5)),
+            ])
+        print('titles', titles)
+        final_clip = CompositeVideoClip([slides, logo, titles])
         final_clip.write_videofile("ottotxt.mp4", fps=30)
 
 if __name__ == '__main__':
