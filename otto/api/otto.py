@@ -43,9 +43,16 @@ def resize_func(t, duration=5):
 transitions = ['left-in', 'right-in', 'center']
 moviesize = (1920,1080)
 
+def kburns(clips, padding=1):
+    kb = [clips[0]]
+    t = clips[0].duration - padding
+    for c in clips[1:]:
+        kb.append(c.set_start(t).crossfadein(padding))
+        t += c.duration - padding
+    return CompositeVideoClip(kb).crossfadeout(1)
+
+
 ## Assumes all media files are in a folder called data, and linked properly in the csv
-## commas escaped by '\' (single backslash)
-## apostrophes escaped by '\\\' (triple backslash)
 
 class Otto:
     def __init__(self, data: str):
@@ -98,71 +105,8 @@ class Otto:
                         .crossfadeout(1)
                         )
 
-    # def makeImage(self,
-    #         size,
-    #
-    #         )
-
     def render(self):
-        #TODO rename config so its not a duplicate key!
-
-        # self.config = loads(open('example.json', 'r').read())
-        # self.config['slides'] = []
-        #
-        # for p in self.photos:
-        #     self.config['slides'].append({
-        #         'file': p,
-        #         'slide_duration': 5,
-        #     })
-        # with open('export.json', 'w') as f:
-        #     f.write(dumps(self.config))
-        # run(['kburns', 'kbout.mp4', '-f', 'export.json'])
-
-
-
-        # logoout.mp4 becomes input to text generation
-        # slides = VideoFileClip('kbout.mp4')
-
-
-        imgs = [ImageClip(m).set_duration(5).resize(moviesize).resize(lambda t : 1+0.02*t)
-            for m in self.photos]
-
-        slides = concatenate_videoclips(imgs, method="compose")
-        # # concat_clip.write_videofile("slides.mp4", fps=30)
-
-        texts = [
-            # text1: NAME
-            self.makeText(self.data['NAME']),
-            # text2: ADDRESS, PHONE, HOURS, WEBSITE
-            self.makeText('\n\n'.join([
-                self.data['ADDRESS'],
-                self.data['PHONE'],
-                self.data['HOURS'],
-                self.data['WEBSITE']]), start=5),
-            # text3: INITIAL (drop character)
-            self.makeText(self.data['INITIAL'], start=10),
-            # text4: BULLETS
-            self.makeText(self.data['BULLET1'], start=15),
-            self.makeText(self.data['BULLET2'], start=20),
-            self.makeText(self.data['BULLET3'], start=25),
-            self.makeText(self.data['BULLET4'], start=30),
-            # text5: OPTIONAL
-            self.makeText(self.data['OPTIONAL'], start=35),
-            # text6: CALL
-            self.makeText(self.data['CALL'], start=40),
-            # text7: NAME, PHONE, ADDRESS, WEBSITE
-            self.makeText('\n\n'.join([
-                self.data['NAME'],
-                self.data['PHONE'],
-                self.data['ADDRESS'],
-                self.data['WEBSITE']
-            ]), start=45)
-        ]
-
-        colors = [self.makeColor((slides.w//10,slides.h),color=(0,0.7,0.1),opacity=0.9)]
-
-        for txt in texts:
-            colors.append(self.makeColor(txt.size, position=txt.pos, start=txt.start, opacity=0.7))
+        slides = kburns([ImageClip(m).set_duration(5).resize(moviesize).resize(lambda t : 1+0.02*t) for m in self.photos])
 
         logobg = self.makeColor(moviesize,color=(0,0,0),opacity=0)
         logoimg = (ImageClip("data/steves.png")
