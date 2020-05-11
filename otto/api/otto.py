@@ -28,6 +28,10 @@ def openCsv(path):
        k, v = row
        d[k] = v
     return d
+def openJson(path):
+    from json import loads
+    with open(path, 'r') as f:
+        return loads(f.read())
 
 def textEsc(cmd):
     return cmd.replace("'", r"\\\'").replace(',', r'\,')
@@ -42,6 +46,8 @@ def resize_func(t, duration=5):
 
 transitions = ['left-in', 'right-in', 'center']
 moviesize = (1920,1080)
+def scale(n):
+    return int(moviesize[0]/n), int(moviesize[1]/n)
 
 def kburns(clips, padding=1):
     kb = [clips[0]]
@@ -56,10 +62,8 @@ def kburns(clips, padding=1):
 
 class Otto:
     def __init__(self, data: str):
-        self.data = openCsv(data)
-        self.photos = []
-        for i in range(1,10):
-            self.photos.append(download(self.data['MEDIA' + str(i)], location='data'))
+        self.data = openJson(data)
+        self.photos = self.data['MEDIA']
 
     def makeText(self,
             txt,
@@ -121,5 +125,5 @@ class Otto:
         final_clip.write_videofile("ottotxt.mp4", fps=30)
 
 if __name__ == '__main__':
-    v = Otto('data.csv')
+    v = Otto('data.json')
     v.render()
