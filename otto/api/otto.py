@@ -132,7 +132,7 @@ def initial(text,
 class Otto:
     def __init__(self, data: str):
         self.data = openJson(data)
-        self.photos = self.data['MEDIA']
+        self.photos = [download(m, location='data') for m in self.data['MEDIA']]
 
     def makeText(self,
             txt,
