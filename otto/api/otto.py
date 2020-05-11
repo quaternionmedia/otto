@@ -115,16 +115,17 @@ def initial(text,
                 font=font,
                 method=method,
                 ).set_start(i*duration)
+                .set_duration(duration)
                 .set_position(position) for i, t in enumerate(text) if t]
     bkgs = [ColorClip((t.w, t.h),color=(1,1,1))
+                .set_duration(t.duration)
+                .set_start(t.start)
                 .set_position(t.pos)
                 .set_opacity(opacity)
-                .set_start(i*duration)
                 for i, t in enumerate(texts)]
     return (CompositeVideoClip([*bkgs, *texts], size=moviesize)
             .set_position(position)
             .set_fps(30)
-            .set_duration(duration)
             .crossfadein(1)
             .crossfadeout(1))
 
