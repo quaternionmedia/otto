@@ -4,7 +4,7 @@ from subprocess import run
 from os import path
 from glob import glob
 from json import loads, dumps
-from random import choice
+from random import choice, randrange
 from moviepy.editor import TextClip, ColorClip, ImageClip, concatenate_videoclips#, CompositeVideoClip
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
@@ -49,14 +49,20 @@ moviesize = (1920,1080)
 def scale(n):
     return int(moviesize[0]/n), int(moviesize[1]/n)
 
-def kburns(clips, padding=1):
-    kb = [clips[0]]
-    t = clips[0].duration - padding
-    for c in clips[1:]:
-        kb.append(c.set_start(t).crossfadein(padding))
-        t += c.duration - padding
+def kburns(clips, padding=1, duration=5):
+    kb = []
+    t = 0
+    for c in clips:
+        zoom = randrange(2, 6, 1)/100 * choice([1, -1])
+        print('kburns', c, zoom,)
+        kb.append( CompositeVideoClip([ImageClip(c)])
+                    .resize(moviesize)
+                    .set_duration(duration + padding)
+                    .resize(lambda t : 1+zoom*t if zoom > 0 else (1-zoom)+zoom*t)
+                    .set_start(t)
+                    .crossfadein(padding))
+        t += kb[-1].duration - padding
     return CompositeVideoClip(kb).crossfadeout(1)
-
 
 ## Assumes all media files are in a folder called data, and linked properly in the csv
 
@@ -179,8 +185,7 @@ class Otto:
                         )
 
     def render(self):
-        slides = kburns([ImageClip(m).set_duration(5).resize(moviesize).resize(lambda t : 1+0.02*t) for m in self.photos])
-
+        slides = kburns(self.photos)
         logobg = self.makeColor(moviesize,color=(0,0,0),opacity=0)
         logoimg = (ImageClip("data/steves.png")
                   .set_duration(slides.duration)
