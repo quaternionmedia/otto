@@ -123,7 +123,17 @@ def initial(text,
                 method=method,
                 ).set_start(i*duration)
                 .set_duration(duration)
-                .set_position(position) for i, t in enumerate(text) if t]
+                .set_position(position)
+                .crossfadein(1)
+                .crossfadeout(1) for i, t in enumerate(text) if t.rstrip().lstrip()]
+
+    bkgs = [ColorClip((t.w, t.h),color=(1,1,1))
+                .set_duration(t.duration)
+                .set_start(t.start)
+                .set_position(t.pos)
+                .set_opacity(opacity)
+                .crossfadein(1)
+                .crossfadeout(1)
     bkgs = [ColorClip((t.w, t.h),color=(1,1,1))
                 .set_duration(t.duration)
                 .set_start(t.start)
