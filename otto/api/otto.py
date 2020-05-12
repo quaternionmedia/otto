@@ -134,17 +134,99 @@ def initial(text,
                 .set_opacity(opacity)
                 .crossfadein(1)
                 .crossfadeout(1)
+                for i, t in enumerate(texts)]
+    return (CompositeVideoClip([*bkgs, *texts], size=moviesize)
+            .set_position(position)
+            .set_fps(30))
+
+
+def bullets(text,
+            data=None,
+            color=None,
+            fontsize=None,
+            size=(1920,1080),
+            font='Yrsa-Bold',
+            method='caption',
+            start=0,
+            duration=5,
+            position='center',
+            opacity=.4,
+            fps=30,):
+    if not color:
+        color = data['COLOR']
+    text = text.split('\u2022')
+    text = [t.lstrip().rstrip() for t in text if t.lstrip().rstrip()]
+    print('bullet texts', text)
+    texts = [TextClip(t,
+                color=color,
+                fontsize=fontsize,
+                size=size,
+                font=font,
+                method=method,
+                ).set_start(i*duration)
+                .set_duration(duration)
+                .set_position(position)
+                .crossfadein(1)
+                .crossfadeout(1) for i, t in enumerate(text) if t.rstrip().lstrip()]
+
     bkgs = [ColorClip((t.w, t.h),color=(1,1,1))
                 .set_duration(t.duration)
                 .set_start(t.start)
                 .set_position(t.pos)
                 .set_opacity(opacity)
+                .crossfadein(1)
+                .crossfadeout(1)
                 for i, t in enumerate(texts)]
     return (CompositeVideoClip([*bkgs, *texts], size=moviesize)
             .set_position(position)
-            .set_fps(30)
+            .set_fps(30))
+
+def final(text,
+            data=None,
+            color=None,
+            fontsize=None,
+            size=(1920,1080),
+            font='Yrsa-Bold',
+            method='caption',
+            start=0,
+            duration=5,
+            position='center',
+            opacity=.4,
+            fps=30,):
+    if not color:
+        color = data['COLOR']
+    texts = [
+        TextClip(text, color=color,
+            fontsize=fontsize,
+            size=scale(1.5),
+            font=font,
+            method='label',
+            align='north').set_position(('center', 'top')),
+        TextClip(data['ADDRESS'], color=color,
+            fontsize=fontsize,
+            size=scale(3),
+            font=font,
+            method=method,
+            align='west').set_position(('left', 'center')),
+        TextClip(data['WEBSITE'], color=color,
+            fontsize=fontsize,
+            size=scale(1.5),
+            font=font,
+            method=method,
+            align='south').set_position(('center', 'bottom')),
+        TextClip(data['PHONE'], color=color,
+            fontsize=fontsize,
+            size=scale(3),
+            font=font,
+            method=method,
+            align='east').set_position(('right', 'center')),
+    ]
+    return (CompositeVideoClip(texts, size=size)
+            .set_fps(fps)
+            .set_duration(duration)
             .crossfadein(1)
             .crossfadeout(1))
+
 
 class Otto:
     def __init__(self, data: str):
@@ -209,10 +291,12 @@ class Otto:
         logo = CompositeVideoClip([logobg,logoimg],size=moviesize).fx(slide_in, 1,'left')
 
         titles = concatenate_videoclips([
-            title(text=self.data['NAME'], data=self.data, size=scale(2)),
-            initial(text=self.data['INITIAL'], data=self.data, size=scale(1.5)),
+            title(text=self.data['NAME'], data=self.data, size=scale(2), duration=duration),
+            initial(text=self.data['INITIAL'], data=self.data, size=scale(1.5), duration=duration),
+            bullets(text=self.data['BULLETS'], data=self.data, size=scale(1.5), duration=duration),
+            initial(text=self.data['CALL'], data=self.data, size=scale(1.5), duration=duration),
+            final(text=self.data['NAME'], data=self.data, duration=duration)
             ])
-        print('titles', titles)
         final_clip = CompositeVideoClip([slides, logo, titles])
         final_clip.write_videofile("ottotxt.mp4", fps=30)
 
