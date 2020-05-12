@@ -186,7 +186,9 @@ class Otto:
                         )
 
     def render(self):
-        slides = kburns(self.photos)
+        duration = 60/len(self.photos)
+        slides = kburns(self.photos, duration = duration)
+
         logobg = self.makeColor(moviesize,color=(0,0,0),opacity=0)
         logoimg = (ImageClip("data/steves.png")
                   .set_duration(slides.duration)
