@@ -114,6 +114,7 @@ def initial(text,
     if not color:
         color = data['COLOR']
     text = text.split('.')
+    text = [t.lstrip().rstrip() for t in text if t.lstrip().rstrip()]
     texts = [TextClip(t.rstrip().lstrip(),
                 color=color,
                 fontsize=fontsize,
