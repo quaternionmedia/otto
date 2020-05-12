@@ -5,11 +5,11 @@ from os import path
 from glob import glob
 from json import loads, dumps
 from random import choice, randrange
-from moviepy.editor import TextClip, ColorClip, ImageClip, concatenate_videoclips#, CompositeVideoClip
+from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip, concatenate_videoclips
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
-
+from colortransitions import growBox
 
 def download(url, location=None):
     filename = path.join(location, url.split('/')[-1]) if location else url.split('/')[-1]
@@ -53,7 +53,7 @@ def kburns(clips, padding=1, duration=5):
     kb = []
     t = 0
     for c in clips:
-        zoom = randrange(2, 6, 1)/100 * choice([1, -1])
+        zoom = randrange(2, 4, 1)/100 * choice([1, -1])
         print('kburns', c, zoom,)
         kb.append( CompositeVideoClip([ImageClip(c)])
                     .resize(moviesize)
@@ -93,7 +93,12 @@ def title(text,
             .set_position(t.pos)
             .set_opacity(opacity)
             )
-    return (CompositeVideoClip([bkg, t], size=moviesize)
+    gb = growBox(duration=duration, size=scale(2))
+    box = VideoClip(gb)
+    boxmask = VideoClip(lambda t: gb(t)[:,:,3]/255.0, ismask=True)
+    boxclip = VideoClip(lambda t: gb(t)[:,:,:3], duration=duration, ismask=True).set_mask(boxmask).set_position(position)
+
+    return (CompositeVideoClip([bkg, boxclip, t], size=moviesize)
             .set_fps(fps)
             .set_duration(duration)
             .crossfadein(1)
