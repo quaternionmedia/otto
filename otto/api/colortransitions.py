@@ -5,7 +5,7 @@ def growBox(duration=5, size=(800,600)):
     surface = gizeh.Surface(size[0],size[1],bg_color=(0,0,0,0))
     def gb(t):
         x = size[0]*t*2
-        rect = gizeh.rectangle(lx=x,ly=size[1],xy=(0,size[1]/2),fill=(0,0,.5,.4))
+        rect = gizeh.rectangle(lx=x,ly=size[1],xy=(0,size[1]/2),fill=(0,0,.5))
         rect.draw(surface)
 
         return surface.get_npimage(transparent=True)
