@@ -32,12 +32,14 @@ def boxReveal(duration=5, size=(800,600), padding=(100,20), color=(0,0,.5)):
     w = size[0]+padding[0]*2
     def br(t):
         surface = gizeh.Surface(w,size[1]+padding[1]*2,bg_color=(0,0,0,0))
-        x = max(w - t * (size[0] + padding[0]) / duration * 3, padding[0])
+        x = max(w - t * (size[0] + padding[0]) / duration * 6, padding[0])
         rect = gizeh.rectangle(lx=x,ly=size[1]+padding[1]*2,xy=(x/2,size[1]/2),fill=(0,0,.5))
         rect.draw(surface)
-
         return surface.get_npimage(transparent=True)
-    return br
+    boxVideo = VideoClip(br)
+    boxMask = VideoClip(lambda t: br(t)[:,:,3]/255.0, ismask=True, duration=duration)
+    boxClip = VideoClip(lambda t: br(t)[:,:,:3], duration=duration, ).set_mask(boxMask).set_position('center')
+    return boxClip
 
 def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, isTransparent=isTransparent):
     surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
