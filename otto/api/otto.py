@@ -9,7 +9,9 @@ from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip, concatenat
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
-from colortransitions import growBox
+from colortransitions import growBox, flyInAndGrow
+import time
+
 
 def download(url, location=None):
     filename = path.join(location, url.split('/')[-1]) if location else url.split('/')[-1]
@@ -28,21 +30,15 @@ def openCsv(path):
        k, v = row
        d[k] = v
     return d
+
 def openJson(path):
-    from json import loads
     with open(path, 'r') as f:
         return loads(f.read())
 
-def textEsc(cmd):
-    return cmd.replace("'", r"\\\'").replace(',', r'\,')
-
-def resize_func(t, duration=5):
-    if t < 4:
-        return 1 + 0.2*t  # Zoom-in.
-    elif 4 <= t <= 6:
-        return 1 + 0.2*4  # Stay.
-    else: # 6 < t
-        return 1 + 0.2*(duration-t)  # Zoom-out.
+def getRGBdecr(hex):
+    hex = hex.lstrip('#')
+    hlen = len(hex)
+    return tuple(int(hex[i:i+hlen//3], 16) / 255.0 for i in range(0, hlen, hlen//3))
 
 transitions = ['left-in', 'right-in', 'center']
 moviesize = (1920,1080)
@@ -80,7 +76,7 @@ def title(text,
             opacity=.4,
             fps=30):
     if not color:
-        color = data['COLOR']
+        color = data['FONTCOLOR']
     t = (TextClip(text.rstrip().lstrip(),
         color=color,
         fontsize=fontsize,
@@ -93,7 +89,8 @@ def title(text,
     #         .set_position(t.pos)
     #         .set_opacity(opacity)
     #         )
-    gb = growBox(duration=duration, size=scale(2))
+    print(getRGBdecr(data['THEMECOLOR']))
+    gb = growBox(duration=duration, size=scale(2), fill=getRGBdecr(data['THEMECOLOR']))
     box = VideoClip(gb)
     boxmask = VideoClip(lambda t: gb(t)[:,:,3]/255.0, ismask=True, duration=duration)
     boxclip = VideoClip(lambda t: gb(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
@@ -117,7 +114,7 @@ def initial(text,
             opacity=.4,
             fps=30,):
     if not color:
-        color = data['COLOR']
+        color = data['FONTCOLOR']
     text = text.split('.')
     text = [t.lstrip().rstrip() for t in text if t.lstrip().rstrip()]
     texts = [TextClip(t.rstrip().lstrip(),
@@ -158,7 +155,7 @@ def bullets(text,
             opacity=.4,
             fps=30,):
     if not color:
-        color = data['COLOR']
+        color = data['FONTCOLOR']
     text = text.split('\u2022')
     text = [t.lstrip().rstrip() for t in text if t.lstrip().rstrip()]
     print('bullet texts', text)
@@ -199,7 +196,7 @@ def final(text,
             opacity=.4,
             fps=30,):
     if not color:
-        color = data['COLOR']
+        color = data['FONTCOLOR']
     texts = [
         TextClip(text, color=color,
             fontsize=fontsize,
@@ -226,7 +223,14 @@ def final(text,
             method=method,
             align='east').set_position(('right', 'center')),
     ]
-    return (CompositeVideoClip(texts, size=size)
+
+    fiag = growBox(duration=duration, fill=getRGBdecr(data['THEMECOLOR']))#, size=scale(2))
+    box = VideoClip(fiag)
+    boxmask = VideoClip(lambda t: fiag(t)[:,:,3]/255.0, ismask=True, duration=duration)
+    boxclip = VideoClip(lambda t: fiag(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
+
+
+    return (CompositeVideoClip([boxclip, *texts], size=size)
             .set_fps(fps)
             .set_duration(duration)
             .crossfadein(1)
@@ -289,7 +293,7 @@ class Otto:
         logobg = self.makeColor(moviesize,color=(0,0,0),opacity=0)
         logoimg = (ImageClip("data/steves.png")
                   .set_duration(slides.duration)
-                  # .resize(height=50) # if you need to resize...
+                  .resize(height=moviesize[1]//5) # if you need to resize...
                   .margin(right=8, top=8, opacity=0) # (optional) logo-border padding
                   .set_position(("right","bottom"))
                   )
@@ -303,7 +307,8 @@ class Otto:
             final(text=self.data['NAME'], data=self.data, duration=duration)
             ])
         final_clip = CompositeVideoClip([slides, logo, titles])
-        final_clip.write_videofile("ottotxt.mp4", fps=30)
+        timestr = time.strftime("%Y%m%d-%H%M%S")
+        final_clip.write_videofile("{}_ottorender.mp4".format(timestr), fps=30)
 
 if __name__ == '__main__':
     v = Otto('data.json')
