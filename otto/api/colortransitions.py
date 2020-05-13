@@ -42,8 +42,8 @@ def boxReveal(duration=5, size=(800,600), padding=(100,20), color=(0,0,.5)):
     return boxClip
 
 def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, isTransparent=isTransparent):
-    surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
     def fiag(t):
+        surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
         fstart = 0
         fend = 0.5
         gstart = fend
@@ -64,8 +64,8 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, isTranspa
     return fiag
 
 def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, isTransparent=isTransparent):
-    surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
     def zfc(t):
+        surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
         zstart = 0
         zend = 1
         staticduration = duration - (zend-zstart)
