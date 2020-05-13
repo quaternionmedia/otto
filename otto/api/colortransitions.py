@@ -29,7 +29,9 @@ def flyInAndGrow(duration=5, size=(1920,1080)):
         return surface.get_npimage()
     return fiag
 
-# clip = VideoClip(growBox())
-#
-# final_clip = CompositeVideoClip([clip])
-# final_clip.write_videofile("growbox.mp4", fps=30)
+
+if __name__ == '__main__':
+    clip = VideoClip(growBox())
+
+    final_clip = CompositeVideoClip([clip, ColorClip(color=(1,1,1), size=(800,600))]).set_duration(5)
+    final_clip.write_videofile("growbox.mp4", fps=30)
