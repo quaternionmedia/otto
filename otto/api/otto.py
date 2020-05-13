@@ -9,7 +9,7 @@ from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip, concatenat
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
-from colortransitions import growBox, boxReveal, flyInAndGrow
+from colortransitions import growBox, boxReveal, flyInAndGrow, zoomFromCenter
 import time
 
 def download(url, location=None):
@@ -83,13 +83,9 @@ def title(text,
         method=method)
             .set_position(position)
     )
-    gb = boxReveal(duration=duration, size=size, color=color)
-    # gb = growBox(duration=duration, size=scale(2), fill=getRGBdecr(data['THEMECOLOR']), isTransparent=True)
-    box = VideoClip(gb).set_position(position)
-    boxmask = VideoClip(lambda t: gb(t)[:,:,3]/255.0, ismask=True, duration=duration)
-    boxclip = VideoClip(lambda t: gb(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position('center')
+    box = boxReveal(duration=duration, size=size, color=color)
 
-    return (CompositeVideoClip([t, boxclip], size=moviesize)
+    return (CompositeVideoClip([t, box], size=moviesize)
             .set_position('center')
             .set_fps(fps)
             .set_duration(duration)
@@ -221,10 +217,10 @@ def final(text,
             align='east').set_position(('right', 'center')),
     ]
 
-    fiag = flyInAndGrow(size=moviesize, duration=duration, fill=getRGBdecr(data['THEMECOLOR']), isTransparent=True)#, size=scale(2))
-    box = VideoClip(fiag)
-    boxmask = VideoClip(lambda t: fiag(t)[:,:,3]/255.0, ismask=True, duration=duration)
-    boxclip = VideoClip(lambda t: fiag(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
+    zfc = zoomFromCenter(size=moviesize, duration=duration, fill=getRGBdecr(data['THEMECOLOR']), isTransparent=True)#, size=scale(2))
+    box = VideoClip(zfc)
+    boxmask = VideoClip(lambda t: zfc(t)[:,:,3]/255.0, ismask=True, duration=duration)
+    boxclip = VideoClip(lambda t: zfc(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
 
 
     return (CompositeVideoClip([boxclip, *texts], size=size)
