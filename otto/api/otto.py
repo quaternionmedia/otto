@@ -83,16 +83,20 @@ def title(text,
         method=method)
             .set_position(position)
     )
-    gb = growBox(duration=duration, size=scale(2), fill=getRGBdecr(data['THEMECOLOR']), isTransparent=True)
-    box = VideoClip(gb)
+    gb = boxReveal(duration=duration, size=size, color=color)
+    # gb = growBox(duration=duration, size=scale(2), fill=getRGBdecr(data['THEMECOLOR']), isTransparent=True)
+    box = VideoClip(gb).set_position(position)
     boxmask = VideoClip(lambda t: gb(t)[:,:,3]/255.0, ismask=True, duration=duration)
-    boxclip = VideoClip(lambda t: gb(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
+    boxclip = VideoClip(lambda t: gb(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position('center')
 
-    return (CompositeVideoClip([boxclip, t], size=moviesize)
+    return (CompositeVideoClip([t, boxclip], size=moviesize)
+            .set_position('center')
             .set_fps(fps)
             .set_duration(duration)
+            # .resize(lambda t: min(t+.01, 1))
             .crossfadein(1)
-            .crossfadeout(1))
+            .crossfadeout(1)
+            )
 
 def initial(text,
             data=None,
@@ -281,20 +285,22 @@ class Otto:
 
     def render(self):
         duration = 60/len(self.photos)
-        slides = kburns(self.photos, duration = duration)
-
+        # slides = kburns(self.photos, duration = duration)
+        slides = VideoFileClip('kbout.mp4')
         logobg = self.makeColor(moviesize,color=(0,0,0),opacity=0)
-        logoimg = (ImageClip("data/steves.png")
+        logoimg = (ImageClip('data/steves.png')
                   .set_duration(slides.duration)
                   .resize(height=moviesize[1]//5) # if you need to resize...
                   .margin(right=8, top=8, opacity=0) # (optional) logo-border padding
-                  .set_position(("right","bottom"))
+                  .set_position(('right','bottom'))
                   )
         logo = CompositeVideoClip([logobg,logoimg],size=moviesize).fx(slide_in, 1,'right')
 
         titles = concatenate_videoclips([
             title(text=self.data['NAME'], data=self.data, size=scale(2), duration=duration),
             initial(text=self.data['INITIAL'], data=self.data, size=scale(2), duration=duration/1.5),
+            bullets(text=self.data['BULLETS'], data=self.data, size=scale(2.5), duration=duration/2),
+            # initial(text=self.data['OPTIONAL'], data=self.data, size=scale(3), duration=duration/2),
             initial(text=self.data['CALL'], data=self.data, size=scale(1.5), duration=duration),
             final(text=self.data['NAME'], data=self.data, duration=duration)
             ])
