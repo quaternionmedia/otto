@@ -9,9 +9,8 @@ from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip, concatenat
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
-from colortransitions import growBox, flyInAndGrow
+from colortransitions import growBox, boxReveal, flyInAndGrow
 import time
-
 
 def download(url, location=None):
     filename = path.join(location, url.split('/')[-1]) if location else url.split('/')[-1]
@@ -68,9 +67,8 @@ def title(text,
             color=None,
             fontsize=None,
             size=(1920,1080),
-            font='Yrsa-Bold',
-            method='label',
-            start=0,
+            font='Segoe UI Black',
+            method='caption',
             duration=5,
             position='center',
             opacity=.4,
@@ -101,7 +99,7 @@ def initial(text,
             color=None,
             fontsize=None,
             size=(1920,1080),
-            font='Yrsa-Bold',
+            font='Segoe UI Black',
             method='caption',
             start=0,
             duration=5,
@@ -142,7 +140,7 @@ def bullets(text,
             color=None,
             fontsize=None,
             size=(1920,1080),
-            font='Yrsa-Bold',
+            font='Segoe UI Black',
             method='caption',
             start=0,
             duration=5,
@@ -183,7 +181,7 @@ def final(text,
             color=None,
             fontsize=None,
             size=(1920,1080),
-            font='Yrsa-Bold',
+            font='Segoe UI Black',
             method='caption',
             start=0,
             duration=5,
@@ -242,7 +240,7 @@ class Otto:
             color=None,
             fontsize=None,
             size=(1920/2,1080/2),
-            font='Yrsa-Bold',
+            font='Segoe UI Black',
             method='caption',
             duration=5,
             start=0,
@@ -296,14 +294,13 @@ class Otto:
 
         titles = concatenate_videoclips([
             title(text=self.data['NAME'], data=self.data, size=scale(2), duration=duration),
-            initial(text=self.data['INITIAL'], data=self.data, size=scale(1.5), duration=duration),
-            bullets(text=self.data['BULLETS'], data=self.data, size=scale(1.5), duration=duration),
+            initial(text=self.data['INITIAL'], data=self.data, size=scale(2), duration=duration/1.5),
             initial(text=self.data['CALL'], data=self.data, size=scale(1.5), duration=duration),
             final(text=self.data['NAME'], data=self.data, duration=duration)
             ])
         final_clip = CompositeVideoClip([slides, logo, titles])
-        timestr = time.strftime("%Y%m%d-%H%M%S")
-        final_clip.write_videofile("{}_ottorender.mp4".format(timestr), fps=30)
+        timestr = time.strftime('%Y%m%d-%H%M%S')
+        final_clip.write_videofile(f'{timestr}_ottorender.mp4', fps=30)
 
 if __name__ == '__main__':
     v = Otto('data.json')
