@@ -53,11 +53,15 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, isTranspa
         h = size[1]*0.8
         x = size[0]/2
         y = -size[1]/2
-        if (t > fstart and t < fend):
-            y = -h/2 + t*h*2
-        if (t > gstart and t < gend):
-            y = size[1]/2
-            w = size[0]*(t*0.8/gend)
+        if t <= gend:
+            if (t <= fend):
+                y = -h/2 + t*h*2
+            else:
+                y = size[1]/2
+                w = size[0]*(t*0.8/gend)
+        else:
+            w, h = size[0]*.8, size[1]*.8
+            x, y = size[0]/2, size[1]/2
         rect = gizeh.rectangle(lx=w,ly=h,xy=(x,y),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=isTransparent)
@@ -73,9 +77,11 @@ def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, isTrans
         h = 0
         x = size[0]/2
         y = size[1]/2
-        if (t > zstart and t < zend):
+        if (t < zend):
             w = t*size[0]/zend
             h = t*size[1]/zend
+        else:
+            w, h = size[0]/zend, size[1]/zend
         rect = gizeh.rectangle(lx=w, ly=h, xy=(x,y),fill=fill)
         rect.draw(surface)
 
