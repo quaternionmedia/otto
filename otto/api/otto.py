@@ -85,12 +85,7 @@ def title(text,
         method=method)
             .set_position(position)
     )
-    # bkg = (ColorClip((t.w, t.h),color=(1,1,1))
-    #         .set_position(t.pos)
-    #         .set_opacity(opacity)
-    #         )
-    print(getRGBdecr(data['THEMECOLOR']))
-    gb = growBox(duration=duration, size=scale(2), fill=getRGBdecr(data['THEMECOLOR']))
+    gb = growBox(duration=duration, size=scale(2), fill=getRGBdecr(data['THEMECOLOR']), isTransparent=True)
     box = VideoClip(gb)
     boxmask = VideoClip(lambda t: gb(t)[:,:,3]/255.0, ismask=True, duration=duration)
     boxclip = VideoClip(lambda t: gb(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
@@ -129,7 +124,7 @@ def initial(text,
                 .crossfadein(1)
                 .crossfadeout(1) for i, t in enumerate(text) if t.rstrip().lstrip()]
 
-    bkgs = [ColorClip((t.w, t.h),color=(1,1,1))
+    bkgs = [ColorClip((t.w, t.h),color=getRGBdecr(data['THEMECOLOR']))
                 .set_duration(t.duration)
                 .set_start(t.start)
                 .set_position(t.pos)
@@ -171,7 +166,7 @@ def bullets(text,
                 .crossfadein(1)
                 .crossfadeout(1) for i, t in enumerate(text) if t.rstrip().lstrip()]
 
-    bkgs = [ColorClip((t.w, t.h),color=(1,1,1))
+    bkgs = [ColorClip((t.w, t.h),color=getRGBdecr(data['THEMECOLOR']))
                 .set_duration(t.duration)
                 .set_start(t.start)
                 .set_position(t.pos)
@@ -224,7 +219,7 @@ def final(text,
             align='east').set_position(('right', 'center')),
     ]
 
-    fiag = growBox(duration=duration, fill=getRGBdecr(data['THEMECOLOR']))#, size=scale(2))
+    fiag = flyInAndGrow(size=moviesize, duration=duration, fill=getRGBdecr(data['THEMECOLOR']), isTransparent=True)#, size=scale(2))
     box = VideoClip(fiag)
     boxmask = VideoClip(lambda t: fiag(t)[:,:,3]/255.0, ismask=True, duration=duration)
     boxclip = VideoClip(lambda t: fiag(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
@@ -297,7 +292,7 @@ class Otto:
                   .margin(right=8, top=8, opacity=0) # (optional) logo-border padding
                   .set_position(("right","bottom"))
                   )
-        logo = CompositeVideoClip([logobg,logoimg],size=moviesize).fx(slide_in, 1,'left')
+        logo = CompositeVideoClip([logobg,logoimg],size=moviesize).fx(slide_in, 1,'right')
 
         titles = concatenate_videoclips([
             title(text=self.data['NAME'], data=self.data, size=scale(2), duration=duration),
