@@ -202,7 +202,7 @@ def final(text,
             size=scale(3),
             font=font,
             method=method,
-            align='west').set_position(('left', 'center')),
+            align='west').set_position('left'),
         TextClip(data['WEBSITE'], color=color,
             fontsize=fontsize,
             size=scale(1.5),
@@ -214,7 +214,7 @@ def final(text,
             size=scale(3),
             font=font,
             method=method,
-            align='east').set_position(('right', 'center')),
+            align='east').set_position('right'),
     ]
 
     zfc = zoomFromCenter(size=moviesize, duration=duration, fill=getRGBdecr(data['THEMECOLOR']), isTransparent=True)#, size=scale(2))
