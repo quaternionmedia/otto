@@ -70,7 +70,7 @@ def title(text,
             method='caption',
             duration=5,
             position='center',
-            opacity=.4,
+            opacity=.7,
             fps=30):
     if not color:
         color = data['FONTCOLOR']
@@ -103,7 +103,7 @@ def initial(text,
             start=0,
             duration=5,
             position='center',
-            opacity=.4,
+            opacity=.7,
             fps=30,):
     if not color:
         color = data['FONTCOLOR']
@@ -144,19 +144,21 @@ def bullets(text,
             start=0,
             duration=5,
             position='center',
-            opacity=.4,
+            align='center',
+            opacity=.7,
             fps=30,):
     if not color:
         color = data['FONTCOLOR']
     text = text.split('\u2022')
     text = [t.lstrip().rstrip() for t in text if t.lstrip().rstrip()]
     print('bullet texts', text)
-    texts = [TextClip(t,
+    texts = [TextClip(f'\u2022 {t}',
                 color=color,
                 fontsize=fontsize,
                 size=size,
                 font=font,
                 method=method,
+                align=align,
                 ).set_start(i*duration)
                 .set_duration(duration)
                 .set_position(position)
