@@ -33,7 +33,7 @@ def boxReveal(duration=5, size=(800,600), padding=(100,20), color=(0,0,.5)):
     def br(t):
         surface = gizeh.Surface(w,size[1]+padding[1]*2,bg_color=(0,0,0,0))
         x = max(w - t * (size[0] + padding[0]) / duration * 6, padding[0])
-        rect = gizeh.rectangle(lx=x,ly=size[1]+padding[1]*2,xy=(x/2,size[1]/2),fill=(0,0,.5))
+        rect = gizeh.rectangle(lx=x,ly=size[1]+padding[1]*2,xy=(x/2,size[1]/2),fill=color)
         rect.draw(surface)
         return surface.get_npimage(transparent=True)
     boxVideo = VideoClip(br)

@@ -11,6 +11,7 @@ from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
 from colortransitions import growBox, boxReveal, flyInAndGrow, zoomFromCenter
 import time
+from PIL.ImageColor import getcolor
 
 def download(url, location=None):
     filename = path.join(location, url.split('/')[-1]) if location else url.split('/')[-1]
@@ -34,10 +35,8 @@ def openJson(path):
     with open(path, 'r') as f:
         return loads(f.read())
 
-def getRGBdecr(hex):
-    hex = hex.lstrip('#')
-    hlen = len(hex)
-    return tuple(int(hex[i:i+hlen//3], 16) / 255.0 for i in range(0, hlen, hlen//3))
+def getcolor1(c):
+    return tuple(i/255.0 for i in getcolor(c, 'RGB'))
 
 transitions = ['left-in', 'right-in', 'center']
 moviesize = (1920,1080)
@@ -83,7 +82,7 @@ def title(text,
         method=method)
             .set_position(position)
     )
-    box = boxReveal(duration=duration, size=size, color=color)
+    box = boxReveal(duration=duration, size=size, color=tuple(i/255.0 for i in getcolor(data['THEMECOLOR'], 'RGB')))
 
     return (CompositeVideoClip([t, box], size=moviesize)
             .set_position('center')
@@ -122,7 +121,7 @@ def initial(text,
                 .crossfadein(1)
                 .crossfadeout(1) for i, t in enumerate(text) if t.rstrip().lstrip()]
 
-    bkgs = [ColorClip((t.w, t.h),color=getRGBdecr(data['THEMECOLOR']))
+    bkgs = [ColorClip((t.w, t.h),color=getcolor(data['THEMECOLOR'], 'RGB'))
                 .set_duration(t.duration)
                 .set_start(t.start)
                 .set_position(t.pos)
@@ -164,7 +163,7 @@ def bullets(text,
                 .crossfadein(1)
                 .crossfadeout(1) for i, t in enumerate(text) if t.rstrip().lstrip()]
 
-    bkgs = [ColorClip((t.w, t.h),color=getRGBdecr(data['THEMECOLOR']))
+    bkgs = [ColorClip((t.w, t.h),color=getcolor(data['THEMECOLOR'], 'RGB'))
                 .set_duration(t.duration)
                 .set_start(t.start)
                 .set_position(t.pos)
@@ -217,7 +216,7 @@ def final(text,
             align='east').set_position('right'),
     ]
 
-    zfc = zoomFromCenter(size=moviesize, duration=duration, fill=getRGBdecr(data['THEMECOLOR']), isTransparent=True)#, size=scale(2))
+    zfc = zoomFromCenter(size=moviesize, duration=duration, fill=getcolor1(data['THEMECOLOR']), isTransparent=True)#, size=scale(2))
     box = VideoClip(zfc)
     boxmask = VideoClip(lambda t: zfc(t)[:,:,3]/255.0, ismask=True, duration=duration)
     boxclip = VideoClip(lambda t: zfc(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
@@ -294,10 +293,10 @@ class Otto:
 
         titles = concatenate_videoclips([
             title(text=self.data['NAME'], data=self.data, size=scale(2), duration=duration),
-            initial(text=self.data['INITIAL'], data=self.data, size=scale(2), duration=duration/1.5),
-            bullets(text=self.data['BULLETS'], data=self.data, size=scale(2.5), duration=duration/2),
+            initial(text=self.data['INITIAL'], data=self.data, size=(1600, 300), duration=duration/1.5, position='top'),
+            bullets(text=self.data['BULLETS'], data=self.data, size=(1300, 300), duration=duration/2, position=('left', 'bottom'), align='west', fontsize=100),
             # initial(text=self.data['OPTIONAL'], data=self.data, size=scale(3), duration=duration/2),
-            initial(text=self.data['CALL'], data=self.data, size=scale(1.5), duration=duration),
+            initial(text=self.data['CALL'], data=self.data, size=scale(2), duration=duration/1.5),
             final(text=self.data['NAME'], data=self.data, duration=duration)
             ])
         final_clip = CompositeVideoClip([slides, logo, titles])
