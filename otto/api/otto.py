@@ -13,13 +13,19 @@ from colortransitions import growBox, boxReveal, flyInAndGrow
 import time
 from PIL.ImageColor import getcolor
 
-def download(url, location=None):
-    filename = path.join(location, url.split('/')[-1]) if location else url.split('/')[-1]
+def download(url, location='data'):
+    if url.find('.jpg'):
+        basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode()
+    elif url.find('.png'):
+        basename = run(['basename', url.split('.png')[0] + '.png'], capture_output=True).stdout.decode()
+    else:
+        basename = run(['basename', url.split('/')[-1]])
+    filename = path.join(location, basename) if location else basename
     if not path.isfile(filename):
         if location:
-            run(['wget', '-N', '-O', filename, url])
+            run(['wget', '--content-disposition', '-N', '-O', filename, url])
         else:
-            run(["wget", "-N", url])
+            run(['wget', '--content-disposition',  '-N', url])
     return filename
 
 def openCsv(path):
