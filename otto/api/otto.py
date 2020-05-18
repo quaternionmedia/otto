@@ -285,10 +285,11 @@ class Otto:
 
     def render(self):
         duration = 60/len(self.photos)
-        # slides = kburns(self.photos, duration = duration)
-        slides = VideoFileClip('kbout.mp4')
+        slides = kburns(self.photos, duration = duration)
+        # slides = VideoFileClip('kbout.mp4')
+        logodl = download(self.data['LOGO'])
         logobg = self.makeColor(moviesize,color=(0,0,0),opacity=0)
-        logoimg = (ImageClip('data/steves.png')
+        logoimg = (ImageClip(logodl)
                   .set_duration(slides.duration)
                   .resize(height=moviesize[1]//5) # if you need to resize...
                   .margin(right=8, top=8, opacity=0) # (optional) logo-border padding
