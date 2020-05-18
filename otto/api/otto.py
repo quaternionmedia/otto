@@ -73,7 +73,7 @@ def title(text,
             method='caption',
             duration=5,
             position='center',
-            opacity=.7,
+            opacity=.4,
             fps=30):
     if not color:
         color = data['FONTCOLOR']
@@ -82,7 +82,8 @@ def title(text,
         fontsize=fontsize,
         size=size,
         font=font,
-        method=method)
+        method=method,
+        stroke_color=None)
             .set_position(position)
     )
     boxclip = boxReveal(duration=duration, size=size, fill=getcolor(data['THEMECOLOR'], 'RGB')).set_position(position)
@@ -106,8 +107,9 @@ def initial(text,
             start=0,
             duration=5,
             position='center',
-            opacity=.7,
-            fps=30,):
+            opacity=.4,
+            fps=30,
+            ):
     if not color:
         color = data['FONTCOLOR']
     text = text.split('.')
@@ -118,8 +120,10 @@ def initial(text,
                 size=size,
                 font=font,
                 method=method,
+                stroke_color=None,
+                align='west'
                 ).set_start(i*duration)
-                .set_duration(duration)
+                .set_duration(duration or 2 + pow(len(t.rstrip().lstrip().split(' ')), .5))
                 .set_position(position)
                 .crossfadein(1)
                 .crossfadeout(1) for i, t in enumerate(text) if t.rstrip().lstrip()]
@@ -147,9 +151,9 @@ def bullets(text,
             start=0,
             duration=5,
             position='center',
-            align='center',
-            opacity=.7,
-            fps=30,):
+            opacity=.4,
+            fps=30,
+            align='west'):
     if not color:
         color = data['FONTCOLOR']
     text = text.split('\u2022')
@@ -161,7 +165,8 @@ def bullets(text,
                 size=size,
                 font=font,
                 method=method,
-                align=align,
+                stroke_color=None,
+                align='west'
                 ).set_start(i*duration)
                 .set_duration(duration)
                 .set_position(position)
@@ -200,25 +205,29 @@ def final(text,
             size=scale(1.5),
             font=font,
             method='label',
+            stroke_color=None,
             align='north').set_position(('center', 'top')),
         TextClip(data['ADDRESS'], color=color,
             fontsize=fontsize,
             size=scale(3),
             font=font,
             method=method,
-            align='west').set_position('left'),
+            stroke_color=None,
+            align='west').set_position(('left', 'center')),
         TextClip(data['WEBSITE'], color=color,
             fontsize=fontsize,
             size=scale(1.5),
             font=font,
             method=method,
+            stroke_color=None,
             align='south').set_position(('center', 'bottom')),
         TextClip(data['PHONE'], color=color,
             fontsize=fontsize,
             size=scale(3),
             font=font,
             method=method,
-            align='east').set_position('right'),
+            stroke_color=None,
+            align='east').set_position(('right', 'center')),
     ]
 
     fiag = flyInAndGrow(size=moviesize, duration=duration, fill=getcolor(data['THEMECOLOR'], 'RGB'), transparent=True)#, size=scale(2))
