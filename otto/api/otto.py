@@ -41,9 +41,6 @@ def openJson(path):
     with open(path, 'r') as f:
         return loads(f.read())
 
-def getcolor1(c):
-    return tuple(i/255.0 for i in getcolor(c, 'RGB'))
-
 transitions = ['left-in', 'right-in', 'center']
 moviesize = (1920,1080)
 def scale(n):
@@ -88,9 +85,9 @@ def title(text,
         method=method)
             .set_position(position)
     )
-    box = boxReveal(duration=duration, size=size, color=tuple(i/255.0 for i in getcolor(data['THEMECOLOR'], 'RGB')))
+    boxclip = boxReveal(duration=duration, size=size, fill=getcolor(data['THEMECOLOR'], 'RGB')).set_position(position)
 
-    return (CompositeVideoClip([t, box], size=moviesize)
+    return (CompositeVideoClip([t, boxclip], size=moviesize)
             .set_position('center')
             .set_fps(fps)
             .set_duration(duration)
@@ -224,7 +221,7 @@ def final(text,
             align='east').set_position('right'),
     ]
 
-    fiag = flyInAndGrow(size=moviesize, duration=duration, fill=getRGBdecr(data['THEMECOLOR']), transparent=True)#, size=scale(2))
+    fiag = flyInAndGrow(size=moviesize, duration=duration, fill=getcolor(data['THEMECOLOR'], 'RGB'), transparent=True)#, size=scale(2))
     box = VideoClip(fiag)
     boxmask = VideoClip(lambda t: fiag(t)[:,:,3]/255.0, ismask=True, duration=duration)
     boxclip = VideoClip(lambda t: fiag(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
