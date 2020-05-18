@@ -319,5 +319,5 @@ class Otto:
         final_clip.write_videofile(f'{timestr}_ottorender.mp4', fps=30)
 
 if __name__ == '__main__':
-    v = Otto('data.json')
+    v = Otto('talavideo.json')
     v.render()
