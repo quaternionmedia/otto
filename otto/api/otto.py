@@ -302,9 +302,9 @@ class Otto:
             bullets(text=self.data['BULLETS'], data=self.data, size=(1300, 300), duration=duration/2, position=('left', 'bottom'), align='west', fontsize=100),
             # initial(text=self.data['OPTIONAL'], data=self.data, size=scale(3), duration=duration/2),
             initial(text=self.data['CALL'], data=self.data, size=scale(2), duration=duration/1.5),
-            final(text=self.data['NAME'], data=self.data, duration=duration)
             ])
-        final_clip = CompositeVideoClip([slides, logo, titles])
+        ending = final(text=self.data['NAME'], data=self.data, duration=duration)
+        final_clip = CompositeVideoClip([slides, logo, titles, ending])
         timestr = time.strftime('%Y%m%d-%H%M%S')
         final_clip.write_videofile(f'{timestr}_ottorender.mp4', fps=30)
 
