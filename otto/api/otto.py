@@ -9,7 +9,7 @@ from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip, concatenat
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
-from colortransitions import growBox, boxReveal, flyInAndGrow, zoomFromCenter
+from colortransitions import growBox, boxReveal, flyInAndGrow
 import time
 from PIL.ImageColor import getcolor
 
@@ -218,10 +218,10 @@ def final(text,
             align='east').set_position('right'),
     ]
 
-    zfc = zoomFromCenter(size=moviesize, duration=duration, fill=getcolor1(data['THEMECOLOR']), isTransparent=True)#, size=scale(2))
-    box = VideoClip(zfc)
-    boxmask = VideoClip(lambda t: zfc(t)[:,:,3]/255.0, ismask=True, duration=duration)
-    boxclip = VideoClip(lambda t: zfc(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
+    fiag = flyInAndGrow(size=moviesize, duration=duration, fill=getRGBdecr(data['THEMECOLOR']), transparent=True)#, size=scale(2))
+    box = VideoClip(fiag)
+    boxmask = VideoClip(lambda t: fiag(t)[:,:,3]/255.0, ismask=True, duration=duration)
+    boxclip = VideoClip(lambda t: fiag(t)[:,:,:3], duration=duration, ).set_mask(boxmask).set_position(position)
 
 
     return (CompositeVideoClip([boxclip, *texts], size=size)

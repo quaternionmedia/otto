@@ -5,9 +5,9 @@ clipsize = (800,600)
 defaultdur = 5
 defaultfill = (0,0,0.7)
 defaultbg = (0,0,0,0)
-isTransparent = False
+transparent = False
 
-def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, isTransparent=isTransparent):
+def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     surface = gizeh.Surface(size[0],size[1],bg_color=defaultbg)
     def gb(t):
         x = size[0]/2
@@ -25,15 +25,15 @@ def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, isTransparent=
         rect = gizeh.rectangle(lx=w,ly=h,xy=(400,300),fill=fill)
         rect.draw(surface)
 
-        return surface.get_npimage(transparent=isTransparent)
+        return surface.get_npimage(transparent=transparent)
     return gb
 
-def boxReveal(duration=5, size=(800,600), padding=(100,20), color=(0,0,.5)):
+def boxReveal(duration=5, size=(800,600), padding=(100,20), fill=(0,0,.5)):
     w = size[0]+padding[0]*2
     def br(t):
         surface = gizeh.Surface(w,size[1]+padding[1]*2,bg_color=(0,0,0,0))
         x = max(w - t * (size[0] + padding[0]) / duration * 6, padding[0])
-        rect = gizeh.rectangle(lx=x,ly=size[1]+padding[1]*2,xy=(x/2,size[1]/2),fill=color)
+        rect = gizeh.rectangle(lx=x,ly=size[1]+padding[1]*2,xy=(x/2,size[1]/2),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=True)
     boxVideo = VideoClip(br)
@@ -41,7 +41,7 @@ def boxReveal(duration=5, size=(800,600), padding=(100,20), color=(0,0,.5)):
     boxClip = VideoClip(lambda t: br(t)[:,:,:3], duration=duration, ).set_mask(boxMask).set_position('center')
     return boxClip
 
-def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, isTransparent=isTransparent):
+def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def fiag(t):
         surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
         fstart = 0
@@ -64,10 +64,10 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, isTranspa
             x, y = size[0]/2, size[1]/2
         rect = gizeh.rectangle(lx=w,ly=h,xy=(x,y),fill=fill)
         rect.draw(surface)
-        return surface.get_npimage(transparent=isTransparent)
+        return surface.get_npimage(transparent=transparent)
     return fiag
 
-def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, isTransparent=isTransparent):
+def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def zfc(t):
         surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
         zstart = 0
@@ -85,7 +85,7 @@ def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, isTrans
         rect = gizeh.rectangle(lx=w, ly=h, xy=(x,y),fill=fill)
         rect.draw(surface)
 
-        return surface.get_npimage(transparent=isTransparent)
+        return surface.get_npimage(transparent=transparent)
     return zfc
 
 if __name__ == '__main__':
