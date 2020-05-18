@@ -293,7 +293,8 @@ class Otto:
                         )
 
     def render(self):
-        duration = 60/len(self.photos)
+        # (photos + endcard) * duration = 60 seconds
+        duration = 60/(len(self.photos) + 1)
         slides = kburns(self.photos, duration = duration)
         # slides = VideoFileClip('kbout.mp4')
         logodl = download(self.data['LOGO'])
@@ -313,7 +314,7 @@ class Otto:
             # initial(text=self.data['OPTIONAL'], data=self.data, size=scale(3), duration=duration/2),
             initial(text=self.data['CALL'], data=self.data, size=scale(2), duration=duration/1.5),
             ])
-        ending = final(text=self.data['NAME'], data=self.data, duration=duration)
+        ending = final(text=self.data['NAME'], data=self.data, duration=duration).set_start(slides.duration)
         final_clip = CompositeVideoClip([slides, logo, titles, ending])
         timestr = time.strftime('%Y%m%d-%H%M%S')
         final_clip.write_videofile(f'{timestr}_ottorender.mp4', fps=30)
