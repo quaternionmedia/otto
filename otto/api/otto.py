@@ -155,7 +155,7 @@ def bullets(text,
     text = text.split('\u2022')
     text = [t.lstrip().rstrip() for t in text if t.lstrip().rstrip()]
     print('bullet texts', text)
-    texts = [TextClip(f'\u2022 {t}',
+    texts = [TextClip(t,
                 color=color,
                 fontsize=fontsize,
                 size=size,
