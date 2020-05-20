@@ -136,16 +136,16 @@ def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
             topline = gizeh.rectangle(lx=w*(t/t1), ly=stroke, xy=(x*(t/t1),stroke/2),fill=fill)
         elif(t>=t1 and t<t2):
             topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,stroke/2),fill=fill)
-            rightline = gizeh.rectangle(lx=stroke, ly=h*(t/t2), xy=((w-(stroke/2)),y*(t/t2)), fill=fill)
+            rightline = gizeh.rectangle(lx=stroke, ly=h*((t-t1)/(t2-t1)), xy=((w-(stroke/2)),y*((t-t1)/(t2-t1))), fill=fill)
         elif(t>=t2 and t<t3):
             topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,stroke/2),fill=fill)
             rightline = gizeh.rectangle(lx=stroke, ly=h, xy=(w-(stroke/2),y),fill=fill)
-            bottomline = gizeh.rectangle(lx=w*(t/t3), ly=stroke, xy=(w-(x*(t/t3)),(h-(stroke/2))),fill=fill)
-        elif(t>t3 and t<t4):
+            bottomline = gizeh.rectangle(lx=w*((t-t2)/(t3-t2)), ly=stroke, xy=(w-(x*((t-t2)/(t3-t2))),(h-(stroke/2))),fill=fill)
+        elif(t>=t3 and t<t4):
             topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,stroke/2),fill=fill)
             bottomline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,(h-(stroke/2))),fill=fill)
             rightline = gizeh.rectangle(lx=stroke, ly=h, xy=(w-(stroke/2),y),fill=fill)
-            leftline = gizeh.rectangle(lx=stroke, ly=(h*(t/t4)), xy=(stroke/2,h-(y*(t/t4))),fill=fill)
+            leftline = gizeh.rectangle(lx=stroke, ly=(h*((t-t3)/(t4-t3))), xy=(stroke/2,h-(y*((t-t3)/(t4-t3)))),fill=fill)
 
         else:
             topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,stroke/2),fill=fill)
