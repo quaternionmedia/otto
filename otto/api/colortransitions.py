@@ -88,12 +88,33 @@ def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
         return surface.get_npimage(transparent=transparent)
     return zfc
 
+def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
+    def cs(t):
+        surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
+        sstart = 0
+        send = 1
+        endr = 10
+        r = 0
+        if(t<send):
+            r = (send-t)*size[0]/2 + endr
+        else:
+            r = endr
+
+        x = size[0]/2
+        y = size[1]/2
+
+        circle = gizeh.circle(r=r, xy=[x,y], fill=defaultfill)
+        circle.draw(surface)
+
+        return surface.get_npimage(transparent=transparent)
+    return cs
+
 if __name__ == '__main__':
-    # gb = VideoClip(growBox()).set_duration(defaultdur)
-    # bg = ColorClip(clipsize,color=(0.1,0.1,0.1))
-    clips = [VideoClip(growBox()).set_duration(5),
+    clips = [VideoClip(circleShrink()).set_duration(5),
+                VideoClip(growBox()).set_duration(5),
                 VideoClip(flyInAndGrow()).set_duration(5),
-                VideoClip(zoomFromCenter()).set_duration(5)]
+                VideoClip(zoomFromCenter()).set_duration(5)
+                ]
 
     final_clips = concatenate_videoclips(clips)
-    final_clips.write_videofile("colortransitiontest.mp4", fps=30)
+    final_clips.write_videofile("transitiontest.mp4", fps=30)
