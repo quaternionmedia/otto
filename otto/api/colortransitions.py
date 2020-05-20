@@ -109,8 +109,62 @@ def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         return surface.get_npimage(transparent=transparent)
     return cs
 
+def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
+    def dbo(t):
+        surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
+
+        dstart = 0
+        dend = 1
+
+        stroke = 30
+        x = size[0]/2
+        y = size[1]/2
+        w = size[0]
+        h = size[1]
+
+        topline = gizeh.rectangle(lx=0, ly=0, xy=(x,stroke/2),fill=fill)
+        bottomline = gizeh.rectangle(lx=0, ly=0, xy=(x,(h-(stroke/2))),fill=fill)
+        rightline = gizeh.rectangle(lx=0, ly=0, xy=(w-(stroke/2),y),fill=fill)
+        leftline = gizeh.rectangle(lx=0, ly=0, xy=(stroke/2,y),fill=fill)
+
+        t1 = 0.5
+        t2 = 1
+        t3 = 1.5
+        t4 = 2
+
+        if(t<t1):
+            topline = gizeh.rectangle(lx=w*(t/t1), ly=stroke, xy=(x*(t/t1),stroke/2),fill=fill)
+        elif(t>=t1 and t<t2):
+            topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,stroke/2),fill=fill)
+            rightline = gizeh.rectangle(lx=stroke, ly=h*(t/t2), xy=((w-(stroke/2)),y*(t/t2)), fill=fill)
+        elif(t>=t2 and t<t3):
+            topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,stroke/2),fill=fill)
+            rightline = gizeh.rectangle(lx=stroke, ly=h, xy=(w-(stroke/2),y),fill=fill)
+            bottomline = gizeh.rectangle(lx=w*(t/t3), ly=stroke, xy=(w-(x*(t/t3)),(h-(stroke/2))),fill=fill)
+        elif(t>t3 and t<t4):
+            topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,stroke/2),fill=fill)
+            bottomline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,(h-(stroke/2))),fill=fill)
+            rightline = gizeh.rectangle(lx=stroke, ly=h, xy=(w-(stroke/2),y),fill=fill)
+            leftline = gizeh.rectangle(lx=stroke, ly=(h*(t/t4)), xy=(stroke/2,h-(y*(t/t4))),fill=fill)
+
+        else:
+            topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,stroke/2),fill=fill)
+            bottomline = gizeh.rectangle(lx=w, ly=stroke, xy=(x,(h-(stroke/2))),fill=fill)
+            rightline = gizeh.rectangle(lx=stroke, ly=h, xy=(w-(stroke/2),y),fill=fill)
+            leftline = gizeh.rectangle(lx=stroke, ly=h, xy=(stroke/2,y),fill=fill)
+
+        topline.draw(surface)
+        bottomline.draw(surface)
+        rightline.draw(surface)
+        leftline.draw(surface)
+
+        return surface.get_npimage(transparent=transparent)
+    return dbo
+
+
 if __name__ == '__main__':
-    clips = [VideoClip(circleShrink()).set_duration(5),
+    clips = [VideoClip(drawBoxOutline()).set_duration(5),
+                VideoClip(circleShrink()).set_duration(5),
                 VideoClip(growBox()).set_duration(5),
                 VideoClip(flyInAndGrow()).set_duration(5),
                 VideoClip(zoomFromCenter()).set_duration(5)
