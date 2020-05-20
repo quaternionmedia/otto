@@ -5,7 +5,13 @@ clipsize = (800,600)
 defaultdur = 5
 defaultfill = (0,0,0.7)
 defaultbg = (0,0,0,0)
-transparent = False
+transparent = True
+
+def makeClip(f):
+    video = VideoClip(f)
+    mask = VideoClip(lambda t: f(t)[:,:,3]/255.0, ismask=True)
+    clip = VideoClip(lambda t: f(t)[:,:,:3]).set_mask(mask).set_position('center')
+    return clip
 
 def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     surface = gizeh.Surface(size[0],size[1],bg_color=defaultbg)
@@ -26,7 +32,7 @@ def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=tr
         rect.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return gb
+    return makeClip(gb)
 
 def boxReveal(duration=5, size=(800,600), padding=(100,20), fill=(0,0,.5)):
     w = size[0]+padding[0]*2
@@ -36,10 +42,7 @@ def boxReveal(duration=5, size=(800,600), padding=(100,20), fill=(0,0,.5)):
         rect = gizeh.rectangle(lx=x,ly=size[1]+padding[1]*2,xy=(x/2,size[1]/2),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=True)
-    boxVideo = VideoClip(br)
-    boxMask = VideoClip(lambda t: br(t)[:,:,3]/255.0, ismask=True, duration=duration)
-    boxClip = VideoClip(lambda t: br(t)[:,:,:3], duration=duration, ).set_mask(boxMask).set_position('center')
-    return boxClip
+    return makeClip(br)
 
 def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def fiag(t):
@@ -65,7 +68,7 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         rect = gizeh.rectangle(lx=w,ly=h,xy=(x,y),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=transparent)
-    return fiag
+    return makeClip(fiag)
 
 def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def zfc(t):
@@ -86,7 +89,7 @@ def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
         rect.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return zfc
+    return makeClip(zfc)
 
 def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def cs(t):
@@ -107,7 +110,7 @@ def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         circle.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return cs
+    return makeClip(cs)
 
 def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def dbo(t):
@@ -159,15 +162,16 @@ def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
         leftline.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return dbo
+    return makeClip(dbo)
 
 
 if __name__ == '__main__':
-    clips = [VideoClip(drawBoxOutline()).set_duration(5),
-                VideoClip(circleShrink()).set_duration(5),
-                VideoClip(growBox()).set_duration(5),
-                VideoClip(flyInAndGrow()).set_duration(5),
-                VideoClip(zoomFromCenter()).set_duration(5)
+    clips = [
+                drawBoxOutline().set_duration(5),
+                circleShrink().set_duration(5),
+                growBox().set_duration(5),
+                flyInAndGrow().set_duration(5),
+                zoomFromCenter().set_duration(5)
                 ]
 
     final_clips = concatenate_videoclips(clips)
