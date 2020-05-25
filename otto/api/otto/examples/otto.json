@@ -1,0 +1,38 @@
+{
+    "config": {
+        "output_width": 1920,
+        "output_height": 1080,
+        "slide_duration": 5,
+        "slide_duration_min": 1,
+        "fade_duration": 0.5,
+        "fps": 30,
+        "zoom_rate": 0.1
+    },
+    "media": [
+
+        {
+            "file": "https://stevesautocare.net/wp-content/uploads/2014/12/10DSCN29061.jpg",
+            "slide_duration": 5,
+            "overlay":{
+                "text": "Steve's Auto Care",
+                "font": "Yrsa-Bold",
+                "duration": 5
+            }
+        },
+
+        {
+            "file": "steves.png",
+            "slide_duration": 60,
+            "position": ["bottom", "right"]
+        },
+        {
+            "file": "https://stevesautocare.net/wp-content/uploads/2016/03/Steve1.jpg",
+            "slide_duration": 5,
+            "overlay":{
+                "text": "Our priority is providing you with high quality service founded on honesty and integrity. Specializing in Asian imports, most domestic vehicles, even hybrids.",
+                "font": "Yrsa-Bold",
+                "duration": 5
+            }
+        }
+    ]
+}
