@@ -32,7 +32,7 @@ def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=tr
         rect.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return makeClip(gb)
+    return makeClip(gb).set_duration(duration)
 
 def boxReveal(duration=5, size=(800,600), padding=(100,20), fill=(0,0,.5)):
     w = size[0]+padding[0]*2
@@ -42,7 +42,7 @@ def boxReveal(duration=5, size=(800,600), padding=(100,20), fill=(0,0,.5)):
         rect = gizeh.rectangle(lx=x,ly=size[1]+padding[1]*2,xy=(x/2,size[1]/2),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=True)
-    return makeClip(br)
+    return makeClip(br).set_duration(duration)
 
 def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def fiag(t):
@@ -68,7 +68,7 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         rect = gizeh.rectangle(lx=w,ly=h,xy=(x,y),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=transparent)
-    return makeClip(fiag)
+    return makeClip(fiag).set_duration(duration)
 
 def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def zfc(t):
@@ -89,7 +89,7 @@ def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
         rect.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return makeClip(zfc)
+    return makeClip(zfc).set_duration(duration)
 
 def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def cs(t):
@@ -110,7 +110,7 @@ def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         circle.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return makeClip(cs)
+    return makeClip(cs).set_duration(duration)
 
 def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def dbo(t):
@@ -162,7 +162,7 @@ def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
         leftline.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return makeClip(dbo)
+    return makeClip(dbo).set_duration(duration)
 
 
 if __name__ == '__main__':
