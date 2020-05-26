@@ -1,6 +1,6 @@
 # from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
 import moviepy.editor as e
-# from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 # from colortransitions import drawBoxOutline, circleShrink, growBox, flyInAndGrow, zoomFromCenter, boxReveal
 import colortransitions as ct
 # from PIL.ImageColor import getcolor
@@ -38,7 +38,7 @@ def title(text,
     else:
         bgvid = bg
         bgvid.resize(clipsize).set_position(position)
-    return (e.CompositeVideoClip([bg, t, boxclip], size=clipsize)
+    return (e.CompositeVideoClip([bgvid, t, boxclip], size=clipsize)
             .set_position('center')
             .set_fps(fps)
             .set_duration(duration)
@@ -108,7 +108,7 @@ def bullets(text,
             method='caption',
             start=0,
             duration=None,
-            position='center',
+            position=('left', 'bottom'),
             opacity=.4,
             fps=30):
     if not color:
@@ -135,14 +135,15 @@ def bullets(text,
                     .set_opacity(opacity))
 
         fx = (ct.circleShrink(
-                duration=clip.duration, size=clipsize, fill=ic.getcolor(data['THEMECOLOR'], 'RGB'))
+                duration=clip.duration, size=textsize, fill=ic.getcolor(data['THEMECOLOR'], 'RGB'))
                     .set_position(('left', 'bottom'))
                     )
         clips.append(e.CompositeVideoClip([bkg, clip, fx], size=clipsize)
-                    .set_start(st)
+                    # .set_start(st)
                     .set_duration(d)
                     .crossfadein(1)
-                    .crossfadeout(1))
+                    .crossfadeout(1)
+                    )
         st += d
     return clips
 
