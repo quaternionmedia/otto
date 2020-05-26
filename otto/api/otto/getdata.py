@@ -6,17 +6,17 @@ from json import loads
 
 def download(url, location='data'):
     if url.find('.jpg'):
-        basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode()
+        basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode().strip()
     elif url.find('.png'):
-        basename = run(['basename', url.split('.png')[0] + '.png'], capture_output=True).stdout.decode()
+        basename = run(['basename', url.split('.png')[0] + '.png'], capture_output=True).stdout.decode().strip()
     else:
         basename = run(['basename', url.split('/')[-1]])
     filename = path.join(location, basename) if location else basename
     if not path.isfile(filename):
         if location:
-            run(['wget', '--content-disposition', '-N', '-O', filename, url])
+            run(['wget', '--content-disposition', '-O', filename, url])
         else:
-            run(['wget', '--content-disposition',  '-N', url])
+            run(['wget', '--content-disposition', url])
     return filename
 
 def openCsv(path):

@@ -17,16 +17,19 @@ RUN apk add \
   curl \
   git \
   gnupg \
-  rpm
-#  ssh \
+  rpm \
+  zerotier-one \
+  ffmpeg \
+  cairo-dev \
+  wget \
+  openssh \
+  openrc
+
+#RUN rc-update add sshd && touch /run/openrc/softlevel && rc-status && /etc/init.d/sshd start
 
 RUN curl -s 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' | gpg --import
 
-RUN apk add \
-  ffmpeg \
-  zerotier-one
-
-#RUN zerotier-cli join $zerotier
+#RUN if [ "$deploy" = "true" ]; then zerotier-cli join $zerotier ; else echo $zerotier fi
 
 #RUN pip install -U pip
 
@@ -50,10 +53,6 @@ RUN pip install \
 #COPY requirements.txt /
 #RUN pip install -r /requirements.txt
 
-RUN apk add \
-  cairo-dev
-#  imagemagick
-
 # Toss if ImageMagick runs without the below.
 #RUN curl -SL https://imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-7.0.10-14.x86_64.rpm -o ./ImageMagick-7.0.10-14.x86_64.rpm \
 #  && curl -s https://imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-libs-7.0.10-14.x86_64.rpm -o ./ImageMagick-libs-7.0.10-14.x86_64.rpm
@@ -73,8 +72,12 @@ RUN git clone https://github.com/Trekky12/kburns-slideshow.git
 # Toss if it runs without the below.
 #cd kburns-slideshow
 
-RUN apk add \
-  wget
+#RUN apk add \
+
+
+RUN apk --no-cache add msttcorefonts-installer fontconfig && \
+    update-ms-fonts && \
+    fc-cache -f
 
 #CMD ["python3","otto.py"]
 CMD ["python3"]
