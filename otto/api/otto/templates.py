@@ -1,37 +1,48 @@
-from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
-from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-from colortransitions import drawBoxOutline, circleShrink, growBox, flyInAndGrow, zoomFromCenter, boxReveal
-from PIL.ImageColor import getcolor
+# from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
+import moviepy.editor as e
+# from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+# from colortransitions import drawBoxOutline, circleShrink, growBox, flyInAndGrow, zoomFromCenter, boxReveal
+import colortransitions as ct
+# from PIL.ImageColor import getcolor
+import PIL.ImageColor as ic
 from getdata import scale
+
 
 def title(text,
             data=None,
             color=None,
             fontsize=None,
-            size=(1920,1080),
+            clipsize=(1920,1080),
+            textsize=(1920//2, 1080//2),
             font='Segoe UI Black',
             method='caption',
             duration=5,
             position='center',
             opacity=.4,
-            fps=30):
+            fps=30,
+            bg=None):
     if not color:
         color = data['FONTCOLOR']
-    t = (TextClip(text.strip(),
+    t = (e.TextClip(text.strip(),
         color=color,
         fontsize=fontsize,
-        size=size,
+        size=textsize,
         font=font,
         method=method,
         stroke_color=None)
             .set_position(position)
     )
-    boxclip = boxReveal(duration=duration, size=size, fill=getcolor(data['THEMECOLOR'], 'RGB')).set_position(position)
-
-    return (CompositeVideoClip([t, boxclip], size=size)
-            .set_position(position)
+    boxclip = ct.boxReveal(duration=duration, size=textsize, fill=ic.getcolor(data['THEMECOLOR'], 'RGB')).set_position(position)
+    if(bg is None):
+        bgvid = ct.makeColor(clipsize,color=(0,0,0),opacity=0)
+    else:
+        bgvid = bg
+        bgvid.resize(clipsize).set_position(position)
+    return (e.CompositeVideoClip([bg, t, boxclip], size=clipsize)
+            .set_position('center')
             .set_fps(fps)
             .set_duration(duration)
+            # .resize(size)
             .crossfadein(1)
             .crossfadeout(1)
             )
@@ -40,7 +51,8 @@ def initial(text,
             data=None,
             color=None,
             fontsize=None,
-            size=(1920,1080),
+            clipsize=(1920,1080),
+            textsize=(1920//2, 1080//2),
             font='Segoe UI Black',
             method='caption',
             start=0,
@@ -53,21 +65,22 @@ def initial(text,
         color = data['FONTCOLOR']
     text = text.split('.')
     text = [t.strip() for t in text if t.strip()]
-    texts = [TextClip(t.strip(),
+    texts = [e.TextClip(t.strip(),
                 color=color,
                 fontsize=fontsize,
-                size=size,
+                size=textsize,
                 font=font,
                 method=method,
                 stroke_color=None,
-                align='west'
+                # align='west'
                 ).set_start(i*duration)
                 .set_duration(duration or 2 + pow(len(t.strip().split(' ')), .4))
                 .set_position(position)
+                .resize(textsize)
                 .crossfadein(1)
                 .crossfadeout(1) for i, t in enumerate(text) if t.strip()]
 
-    bkgs = [ColorClip((t.w, t.h),color=getcolor(data['THEMECOLOR'], 'RGB'))
+    bkgs = [e.ColorClip((t.w, t.h),color=ic.getcolor(data['THEMECOLOR'], 'RGBA'))
                 .set_duration(t.duration)
                 .set_start(t.start)
                 .set_position(t.pos)
@@ -75,7 +88,13 @@ def initial(text,
                 .crossfadein(1)
                 .crossfadeout(1)
                 for i, t in enumerate(texts)]
-    return (CompositeVideoClip([*bkgs, *texts], size=size)
+
+    # zfc = ct.zoomFromCenter(size=textsize,
+    #         duration=duration,
+    #         fill=ic.getcolor(data['THEMECOLOR'], 'RGB'),
+    #         transparent=True)
+
+    return (e.CompositeVideoClip([*bkgs, *texts], size=clipsize)
             .set_position(position)
             .set_fps(30))
 
@@ -83,15 +102,15 @@ def bullets(text,
             data=None,
             color=None,
             fontsize=None,
-            size=(1920,1080),
+            textsize=(1920//2, 1080//2),
+            clipsize=(1920,1080),
             font='Segoe UI Black',
             method='caption',
             start=0,
             duration=None,
             position='center',
             opacity=.4,
-            fps=30,
-            align='west'):
+            fps=30):
     if not color:
         color = data['FONTCOLOR']
     text = text.split('\u2022')
@@ -101,42 +120,38 @@ def bullets(text,
     st = 0
     for t in text:
         d = duration or 2 + pow(len(t.split(' ')), .5)
-        clip = (TextClip(t,
+        clip = (e.TextClip(t,
                     color=color,
                     fontsize=fontsize,
-                    size=size,
+                    size=textsize,
                     font=font,
                     method=method,
-                    stroke_color=None,
-                    align='west'
+                    stroke_color=None
                     )
                     .set_position(position)
         )
-        bkg = (ColorClip((clip.w, clip.h),color=getcolor(data['THEMECOLOR'], 'RGB'))
+        bkg = (e.ColorClip((clip.w, clip.h),color=ic.getcolor(data['THEMECOLOR'], 'RGB'))
                     .set_position(clip.pos)
                     .set_opacity(opacity))
 
-        fx = (circleShrink(
-                duration=clip.duration, size=clip.size, fill=getcolor(data['THEMECOLOR'], 'RGB'))
+        fx = (ct.circleShrink(
+                duration=clip.duration, size=clipsize, fill=ic.getcolor(data['THEMECOLOR'], 'RGB'))
                     .set_position(('left', 'bottom'))
                     )
-        clips.append(CompositeVideoClip([bkg, clip, fx])
+        clips.append(e.CompositeVideoClip([bkg, clip, fx], size=clipsize)
                     .set_start(st)
                     .set_duration(d)
                     .crossfadein(1)
                     .crossfadeout(1))
         st += d
-
-    return (CompositeVideoClip(clips, size=(1920,1080))
-            .set_position(position)
-            .set_fps(30))
+    return clips
 
 def final(text,
             data=None,
             color=None,
-            fontsize=None,
+            fontsize=20,
             size=(1920,1080),
-            font='Segoe UI Black',
+            font='Segoe UI Bold',
             method='caption',
             start=0,
             duration=5,
@@ -146,41 +161,59 @@ def final(text,
     if not color:
         color = data['FONTCOLOR']
     texts = [
-        TextClip(text, color=color,
-            fontsize=fontsize,
-            size=scale(1.5),
-            font=font,
-            method='label',
-            stroke_color=None,
-            align='north').set_position(('center', 'top')),
-        TextClip(data['ADDRESS'], color=color,
-            fontsize=fontsize or 120,
-            size=scale(2),
+        e.TextClip(text,
+            color=color,
+            fontsize=60,
+            size=size,
             font=font,
             method=method,
             stroke_color=None,
-            align='west').set_position(('left', 'center')),
-        TextClip(data['WEBSITE'], color=color,
-            fontsize=fontsize,
-            size=scale(1.5),
+            # align='north').set_position(('center', 'top')),
+            ).set_position((0,-size[1]//5)),
+        e.TextClip(data['ADDRESS'],
+            color=color,
+            fontsize=50,
+            size=size,
             font=font,
             method=method,
             stroke_color=None,
-            align='south').set_position(('center', 'bottom')),
-        TextClip(data['PHONE'], color=color,
-            fontsize=fontsize or 120,
-            size=scale(1.5),
+            # align='west').set_position(('left', 'center')),
+            ).set_position((0,-size[1]//10)),
+        e.TextClip(data['WEBSITE'],
+            color=color,
+            fontsize=60,
+            size=size,
+            font=font,
+            method=method,
+            stroke_color=None,
+            # align='south').set_position(('center', 'bottom')),
+            ).set_position((0,size[1]//10)),
+        e.TextClip(data['PHONE'],
+            color=color,
+            fontsize=60,
+            size=size,
             font=font,
             method='label',
             stroke_color=None,
-            align='east').set_position(('right', 'center')),
+            # align='east').set_position(('right', 'center')),
+            ).set_position((0,size[1]//5)),
     ]
 
-    fiag = flyInAndGrow(size=size, duration=duration, fill=getcolor(data['THEMECOLOR'], 'RGB'), transparent=True)
+    # fiag = ct.flyInAndGrow(size=size,
+    #         duration=duration,
+    #         fill=ic.getcolor(data['THEMECOLOR'], 'RGB'),
+    #         transparent=True)
+
+    dbo = ct.drawBoxOutline(
+            size=(int(size[0]*0.7), int(size[1]*0.7)),
+            duration=duration,
+            fill=ic.getcolor(data['THEMECOLOR'], 'RGB'),
+            transparent=True)
 
 
-    return (CompositeVideoClip([fiag, *texts], size=size)
+    return (e.CompositeVideoClip([dbo, *texts], size=size)
             .set_fps(fps)
             .set_duration(duration)
+            .set_position((0,0))
             .crossfadein(1)
             .crossfadeout(1))

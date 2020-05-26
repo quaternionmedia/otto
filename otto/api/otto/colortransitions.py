@@ -1,5 +1,5 @@
 import gizeh
-from moviepy.editor import VideoClip, CompositeVideoClip, ColorClip, concatenate_videoclips
+import moviepy.editor as e
 
 clipsize = (800,600)
 defaultdur = 5
@@ -7,11 +7,30 @@ defaultfill = (0,0,0.7)
 defaultbg = (0,0,0,0)
 transparent = True
 
+
 def makeClip(f):
-    video = VideoClip(f)
-    mask = VideoClip(lambda t: f(t)[:,:,3]/255.0, ismask=True)
-    clip = VideoClip(lambda t: f(t)[:,:,:3]).set_mask(mask).set_position('center')
+    video = e.VideoClip(f)
+    mask = e.VideoClip(lambda t: f(t)[:,:,3]/255.0, ismask=True)
+    clip = e.VideoClip(lambda t: f(t)[:,:,:3]).set_mask(mask).set_position('center')
     return clip
+
+def makeColor(
+        size, #tuple (x,y)
+        color=(1,1,1), #tuple (r,g,b)
+        position=(0,0), #tuple (x,y) from top left
+        opacity=0.5,
+        start=0,
+        duration=5
+        ):
+        return (e.ColorClip(size,color=color)
+                    .set_position(position)
+                    .set_opacity(opacity)
+                    .set_start(start)
+                    .set_duration(duration)
+                    .set_fps(30)
+                    .crossfadein(1)
+                    .crossfadeout(1)
+                    )
 
 def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     surface = gizeh.Surface(size[0],size[1],bg_color=defaultbg)
@@ -114,7 +133,7 @@ def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
         dstart = 0
         dend = 1
 
-        stroke = 30
+        stroke = 20
         x = size[0]/2
         y = size[1]/2
         w = size[0]
@@ -125,10 +144,10 @@ def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
         rightline = gizeh.rectangle(lx=0, ly=0, xy=(w-(stroke/2),y),fill=fill)
         leftline = gizeh.rectangle(lx=0, ly=0, xy=(stroke/2,y),fill=fill)
 
-        t1 = 0.5
-        t2 = 1
-        t3 = 1.5
-        t4 = 2
+        t1 = 0.25
+        t2 = 0.5
+        t3 = 1
+        t4 = 1.5
 
         if(t<t1):
             topline = gizeh.rectangle(lx=w*(t/t1), ly=stroke, xy=(x*(t/t1),stroke/2),fill=fill)
@@ -170,5 +189,5 @@ if __name__ == '__main__':
                 zoomFromCenter()
                 ]
 
-    final_clips = concatenate_videoclips(clips)
+    final_clips = e.concatenate_videoclips(clips)
     final_clips.write_videofile("output/transitiontest.mp4", fps=30)
