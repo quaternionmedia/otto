@@ -62,7 +62,7 @@ def initial(text,
                 stroke_color=None,
                 align='west'
                 ).set_start(i*duration)
-                .set_duration(duration or 2 + pow(len(t.strip().split(' ')), .5))
+                .set_duration(duration or 2 + pow(len(t.strip().split(' ')), .4))
                 .set_position(position)
                 .crossfadein(1)
                 .crossfadeout(1) for i, t in enumerate(text) if t.strip()]
@@ -109,26 +109,23 @@ def bullets(text,
                     method=method,
                     stroke_color=None,
                     align='west'
-                    ).set_start(st)
-                    .set_duration(d)
+                    )
                     .set_position(position)
-                    .crossfadein(1)
-                    .crossfadeout(1)
         )
-        st += d
         bkg = (ColorClip((clip.w, clip.h),color=getcolor(data['THEMECOLOR'], 'RGB'))
-                    .set_duration(clip.duration)
-                    .set_start(clip.start)
                     .set_position(clip.pos)
                     .set_opacity(opacity))
 
         fx = (circleShrink(
                 duration=clip.duration, size=clip.size, fill=getcolor(data['THEMECOLOR'], 'RGB'))
                     .set_position(('left', 'bottom'))
-                    .set_start(clip.start))
+                    )
         clips.append(CompositeVideoClip([bkg, clip, fx])
+                    .set_start(st)
+                    .set_duration(d)
                     .crossfadein(1)
                     .crossfadeout(1))
+        st += d
 
     return (CompositeVideoClip(clips, size=(1920,1080))
             .set_position(position)
