@@ -95,13 +95,13 @@ def bullets(text,
     if not color:
         color = data['FONTCOLOR']
     text = text.split('\u2022')
-    text = ['\u2022 ' + t.strip() for t in text if t.strip()]
+    text = [t.strip() for t in text if t.strip()]
     print('bullet texts', text, )
-    texts = []
+    clips = []
     st = 0
     for t in text:
-        d = duration or 1 + pow(len(t.split(' ')), .5)
-        texts.append(TextClip(t,
+        d = duration or 2 + pow(len(t.split(' ')), .5)
+        clip = (TextClip(t,
                     color=color,
                     fontsize=fontsize,
                     size=size,
@@ -116,17 +116,21 @@ def bullets(text,
                     .crossfadeout(1)
         )
         st += d
+        bkg = (ColorClip((clip.w, clip.h),color=getcolor(data['THEMECOLOR'], 'RGB'))
+                    .set_duration(clip.duration)
+                    .set_start(clip.start)
+                    .set_position(clip.pos)
+                    .set_opacity(opacity))
 
-    bkgs = [ColorClip((t.w, t.h),color=getcolor(data['THEMECOLOR'], 'RGB'))
-                .set_duration(t.duration)
-                .set_start(t.start)
-                .set_position(t.pos)
-                .set_opacity(opacity)
-                .crossfadein(1)
-                .crossfadeout(1)
-                for i, t in enumerate(texts)]
-    fx = [circleShrink(duration=t.duration, size=t.size, fill=getcolor(data['THEMECOLOR'], 'RGB')).set_position(('left', 'bottom')).set_start(t.start) for t in texts]
-    return (CompositeVideoClip([*bkgs, *texts, *fx], size=texts[0].size)
+        fx = (circleShrink(
+                duration=clip.duration, size=clip.size, fill=getcolor(data['THEMECOLOR'], 'RGB'))
+                    .set_position(('left', 'bottom'))
+                    .set_start(clip.start))
+        clips.append(CompositeVideoClip([bkg, clip, fx])
+                    .crossfadein(1)
+                    .crossfadeout(1))
+
+    return (CompositeVideoClip(clips, size=(1920,1080))
             .set_position(position)
             .set_fps(30))
 
