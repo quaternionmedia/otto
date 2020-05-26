@@ -1,4 +1,5 @@
-from moviepy.editor import concatenate_videoclips, ColorClip, CompositeVideoClip, ImageClip, VideoFileClip
+from moviepy.editor import concatenate_videoclips, ColorClip, ImageClip, VideoFileClip
+from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
 from time import strftime
 from kburns import kburns
@@ -42,27 +43,31 @@ class Otto:
         # (photos + endcard) * duration = 60 seconds
         duration = 60/(len(self.photos) + 1)
         slides = kburns(self.photos, duration = duration)
-        # slides = VideoFileClip('kbout.mp4')
+        slides = VideoFileClip('kbout.mp4')
         logodl = gd.download(self.data['LOGO'])
-        logobg = self.makeColor(self.moviesize,color=(0,0,0),opacity=0)
-        logoimg = (ImageClip(logodl)
-                  .set_duration(slides.duration)
-                  .resize(height=self.moviesize[1]//5)
-                  .margin(right=8, top=8, opacity=0) # (optional) logo-border padding
-                  .set_position(('right','bottom'))
+        logobg = ct.makeColor(self.moviesize,color=(0,0,0),opacity=0)
+        logoimg = (e.ImageClip(logodl)
+                    .set_duration(60)
+                    .resize(height=self.moviesize[1]//5)
+                    .margin(right=8, top=8, opacity=0) # (optional) logo-border padding
+                    .set_position(('right','bottom'))
+        # logobg = self.makeColor(self.moviesize,color=(0,0,0),opacity=0)
+        # logoimg = (ImageClip(logodl)
+        #           .set_duration(slides.duration)
+        #           .resize(height=self.moviesize[1]//5)
                   )
         logo = CompositeVideoClip([logobg,logoimg],size=self.moviesize).fx(slide_in, 1.5,'right')
 
         titles = concatenate_videoclips([
             title(text=self.data['NAME'], data=self.data, duration=duration),
             initial(text=self.data['INITIAL'], data=self.data, position=('center', 'top'), clipsize=self.moviesize, textsize=(1600, 600),
-            fontsize=120),
+            fontsize=100),
             *bullets(text=self.data['BULLETS'], data=self.data, fontsize=100),
             # initial(text=self.data['OPTIONAL'], data=self.data, size=scale(3), duration=duration/2),
             initial(text=self.data['CALL'], data=self.data, position=('center', 'bottom'), clipsize=self.moviesize, textsize=(1400, 600),
-            fontsize=120),
+            fontsize=120, duration=10),
             ])
-        ending = final(text=self.data['NAME'], data=self.data, duration=duration).set_start(slides.duration)
+        ending = final(text=self.data['NAME'], data=self.data, duration=duration).set_start(60-duration)
         final_clip = CompositeVideoClip([slides, logo, titles, ending])
         timestr = strftime('%Y%m%d-%H%M%S')
         finalout = os.path.join(self.dir, f'output/{timestr}_ottorender.mp4')
