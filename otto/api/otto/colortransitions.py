@@ -47,23 +47,22 @@ def boxReveal(duration=5, size=(800,600), padding=(100,20), fill=(0,0,.5)):
 def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def fiag(t):
         surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
-        fstart = 0
         fend = 0.5
         gstart = fend
         gend = 1.5
         # staticduration = duration - gend
         w = size[0]*0.1
-        h = size[1]*0.8
+        h = size[1]
         x = size[0]/2
         y = -size[1]/2
         if t <= gend:
             if (t <= fend):
-                y = -h/2 + t*h*2
+                y = -h/2 + t/fend*h
             else:
                 y = size[1]/2
-                w = size[0]*(t*0.8/gend)
+                w = w + size[0]*((t-fend)/(gend-gstart))
         else:
-            w, h = size[0]*.8, size[1]*.8
+            w, h = size[0], size[1]
             x, y = size[0]/2, size[1]/2
         rect = gizeh.rectangle(lx=w,ly=h,xy=(x,y),fill=fill)
         rect.draw(surface)
@@ -97,9 +96,9 @@ def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         send = 1
         r = 10
         x = r
-        if(t<send):
-            r = (send-t)*size[0] + r
-            x = (send-t)*size[0]/2 + r
+        if(t <= send):
+            r = (send-t)*size[0]/2 + r
+            x = (send-t)*size[0]/2
         y = size[1]/2
 
         circle = gizeh.circle(r=r, xy=[x,y], fill=fill)
@@ -163,12 +162,13 @@ def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
 
 if __name__ == '__main__':
     clips = [
-                drawBoxOutline().set_duration(5),
-                circleShrink().set_duration(5),
-                growBox().set_duration(5),
-                flyInAndGrow().set_duration(5),
-                zoomFromCenter().set_duration(5)
+                drawBoxOutline(),
+                circleShrink(),
+                growBox(),
+                boxReveal(),
+                flyInAndGrow(),
+                zoomFromCenter()
                 ]
 
     final_clips = concatenate_videoclips(clips)
-    final_clips.write_videofile("transitiontest.mp4", fps=30)
+    final_clips.write_videofile("output/transitiontest.mp4", fps=30)
