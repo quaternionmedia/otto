@@ -1,5 +1,5 @@
 import gizeh
-from moviepy.editor import VideoClip, CompositeVideoClip, ColorClip, concatenate_videoclips
+from moviepy.editor import VideoClip, ColorClip, concatenate_videoclips
 
 clipsize = (800,600)
 defaultdur = 5
@@ -32,7 +32,7 @@ def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=tr
         rect.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return makeClip(gb)
+    return makeClip(gb, duration=duration)
 
 def boxReveal(duration=5, size=(800,600), padding=(100,20), fill=(0,0,.5)):
     w = size[0]+padding[0]*2
@@ -42,7 +42,7 @@ def boxReveal(duration=5, size=(800,600), padding=(100,20), fill=(0,0,.5)):
         rect = gizeh.rectangle(lx=x,ly=size[1]+padding[1]*2,xy=(x/2,size[1]/2),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=True)
-    return makeClip(br)
+    return makeClip(br, duration=duration)
 
 def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def fiag(t):
@@ -68,7 +68,7 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         rect = gizeh.rectangle(lx=w,ly=h,xy=(x,y),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=transparent)
-    return makeClip(fiag)
+    return makeClip(fiag, duration=duration)
 
 def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def zfc(t):
@@ -89,7 +89,7 @@ def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
         rect.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return makeClip(zfc)
+    return makeClip(zfc, duration=duration)
 
 def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def cs(t):
@@ -103,10 +103,10 @@ def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         else:
             r = endr
 
-        x = size[0]/2
-        y = size[1]/2
+        x = 10
+        y = size[1]
 
-        circle = gizeh.circle(r=r, xy=[x,y], fill=defaultfill)
+        circle = gizeh.circle(r=r, xy=[x,y], fill=fill)
         circle.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
@@ -162,11 +162,11 @@ def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
         leftline.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return makeClip(dbo)
+    return makeClip(dbo, duration=duration)
 
 
 if __name__ == '__main__':
-    clips = [
+    clips = [   boxReveal().set_duration(5),
                 drawBoxOutline().set_duration(5),
                 circleShrink().set_duration(5),
                 growBox().set_duration(5),
