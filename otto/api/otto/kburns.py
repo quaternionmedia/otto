@@ -3,14 +3,14 @@ from json import loads, dumps
 from getdata import download
 import moviepy.editor as e
 
-def kburns(photos):
+def kburns(photos, duration=5):
         config = loads(open('examples/example.json', 'r').read())
         config['slides'] = []
 
         for p in photos:
             config['slides'].append({
                 'file': p,
-                'slide_duration': round(60/(len(photos) + 1), 2) + 1,
+                'slide_duration': duration + 1,
             })
         with open('examples/export.json', 'w') as f:
             f.write(dumps(config))
