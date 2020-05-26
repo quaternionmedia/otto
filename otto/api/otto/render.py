@@ -1,7 +1,7 @@
 from moviepy.editor import concatenate_videoclips, ColorClip, CompositeVideoClip, ImageClip, VideoFileClip
 from moviepy.video.compositing.transitions import slide_in
 from time import strftime
-# import kburns
+from kburns import kburns
 import getdata as gd
 from templates import *
 import os
@@ -41,8 +41,8 @@ class Otto:
     def render(self, size=(1920,1080)):
         # (photos + endcard) * duration = 60 seconds
         duration = 60/(len(self.photos) + 1)
-        # slides = kburns.kburns(self.photos, duration = duration)
-        slides = VideoFileClip('kbout.mp4')
+        slides = kburns(self.photos, duration = duration)
+        # slides = VideoFileClip('kbout.mp4')
         logodl = gd.download(self.data['LOGO'])
         logobg = self.makeColor(self.moviesize,color=(0,0,0),opacity=0)
         logoimg = (ImageClip(logodl)
@@ -63,7 +63,7 @@ class Otto:
             fontsize=120),
             ])
         ending = final(text=self.data['NAME'], data=self.data, duration=duration).set_start(slides.duration)
-        final_clip = CompositeVideoClip([slides, logo, titles, ending]).subclip(40, 50)
+        final_clip = CompositeVideoClip([slides, logo, titles, ending])
         timestr = strftime('%Y%m%d-%H%M%S')
         finalout = os.path.join(self.dir, f'output/{timestr}_ottorender.mp4')
         final_clip.write_videofile(finalout, fps=30)
