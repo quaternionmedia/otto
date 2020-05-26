@@ -9,7 +9,7 @@ def kburns(photos):
         for p in photos:
             config['slides'].append({
                 'file': p,
-                'slide_duration': round(60/(len(photos) + 1)),
+                'slide_duration': round(60/(len(photos) + 1), 2) + 1,
             })
         with open('examples/export.json', 'w') as f:
             f.write(dumps(config))
