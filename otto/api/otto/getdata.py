@@ -30,3 +30,6 @@ def openCsv(path):
 def openJson(path):
     with open(path, 'r') as f:
         return loads(f.read())
+
+def scale(n, size=(1920,1080)):
+    return int(size[0]/n), int(size[1]/n)
