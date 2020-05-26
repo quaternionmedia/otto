@@ -29,10 +29,9 @@ def title(text,
     boxclip = boxReveal(duration=duration, size=size, fill=getcolor(data['THEMECOLOR'], 'RGB')).set_position(position)
 
     return (CompositeVideoClip([t, boxclip], size=size)
-            .set_position('center')
+            .set_position(position)
             .set_fps(fps)
             .set_duration(duration)
-            # .resize(lambda t: min(t+.01, 1))
             .crossfadein(1)
             .crossfadeout(1)
             )
@@ -154,7 +153,7 @@ def final(text,
             stroke_color=None,
             align='north').set_position(('center', 'top')),
         TextClip(data['ADDRESS'], color=color,
-            fontsize=fontsize,
+            fontsize=fontsize or 120,
             size=scale(2),
             font=font,
             method=method,
@@ -168,10 +167,10 @@ def final(text,
             stroke_color=None,
             align='south').set_position(('center', 'bottom')),
         TextClip(data['PHONE'], color=color,
-            fontsize=fontsize,
-            size=scale(3),
+            fontsize=fontsize or 120,
+            size=scale(1.5),
             font=font,
-            method=method,
+            method='label',
             stroke_color=None,
             align='east').set_position(('right', 'center')),
     ]

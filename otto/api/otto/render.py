@@ -55,13 +55,13 @@ class Otto:
 
         titles = concatenate_videoclips([
             title(text=self.data['NAME'], data=self.data, size=self.scale(2), duration=duration),
-            initial(text=self.data['INITIAL'], data=self.data, size=(1600, 300), duration=duration/1.5, position='top'),
+            initial(text=self.data['INITIAL'], data=self.data, size=(1600, 300), position=('center', 'top')),
             bullets(text=self.data['BULLETS'], data=self.data, size=(1300, 300), position=('left', 'bottom'), align='west', fontsize=100),
             # initial(text=self.data['OPTIONAL'], data=self.data, size=scale(3), duration=duration/2),
-            initial(text=self.data['CALL'], data=self.data, size=self.scale(2), duration=duration/1.5),
+            initial(text=self.data['CALL'], data=self.data, size=self.scale(1.5), position=('center', 'bottom')),
             ])
         ending = final(text=self.data['NAME'], data=self.data, duration=duration).set_start(slides.duration)
-        final_clip = CompositeVideoClip([slides, logo, titles, ending]).set_duration(15)
+        final_clip = CompositeVideoClip([slides, logo, titles, ending])
         timestr = strftime('%Y%m%d-%H%M%S')
         finalout = os.path.join(self.dir, f'output/{timestr}_ottorender.mp4')
         final_clip.write_videofile(finalout, fps=30)
