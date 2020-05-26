@@ -5,12 +5,12 @@ from json import loads
 
 
 def download(url, location='data'):
-    if url.find('.jpg'):
+    if url.find('.jpg') > 0:
         basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode().strip()
-    elif url.find('.png'):
+    elif url.find('.png') > 0:
         basename = run(['basename', url.split('.png')[0] + '.png'], capture_output=True).stdout.decode().strip()
     else:
-        basename = run(['basename', url.split('/')[-1]])
+        basename = run(['basename', url.split('/')[-1]]).strip()
     filename = path.join(location, basename) if location else basename
     if not path.isfile(filename):
         if location:
