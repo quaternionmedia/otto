@@ -94,19 +94,15 @@ def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
 def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def cs(t):
         surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
-        sstart = 0
         send = 1
-        endr = 10
-        r = 0
+        r = 10
+        x = r
         if(t<send):
-            r = (send-t)*size[0]/2 + endr
-        else:
-            r = endr
-
-        x = size[0]/2
+            r = (send-t)*size[0] + r
+            x = (send-t)*size[0]/2 + r
         y = size[1]/2
 
-        circle = gizeh.circle(r=r, xy=[x,y], fill=defaultfill)
+        circle = gizeh.circle(r=r, xy=[x,y], fill=fill)
         circle.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
