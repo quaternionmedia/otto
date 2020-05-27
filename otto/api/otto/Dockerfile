@@ -1,39 +1,36 @@
-FROM python:3.8.3-alpine3.11
+FROM ubuntu:20.04
 
-# TODO install imagemagick from curl file; linked properly; needs a "data" folder locally relative;
+RUN apt-get update
+#&& apt-get install -y \
+#  gcc
+#\  build-base \  openssl-dev \  libffi-dev \  jpeg-dev \  zlib-dev
 
-# TODO build form input for talavideo.json
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+RUN apt-get install -y \
+  python3.8 \
+  python3-pip \
+  python3-dev \
+  python3-setuptools
 
-RUN apk update && apk add --no-cache --virtual .builds-deps \
-  build-base \
-  gcc \
-  openssl-dev \
-  libffi-dev \
-  jpeg-dev \
-  zlib-dev
+RUN apt-get install -y \
+  ffmpeg \
+  aubio-tools \
+  libaubio-dev \
+  libaubio-doc
 
-RUN apk add \
+RUN apt-get install -y \
   g++ \
   curl \
   git \
   gnupg \
   rpm \
-  zerotier-one \
   ffmpeg \
-  cairo-dev \
-  wget \
-  openssh \
-  openrc
+  wget
 
-#RUN rc-update add sshd && touch /run/openrc/softlevel && rc-status && /etc/init.d/sshd start
 
-RUN curl -s 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' | gpg --import
+#zerotier-one \  cairo-dev \  openssh \  openrc
 
-#RUN if [ "$deploy" = "true" ]; then zerotier-cli join $zerotier ; else echo $zerotier fi
-
-#RUN pip install -U pip
-
-RUN pip install \
+RUN pip3 install \
   FastAPI \
   aiofiles \
   python-multipart \
@@ -41,43 +38,34 @@ RUN pip install \
   pyjwt \
   passlib[bcrypt] \
   pymongo \
-  ffmpeg-python \
   moviepy \
-  gizeh
-RUN pip install \
+  gizeh \
+  ffmpeg-python
+  #aubio
+
+RUN pip3 install \
   numpy
 
-RUN pip install \
-  aubio
-
 #COPY requirements.txt /
-#RUN pip install -r /requirements.txt
-
-# Toss if ImageMagick runs without the below.
-#RUN curl -SL https://imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-7.0.10-14.x86_64.rpm -o ./ImageMagick-7.0.10-14.x86_64.rpm \
-#  && curl -s https://imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-libs-7.0.10-14.x86_64.rpm -o ./ImageMagick-libs-7.0.10-14.x86_64.rpm
-#  RUN rpm -Uvh ImageMagick-libs-7.0.10-14.x86_64.rpm
-#RUN rpm -Uvh ImageMagick-7.0.10-14.x86_64.rpm
+#RUN pip3 install -r /requirements.txt
 
 RUN curl https://imagemagick.org/download/ImageMagick.tar.gz -o ./ImageMagick.tar.gz
 RUN tar xvzf ImageMagick.tar.gz
 RUN cd ImageMagick-7.0.10-14 && ./configure && make
-RUN  cd ImageMagick-7.0.10-14 && make install
+#COPY ./examples/ImageMagick-7.0.10-14.tar.gz / &&
+#RUN ./examples/tar xvzf ImageMagick-7.0.10-14.tar.gz &&
+RUN cd ImageMagick-7.0.10-14 && make install
 RUN ldconfig /usr/local/lib
 
+RUN git clone git://github.com/Trekky12/kburns-slideshow.git
+COPY ./examples/config_otto.json /kburns-slideshow/config.json
+RUN chmod +x /kburns-slideshow/main.py && ln -s /kburns-slideshow/main.py /usr/local/bin/kburns
+
 WORKDIR /opt/code
-# TODO uncomment RUN and COPY for kburns
-RUN git clone https://github.com/Trekky12/kburns-slideshow.git
-#COPY ./examples/config_otto.json ./kburns-slideshow/config.json
-# Toss if it runs without the below.
-#cd kburns-slideshow
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ttf-mscorefonts-installer && fc-cache -f && mkdir ~/.fonts
+#RUN cp ./examples/seg{oeui{,b,i,l,sl,z},ui{bl,bli,li,sb,sbi,sli}}.ttf ~/.fonts/ && fc-cache -f
 
-#RUN apk add \
+RUN mkdir -p  /opt/code/audios/ /opt/code/videos/ /opt/code/output/ /opt/code/data/
+#Add talaaudio.mp3 talavid.mp4
 
-
-RUN apk --no-cache add msttcorefonts-installer fontconfig && \
-    update-ms-fonts && \
-    fc-cache -f
-
-#CMD ["python3","otto.py"]
 CMD ["python3"]
