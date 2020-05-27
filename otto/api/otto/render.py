@@ -83,8 +83,11 @@ class Otto:
         logodl = gd.download(self.data['LOGO'])
         logobg = ct.makeColor(self.moviesize,color=(0,0,0),opacity=0)
         logoimg = (e.ImageClip(logodl)
-          .set_duration(self.totalduration)
-          .resize(height=self.moviesize[1]//5))
+                .set_duration(self.totalduration)
+                .resize(height=self.moviesize[1]//5)
+                .margin(right=8, top=8, opacity=0)
+                .set_position(('right','bottom'))
+        )
         logo = e.CompositeVideoClip([logobg,logoimg],
             size=self.moviesize).fx(slide_in, 1.5,'right')
         # ending = final(text=self.data['NAME'], data=self.data, duration=self.slideduration).set_start(self.totalduration - self.slideduration)
