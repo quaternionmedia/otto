@@ -2,16 +2,27 @@ from subprocess import run
 from json import loads, dumps
 from getdata import download
 import moviepy.editor as e
+from sys import path
 
-def kburns(photos, duration=5):
+def kburns(media, duration=5):
         config = loads(open('examples/example.json', 'r').read())
-        config['slides'] = []
+        slides = [
 
-        for p in photos:
-            config['slides'].append({
-                'file': p,
-                'slide_duration': duration + 1,
-            })
+        ]
+        for m in media:
+            if m.endswith('.mp4'):
+                slides.append({
+                        'file': media[0],
+                        'force_no_audio': True,
+                        'start': 0,
+                        'end': duration*2,
+                    })
+            else:
+                slides.append({
+                    'file': m,
+                    'slide_duration': duration + 1,
+                })
+        config['slides'] = slides
         with open('examples/export.json', 'w') as f:
             f.write(dumps(config))
         run(['kburns', 'kbout.mp4', '-f', 'examples/export.json'])
@@ -41,6 +52,8 @@ def kburns2(clips, padding=1, duration=5, moviesize=(1920,1080)):
     return e.CompositeVideoClip(kb).crossfadeout(1)
 
 if __name__ == '__main__':
-    photos = loads(open('examples/talavideo.json', 'r').read())['MEDIA']
-    photos = [download(p) for p in photos]
-    kburns(photos)
+    config = loads(open('examples/talavideo.json', 'r').read())
+    photos = config['VIDEOS']
+    photos += [download(p) for p in config['MEDIA']]
+    print('running kburns with', photos)
+    kburns(photos, duration=60/(len(photos) + 1))
