@@ -36,15 +36,14 @@ def title(text,
     if(bg is None):
         bgvid = ct.makeColor(clipsize,color=(0,0,0),opacity=0)
     else:
-        bgvid = bg
-        bgvid.resize(clipsize).set_position(position)
+        bgvid = bg.resize(clipsize).set_position(position)
     return (e.CompositeVideoClip([bgvid, t, boxclip], size=clipsize)
             .set_position('center')
             .set_fps(fps)
             .set_duration(duration)
-            # .resize(size)
             .crossfadein(1)
             .crossfadeout(1)
+            # .resize(size)
             )
 
 def initial(text,
