@@ -126,6 +126,23 @@ def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         return surface.get_npimage(transparent=transparent)
     return makeClip(cs).set_duration(duration)
 
+def boxShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
+    def cs(t):
+        surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
+        send = 1
+        r = 10
+        x = r
+        if(t <= send):
+            r = (send-t)*size[0]/2 + r
+            x = (send-t)*size[0]/2
+        y = size[1]/2
+
+        circle = gizeh.rectangle(lx=r, ly=r, xy=(x,y), fill=fill)
+        circle.draw(surface)
+
+        return surface.get_npimage(transparent=transparent)
+    return makeClip(cs).set_duration(duration)
+
 def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def dbo(t):
         surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)

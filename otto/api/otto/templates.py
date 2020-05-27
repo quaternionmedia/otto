@@ -133,7 +133,7 @@ def bullets(text,
                     .set_position(clip.pos)
                     .set_opacity(opacity))
 
-        fx = (ct.circleShrink(
+        fx = (ct.boxShrink(
                 duration=clip.duration, size=textsize, fill=ic.getcolor(data['THEMECOLOR'], 'RGB'))
                     .set_position(('left', 'bottom'))
                     )
@@ -216,4 +216,5 @@ def final(text,
             .set_duration(duration)
             .set_position((0,0))
             .crossfadein(1)
-            .crossfadeout(1))
+            # .crossfadeout(1)
+            )
