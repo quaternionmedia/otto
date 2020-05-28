@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
 COPY deploy_otto.sh /deploy.sh
-RUN /deploy.sh
+#RUN /deploy.sh
 
 CMD ["bash"]

@@ -73,6 +73,6 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y ttf-mscorefonts-installer && f
 cp ./examples/segoeuibl.ttf /usr/share/fonts/
 fc-cache -fv
 
-WORKING_DIR=~/src
+WORKING_DIR=~/otto/otto
 mkdir -p  $WORKING_DIR/audios/ $WORKING_DIR/videos/ $WORKING_DIR/output/ $WORKING_DIR/data/
 #ADD talaaudio.mp3 talavid.mp4

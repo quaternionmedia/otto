@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile_plain
     image: otto2
     volumes:
-      - "./src/:/opt/code"
+      - "./otto/:/opt/code"
     ports:
       - "8000:80"
     networks:
