@@ -49,17 +49,20 @@ RUN pip3 install \
 #COPY requirements.txt /
 #RUN pip3 install -r /requirements.txt
 
+RUN apt-get install -y \
+  libmagick++-dev
+
 RUN curl https://imagemagick.org/download/ImageMagick.tar.gz -o ./ImageMagick.tar.gz
 RUN tar xvzf ImageMagick.tar.gz
 RUN cd ImageMagick-7.0.10-14 && ./configure && make
 #COPY ./examples/ImageMagick-7.0.10-14.tar.gz / &&
 #RUN ./examples/tar xvzf ImageMagick-7.0.10-14.tar.gz &&
 RUN cd ImageMagick-7.0.10-14 && make install
-RUN ldconfig /usr/local/lib && \
-  export MAGICK_HOME="/ImageMagick-7.0.10-14" && \
-  export PATH="$MAGICK_HOME/bin:$PATH && \
-  LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$MAGICK_HOME/lib && \
-  export LD_LIBRARY_PATH
+
+RUN ldconfig /usr/local/lib
+ENV MAGICK_HOME="/ImageMagick-7.0.10-14"
+ENV PATH="$MAGICK_HOME/bin:$PATH"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$MAGICK_HOME/lib"
 
 RUN git clone git://github.com/Trekky12/kburns-slideshow.git
 COPY ./examples/config_otto.json /kburns-slideshow/config.json
@@ -68,7 +71,7 @@ RUN chmod +x /kburns-slideshow/main.py && ln -s /kburns-slideshow/main.py /usr/l
 WORKDIR /opt/code
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ttf-mscorefonts-installer && fc-cache -f && mkdir ~/.fonts
 #RUN cd /opt/code && \
-COPY ./examples/segoeuibl.ttf ~/.fonts/
+COPY ./examples/segoeuibl.ttf /usr/share/fonts/
 RUN fc-cache -fv
 #  cp ./examples/seg{oeui{,b,i,l,sl,z},ui{bl,bli,li,sb,sbi,sli}}.ttf ~/.fonts/ && fc-cache -f
 

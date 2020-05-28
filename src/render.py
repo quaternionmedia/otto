@@ -35,7 +35,7 @@ class Otto:
     def render(self, size=(1920,1080), outfile='out.mp4'):
 
         # slides = kburns(self.photos)
-        slides = (VideoFileClip('videos\kbout.mp4')
+        slides = (VideoFileClip('videos/kbout.mp4')
                 .crossfadein(1)
                 .crossfadeout(1)
         )

@@ -1,0 +1,47 @@
+# project based
+data/*
+src/data/*
+src/output/*
+src/videos/*
+src/audios/*
+
+node_modules
+*/dist/*
+/dist/*
+.cache
+package-lock.json
+yarn.lock
+media/
+/website/cypress/screenshots/
+/website/cypress/videos/
+__*__
+/videos
+database/
+*.jpg
+# compiled output
+/tmp
+/out-tsc
+*.env
+
+# dependencies
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# misc
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+/_trash
+
+# System Files
+.DS_Store
+Thumbs.db
+
+*.mp4
