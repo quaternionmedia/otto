@@ -10,10 +10,8 @@ import os
 class Otto:
     def __init__(self, data=None):
         self.dir =  os.path.dirname(os.path.abspath(__file__))
-
-        if(data is None):
-            data = os.path.join(self.dir, 'examples/talavideo.json')
-        self.data = gd.openJson(data)
+        self.data = gd.openJson(data or os.path.join(self.dir, 'examples', 'talavideo.json'))
+        
         self.name = self.data['NAME'].replace(' ', '_')
         self.photos = [gd.download(m, location='data') for m in self.data['MEDIA']]
         self.moviesize=(1920,1080)

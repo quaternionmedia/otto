@@ -3,6 +3,7 @@ from json import loads, dumps
 from getdata import download
 import moviepy.editor as e
 from sys import path
+from os.path import join
 
 def kburns(media, duration=5):
         config = loads(open('examples/example.json', 'r').read())
@@ -25,7 +26,7 @@ def kburns(media, duration=5):
         config['slides'] = slides
         with open('examples/export.json', 'w') as f:
             f.write(dumps(config))
-        run(['kburns', 'kbout.mp4', '-f', 'examples/export.json'])
+        run(['kburns', join('videos', 'kbout.mp4'), '-f', join('examples', 'export.json')])
 
 
 
