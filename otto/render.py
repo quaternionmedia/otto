@@ -17,8 +17,8 @@ class Otto:
         self.name = self.data['NAME'].replace(' ', '_')
         self.photos = [gd.download(m, location='data') for m in self.data['MEDIA']]
         self.moviesize=(1920,1080)
-        self.totalduration = 0
-        self.slideduration = 5
+        self.duration = self.data.get('DURATION') or 60
+        self.slideduration = self.duration / len(self.data['MEDIA'])
         self.videos = [self.movieclip(m) for m in self.data['VIDEOS']]
         self.audios = [self.audioClip(a) for a in self.data['AUDIOS']]
         self.clips = []
@@ -77,22 +77,21 @@ class Otto:
         for i, c in enumerate(self.clips):
             c.set_start(i*self.slideduration)
 
-        self.totalduration = len(self.clips)* self.slideduration
+        self.duration = len(self.clips)* self.slideduration
         allclips = e.concatenate_videoclips(self.clips)
         logodl = gd.download(self.data['LOGO'])
         logobg = ct.makeColor(self.moviesize,color=(0,0,0),opacity=0)
         logoimg = (e.ImageClip(logodl)
-                .set_duration(self.totalduration)
+                .set_duration(self.duration)
                 .resize(height=self.moviesize[1]//5)
                 .margin(right=8, top=8, opacity=0)
                 .set_position(('right','bottom'))
         )
         logo = e.CompositeVideoClip([logobg,logoimg],
             size=self.moviesize).fx(slide_in, 1.5,'right')
-        # ending = final(text=self.data['NAME'], data=self.data, duration=self.slideduration).set_start(self.totalduration - self.slideduration)
         finalVideo = (e.CompositeVideoClip([slides, allclips, logo])
                     .set_audio(self.audios[0])
-                    .set_duration(self.totalduration)
+                    .set_duration(self.duration)
         )
         timestr = strftime('%Y%m%d-%H%M%S')
         filename = os.path.join(self.dir, 'output', f'{timestr}_{self.name}.mp4')
