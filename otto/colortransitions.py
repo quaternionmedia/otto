@@ -7,6 +7,21 @@ defaultfill = (0,0,0.7)
 defaultbg = (0,0,0,0)
 transparent = True
 
+def translate(value, leftMin, leftMax, rightMin, rightMax):
+    # Figure out how 'wide' each range is
+    leftSpan = leftMax - leftMin
+    rightSpan = rightMax - rightMin
+
+    # Convert the left range into a 0-1 range (float)
+    valueScaled = float(value - leftMin) / float(leftSpan)
+
+    # Convert the 0-1 range into a value in the right range.
+    return rightMin + (valueScaled * rightSpan)
+
+def maprange(a, b, s):
+	(a1, a2), (b1, b2) = a, b
+	return  b1 + ((s - a1) * (b2 - b1) / (a2 - a1))
+
 
 def makeClip(f):
     video = e.VideoClip(f)
@@ -130,14 +145,31 @@ def boxShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=
     def cs(t):
         surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
         send = 1
-        r = 10
-        x = r
-        if(t <= send):
-            r = (send-t)*size[0]/2 + r
-            x = (send-t)*size[0]/2
-        y = size[1]/2
+        w = clipsize[0]
+        h = clipsize[1]
+        sw = w
+        sh = h
+        ew = int(w * 0.2)
+        eh = int(h * 0.7)
+        sx = w//2
+        sy = h//2
+        ex = w//10
+        ey = h//2
+        x = sx
+        y = sy
 
-        circle = gizeh.rectangle(lx=r, ly=r, xy=(x,y), fill=fill)
+        if(t <= send):
+            x = translate(t, 0, send, sx, ex)
+            y = translate(t, 0, send, sy, ey)
+            w = translate(t, 0, send, sw, ew)
+            h = translate(t, 0, send, sh, eh)
+        else:
+            x = ex
+            y = ey
+            w = ew
+            h = eh
+
+        circle = gizeh.rectangle(lx=w, ly=h, xy=(x,y), fill=fill)
         circle.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
@@ -203,7 +235,9 @@ if __name__ == '__main__':
                 growBox(),
                 boxReveal(),
                 flyInAndGrow(),
-                zoomFromCenter()
+                zoomFromCenter(),
+                boxShrink()
+
                 ]
 
     final_clips = e.concatenate_videoclips(clips)
