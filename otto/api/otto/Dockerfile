@@ -55,7 +55,11 @@ RUN cd ImageMagick-7.0.10-14 && ./configure && make
 #COPY ./examples/ImageMagick-7.0.10-14.tar.gz / &&
 #RUN ./examples/tar xvzf ImageMagick-7.0.10-14.tar.gz &&
 RUN cd ImageMagick-7.0.10-14 && make install
-RUN ldconfig /usr/local/lib
+RUN ldconfig /usr/local/lib && \
+  export MAGICK_HOME="/ImageMagick-7.0.10-14" && \
+  export PATH="$MAGICK_HOME/bin:$PATH && \
+  LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$MAGICK_HOME/lib && \
+  export LD_LIBRARY_PATH
 
 RUN git clone git://github.com/Trekky12/kburns-slideshow.git
 COPY ./examples/config_otto.json /kburns-slideshow/config.json
@@ -63,7 +67,10 @@ RUN chmod +x /kburns-slideshow/main.py && ln -s /kburns-slideshow/main.py /usr/l
 
 WORKDIR /opt/code
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ttf-mscorefonts-installer && fc-cache -f && mkdir ~/.fonts
-#RUN cp ./examples/seg{oeui{,b,i,l,sl,z},ui{bl,bli,li,sb,sbi,sli}}.ttf ~/.fonts/ && fc-cache -f
+#RUN cd /opt/code && \
+COPY ./examples/segoeuibl.ttf ~/.fonts/
+RUN fc-cache -fv
+#  cp ./examples/seg{oeui{,b,i,l,sl,z},ui{bl,bli,li,sb,sbi,sli}}.ttf ~/.fonts/ && fc-cache -f
 
 RUN mkdir -p  /opt/code/audios/ /opt/code/videos/ /opt/code/output/ /opt/code/data/
 #Add talaaudio.mp3 talavid.mp4
