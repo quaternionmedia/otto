@@ -62,7 +62,6 @@ class Otto:
             clipsize=self.moviesize,
             textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
             duration=self.slideduration,
-            position=('left', 'bottom'),
             fontsize=self.moviesize[1]//13))
 
         self.clips.append(initial(text=self.data['CALL'],
