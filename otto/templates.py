@@ -107,7 +107,7 @@ def bullets(text,
             method='caption',
             start=0,
             duration=None,
-            position=('left', 'bottom'),
+            position=('center', 'center'),
             opacity=.4,
             fps=30):
     if not color:
