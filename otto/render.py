@@ -2,7 +2,7 @@ from moviepy.editor import concatenate_videoclips, ColorClip, ImageClip, VideoFi
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
 from time import strftime
-from kburns import kburns2 as kburns
+from kburns import kburns
 import getdata as gd
 from templates import *
 import os
@@ -31,51 +31,60 @@ class Otto:
         return e.AudioFileClip(audiopath)
 
     def render(self, size=(1920,1080), outfile='out.mp4'):
-
-        # slides = kburns(self.photos)
+        slides = kburns(self.photos, duration=self.slideduration)
         slides = (VideoFileClip('videos/kbout.mp4')
                 .crossfadein(1)
                 .crossfadeout(1)
         )
-
         self.clips.append(title(text=self.data['NAME'],
             data=self.data,
             clipsize=self.moviesize,
             textsize=self.scale(2),
-            duration=self.slideduration,
             position='center',
+            duration=min(5, self.duration),
             # bg=self.videos[0],
             )
         )
+        if self.duration > 15:
+            self.clips.append(initial(text=self.data['INITIAL'],
+                data=self.data,
+                clipsize=self.moviesize,
+                textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
+                fontsize=self.moviesize[1]//13,
+                position='center',
+                duration=min(5, self.duration - 15),)
+            )
+                
+        if self.duration > 20:
+            self.clips.extend(bullets(text=self.data['BULLETS'],
+                data=self.data,
+                clipsize=self.moviesize,
+                textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
+                fontsize=self.moviesize[1]//13,
+                duration=min(5, self.duration - 20),)
+            )
+        if self.duration > 10:
+            self.clips.append(initial(text=self.data['CALL'],
+                data=self.data,
+                clipsize=self.moviesize,
+                textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
+                fontsize=self.moviesize[1]//13,
+                position='center',
+                duration=min(5, self.duration - 10),)
+            )
+        if self.duration > 5:
+            self.clips.append(final(text=self.data['NAME'],
+                data=self.data,
+                duration=min(5, self.duration - 5),)
+            )
+        t = 0
+        print('clips:')
+        print(self.clips)
+        for c in self.clips:
+            print(c)
+            c.set_start(t)
+            t += c.duration
 
-        self.clips.append(initial(text=self.data['INITIAL'],
-            data=self.data,
-            clipsize=self.moviesize,
-            textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
-            fontsize=self.moviesize[1]//13,
-            position='center'))
-
-        self.clips.extend(bullets(text=self.data['BULLETS'],
-            data=self.data,
-            clipsize=self.moviesize,
-            textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
-            duration=self.slideduration,
-            fontsize=self.moviesize[1]//13))
-
-        self.clips.append(initial(text=self.data['CALL'],
-            data=self.data,
-            clipsize=self.moviesize,
-            textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
-            fontsize=self.moviesize[1]//13,
-            position='center'))
-
-        self.clips.append(final(text=self.data['NAME'],
-            data=self.data))
-
-        for i, c in enumerate(self.clips):
-            c.set_start(i*self.slideduration)
-
-        self.duration = len(self.clips)* self.slideduration
         allclips = e.concatenate_videoclips(self.clips)
         logodl = gd.download(self.data['LOGO'])
         logobg = ct.makeColor(self.moviesize,color=(0,0,0),opacity=0)
