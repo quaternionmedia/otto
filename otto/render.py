@@ -2,7 +2,7 @@ from moviepy.editor import concatenate_videoclips, ColorClip, ImageClip, AudioFi
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
 from time import strftime
-from kburns import kburns2 as kburns
+from kburns import kburns
 from getdata import *
 from templates import *
 import os
@@ -14,12 +14,12 @@ from log import logger as ll
 class Otto:
     def __init__(self, data=None):
         self.dir =  os.path.dirname(os.path.abspath(__file__))
-        self.data = gd.openJson(data or os.path.join(self.dir, 'examples', 'talavideo.json'))
+        self.data = openJson(data or os.path.join(self.dir, 'examples', 'talavideo.json'))
         
         self.name = self.data['NAME'].replace(' ', '_')
         self.photos = [download(m, location='data') for m in self.data['MEDIA']]
         self.photos.insert(0, self.data['VIDEOS'][0])
-        self.moviesize=(400,400)
+        self.moviesize=(1920,1280)
         self.duration = float(self.data.get('DURATION')) or 60.0
         self.slideduration = max(min(self.duration / len(self.data['MEDIA']), 8), 2)
         self.videos = [self.movieclip(m) for m in self.data['VIDEOS']]
@@ -93,7 +93,7 @@ class Otto:
                     endpos=(bulletsize[0]//10, bulletsize[1]//2),
                     startwh=(bulletsize),
                     endwh=(int(bulletsize[0]*0.1), int(bulletsize[1]*0.8))
-                ).crossfadeout(1)]))
+                ).crossfadeout(1)]
                 )
             )
         if self.duration > 10:
@@ -121,8 +121,8 @@ class Otto:
             t += c.duration
 
         allclips = e.concatenate_videoclips(self.clips)
-        logodl = gd.download(self.data['LOGO'])
-        logobg = ct.makeColor(self.moviesize,color=(0,0,0),opacity=0)
+        logodl = download(self.data['LOGO'])
+        logobg = makeColor(self.moviesize,color=(0,0,0),opacity=0)
         logoimg = (e.ImageClip(logodl)
                 .set_duration(self.duration)
                 .resize(height=self.moviesize[1]//5)
