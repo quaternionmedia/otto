@@ -75,8 +75,8 @@ RUN pip3 install \
   jinja2
 
 WORKDIR /opt/code
-COPY ./deps/*.mp3 audios/
-COPY ./deps/*.mp4 videos/
+# COPY ./deps/*.mp3 audios/
+# COPY ./deps/*.mp4 videos/
 
 #CMD ["python3"]
 ENTRYPOINT ["uvicorn", "main:app", "--reload"]

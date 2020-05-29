@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, AnyUrl
+from getdata import urlToJson
 
 class Video_Request(BaseModel):
     NAME: str
@@ -39,6 +40,11 @@ async def process(request: Request):#vid_request: Video_Request):#
     form = json.loads(json.dumps((await request.form()), default=lambda o: o.__dict__, indent=4))['_dict']
     print(form)
     v = render.Otto(data=form)
+    with open("config_otto.json", "r") as config_file:
+        config = json.load(config_file)
+
+
+    returnDict = urlToJson(config['formpath'])
 
     # # v = render.Otto()
     file_path = await v.render()
@@ -46,6 +52,7 @@ async def process(request: Request):#vid_request: Video_Request):#
     # return {'status': True }
     return FileResponse( file_path )
     # return StreamingResponse(fake_video_streamer())
+    return returnDict
 
 
 @app.get("/")
