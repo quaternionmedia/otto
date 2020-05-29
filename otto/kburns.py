@@ -3,12 +3,13 @@ from json import loads, dumps
 from getdata import download
 import moviepy.editor as e
 from sys import path
+from os.path import join
 
-def kburns(media, duration=5):
-        config = loads(open('examples/example.json', 'r').read())
-        slides = [
-
-        ]
+def kburns(media, duration=5, moviesize=(1920,1080)):
+        config = loads(open(join('examples', 'example.json'), 'r').read())
+        config['config']['output_width'] = moviesize[0]
+        config['config']['output_height'] = moviesize[1]
+        slides = []
         for m in media:
             if m.endswith('.mp4'):
                 slides.append({
@@ -23,9 +24,9 @@ def kburns(media, duration=5):
                     'slide_duration': duration + 1,
                 })
         config['slides'] = slides
-        with open('examples/export.json', 'w') as f:
+        with open(join('examples', 'export.json'), 'w') as f:
             f.write(dumps(config))
-        run(['kburns', 'kbout.mp4', '-f', 'examples/export.json'])
+        run(['kburns', join('videos', 'kbout.mp4'), '-f', join('examples', 'export.json')])
 
 
 
