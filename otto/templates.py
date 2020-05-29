@@ -118,7 +118,7 @@ def bullets(text,
     clips = []
     st = 0
     for t in text:
-        d = duration/len(text) if text else 2 + pow(len(t.split(' ')), .5)
+        d = 2 + pow(len(t.split(' ')), .6)
         clip = (e.TextClip(t,
                     color=color,
                     fontsize=fontsize,
@@ -135,14 +135,15 @@ def bullets(text,
 
         fx = (ct.boxShrink(
                 duration=clip.duration, size=textsize, fill=ic.getcolor(data['THEMECOLOR'], 'RGB'))
-                    .set_position(('left', 'bottom'))
+                    .set_position(position)
                     )
-        clips.append(e.CompositeVideoClip([bkg, clip, fx], size=clipsize)
-                    # .set_start(st)
-                    .set_duration(d)
-                    .crossfadein(1)
-                    .crossfadeout(1)
-                    )
+        if st + d < duration:
+            clips.append(e.CompositeVideoClip([bkg, clip, fx], size=clipsize)
+                        # .set_start(st)
+                        .set_duration(d)
+                        .crossfadein(1)
+                        .crossfadeout(1)
+                        )
         st += d
     return clips
 
