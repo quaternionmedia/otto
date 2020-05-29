@@ -32,7 +32,7 @@ class Otto:
         return e.AudioFileClip(audiopath)
 
     def render(self, size=(1920,1080), outfile='out.mp4'):
-        slides = kburns(self.photos, duration=self.slideduration)
+        slides = kburns(self.photos, duration=self.slideduration, moviesize=self.moviesize)
         slides = (VideoFileClip('videos/kbout.mp4')
                 .crossfadein(1)
                 .crossfadeout(1)
@@ -76,7 +76,9 @@ class Otto:
         if self.duration > 5:
             self.clips.append(final(text=self.data['NAME'],
                 data=self.data,
-                duration=min(5, self.duration - 5),)
+                duration=min(5, self.duration - 5),
+                clipsize=self.moviesize,
+                fontsize=self.moviesize[1]//10,)
             )
         t = 0
         print('clips:')
