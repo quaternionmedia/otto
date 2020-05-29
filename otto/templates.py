@@ -3,10 +3,13 @@ import moviepy.editor as e
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 # from colortransitions import drawBoxOutline, circleShrink, growBox, flyInAndGrow, zoomFromCenter, boxReveal
 import colortransitions as ct
-# from PIL.ImageColor import getcolor
-import PIL.ImageColor as ic
+from PIL.ImageColor import getcolor
 from getdata import scale
 
+def rgbToDec(rgb):
+    color = getcolor(rgb, 'RGB')
+    color = [c / 255 for c in color]
+    return color
 
 def title(text,
             data=None,
@@ -32,7 +35,7 @@ def title(text,
         stroke_color=None)
             .set_position(position)
     )
-    boxclip = ct.boxReveal(duration=duration, size=textsize, fill=ic.getcolor(data['THEMECOLOR'], 'RGB')).set_position(position)
+    boxclip = ct.boxReveal(duration=duration, size=textsize, fill=rgbToDec(data['THEMECOLOR'])).set_position(position)
     if(bg is None):
         bgvid = ct.makeColor(clipsize,color=(0,0,0),opacity=0)
     else:
@@ -87,7 +90,7 @@ def initial(text,
                 .crossfadeout(1)
                 )
         texts.append(tc)
-        bkgs.append(e.ColorClip((tc.w, tc.h),color=ic.getcolor(data['THEMECOLOR'], 'RGBA'))
+        bkgs.append(e.ColorClip((tc.w, tc.h),color=rgbToDec(data['THEMECOLOR']))
                 .set_duration(tc.duration)
                 .set_start(tc.start)
                 .set_position(tc.pos)
@@ -98,7 +101,7 @@ def initial(text,
         st += d
     # zfc = ct.zoomFromCenter(size=textsize,
     #         duration=duration,
-    #         fill=ic.getcolor(data['THEMECOLOR'], 'RGB'),
+    #         fill=rgbToDec(data['THEMECOLOR']),
     #         transparent=True)
     print('initial', bkgs, texts)
     return (CompositeVideoClip([*bkgs, *texts], size=clipsize)
@@ -137,12 +140,12 @@ def bullets(text,
                     )
                     .set_position(position)
         )
-        bkg = (e.ColorClip((clip.w, clip.h),color=ic.getcolor(data['THEMECOLOR'], 'RGB'))
+        bkg = (e.ColorClip((clip.w, clip.h),color=rgbToDec(data['THEMECOLOR']))
                     .set_position(clip.pos)
                     .set_opacity(opacity))
 
         fx = (ct.boxShrink(
-                duration=clip.duration, size=textsize, fill=ic.getcolor(data['THEMECOLOR'], 'RGB'))
+                duration=clip.duration, size=textsize, fill=rgbToDec(data['THEMECOLOR']))
                     .set_position(position)
                     )
         if st + d <= duration:
@@ -210,13 +213,13 @@ def final(text,
 
     # fiag = ct.flyInAndGrow(size=size,
     #         duration=duration,
-    #         fill=ic.getcolor(data['THEMECOLOR'], 'RGB'),
+    #         fill=rgbToDec(data['THEMECOLOR']),
     #         transparent=True)
 
     dbo = ct.drawBoxOutline(
             size=(int(clipsize[0]*0.7), int(clipsize[1]*0.7)),
             duration=duration,
-            fill=ic.getcolor(data['THEMECOLOR'], 'RGB'),
+            fill=rgbToDec(data['THEMECOLOR']),
             transparent=True)
 
 
