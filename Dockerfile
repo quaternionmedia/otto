@@ -69,10 +69,10 @@ RUN fc-cache -f
 
 RUN pip3 install \
   fastapi \
-  uvicorn
-#  \
-#  pydantic \
-#  typing
+  uvicorn \
+  pydantic \
+  typing \
+  jinja2
 
 WORKDIR /opt/code
 COPY ./deps/*.mp3 audios/
