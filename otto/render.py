@@ -8,6 +8,7 @@ from templates import *
 import os
 from subprocess import run
 from colortransitions import *
+from log import logger as ll
 
 class Otto:
     def __init__(self, data=None):
@@ -24,6 +25,9 @@ class Otto:
         self.videos = [self.movieclip(m) for m in self.data['VIDEOS']]
         self.audios = [self.audioClip(a) for a in self.data['AUDIOS']]
         self.clips = []
+
+        if(options.verbose):
+            ll.debug(self)
 
     def scale(self, n):
         return int(self.moviesize[0]/n), int(self.moviesize[1]/n)
@@ -131,6 +135,26 @@ class Otto:
         finalVideo.write_videofile(filename, fps=30)
 
 if __name__ == '__main__':
+    timestr = strftime('%Y%m%d-%H%M%S')
+    fileout = f'output/{timestr}_ottorender.mp4'
 
+    ll.info("otto started")
     v = Otto()
-    v.render()
+
+    if(options.verbose):
+        ll.info("verbosly starting")
+
+    if(options.frame>=0):
+        ll.info(f"rendering frame :{options.frame})")
+        v.render(outfile=fileout, frame=options.frame)
+        ll.info("render frame complete")
+
+    if(options.render):
+        ll.info("render starting")
+        v.render(outfile=fileout)
+        ll.info("render complete")
+
+    if(options.open):
+        ll.info("opening")
+        run(['vlc', fileout])
+        ll.info("opened")
