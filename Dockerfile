@@ -67,7 +67,17 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ttf-mscorefonts-installer 
 COPY ./deps/segoeuibl.ttf /usr/share/fonts/
 RUN fc-cache -f
 
-RUN mkdir -p  /opt/code/audios/ /opt/code/videos/ /opt/code/output/ /opt/code/data/
-WORKDIR /opt/code
+RUN pip3 install \
+  fastapi \
+  uvicorn
+#  \
+#  pydantic \
+#  typing
 
-CMD ["python3"]
+WORKDIR /opt/code
+COPY ./deps/*.mp3 audios/
+COPY ./deps/*.mp4 videos/
+
+#CMD ["python3"]
+ENTRYPOINT ["uvicorn", "main:app", "--reload"]
+CMD ["--host", "0.0.0.0", "--port", "80"]
