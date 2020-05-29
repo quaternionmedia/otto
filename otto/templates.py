@@ -1,8 +1,6 @@
-# from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
-import moviepy.editor as e
+from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-# from colortransitions import drawBoxOutline, circleShrink, growBox, flyInAndGrow, zoomFromCenter, boxReveal
-import colortransitions as ct
+from colortransitions import *
 from PIL.ImageColor import getcolor
 from getdata import scale
 
@@ -26,7 +24,7 @@ def title(text,
             bg=None):
     if not color:
         color = data['FONTCOLOR']
-    t = (e.TextClip(text.strip(),
+    t = (TextClip(text.strip(),
         color=color,
         fontsize=fontsize,
         size=textsize,
@@ -35,11 +33,11 @@ def title(text,
         stroke_color=None)
             .set_position(position)
     )
-    boxclip = ct.boxReveal(duration=duration, size=textsize, fill=rgbToDec(data['THEMECOLOR'])).set_position(position)
+    boxclip = boxReveal(duration=duration, size=textsize, fill=rgbToDec(data['THEMECOLOR'])).set_position(position)
     if(bg is None):
-        bgvid = ct.makeColor(clipsize,color=(0,0,0),opacity=0)
+        bgvid = makeColor(clipsize,color=(0,0,0),opacity=0)
     else:
-        bgvid = bg.resize(clipsize).set_position(position)
+        bgvid = resize(clipsize).set_position(position)
     return (CompositeVideoClip([bgvid, t, boxclip], size=clipsize)
             .set_position('center')
             .set_fps(fps)
@@ -62,6 +60,7 @@ def initial(text,
             position='center',
             opacity=.4,
             fps=30,
+            fxs=[]
             ):
     if not color:
         color = data['FONTCOLOR']
@@ -74,7 +73,7 @@ def initial(text,
         d = 2 + pow(len(t.split(' ')), .6)
         if st + d > duration:
             d = duration - st
-        tc = (e.TextClip(t,
+        tc = (TextClip(t,
                     color=color,
                     fontsize=fontsize,
                     size=textsize,
@@ -90,7 +89,7 @@ def initial(text,
                 .crossfadeout(1)
                 )
         texts.append(tc)
-        bkgs.append(e.ColorClip((tc.w, tc.h),color=rgbToDec(data['THEMECOLOR']))
+        bkgs.append(ColorClip((tc.w, tc.h),color=rgbToDec(data['THEMECOLOR']))
                 .set_duration(tc.duration)
                 .set_start(tc.start)
                 .set_position(tc.pos)
@@ -99,12 +98,21 @@ def initial(text,
                 .crossfadeout(1)
         )
         st += d
-    # zfc = ct.zoomFromCenter(size=textsize,
-    #         duration=duration,
-    #         fill=rgbToDec(data['THEMECOLOR']),
-    #         transparent=True)
+    if(len(fxs) is 0):
+      t = textsize
+
+      fx = [boxShrink(size=(t[0], t[1]),
+              duration=duration,
+              fill=rgbToDec(data['THEMECOLOR']),
+              transparent=True,
+              direction=0,
+              startpos=(t[0]//2, t[1]//2),
+              endpos=(t[0]//2, 9*t[1]//10),
+              startwh=(t[0],t[1]),
+              endwh=(int(t[0]*0.8), int(t[1]*0.1))
+              ).crossfadeout(1)]
     print('initial', bkgs, texts)
-    return (CompositeVideoClip([*bkgs, *texts], size=clipsize)
+    return (CompositeVideoClip([*bkgs, *texts, *fxs], size=clipsize)
             .set_position(position)
             .set_fps(30))
 
@@ -120,7 +128,8 @@ def bullets(text,
             duration=None,
             position=('center', 'center'),
             opacity=.4,
-            fps=30):
+            fps=30,
+            fxs=[]):
     if not color:
         color = data['FONTCOLOR']
     text = text.split('\u2022')
@@ -130,7 +139,7 @@ def bullets(text,
     st = 0
     for t in text:
         d = 2 + pow(len(t.split(' ')), .6)
-        clip = (e.TextClip(t,
+        clip = (TextClip(t,
                     color=color,
                     fontsize=fontsize,
                     size=textsize,
@@ -140,21 +149,21 @@ def bullets(text,
                     )
                     .set_position(position)
         )
-        bkg = (e.ColorClip((clip.w, clip.h),color=rgbToDec(data['THEMECOLOR']))
+        bkg = (ColorClip((clip.w, clip.h),color=rgbToDec(data['THEMECOLOR']))
                     .set_position(clip.pos)
                     .set_opacity(opacity))
-
-        fx = (ct.boxShrink(
-                duration=clip.duration, size=textsize, fill=rgbToDec(data['THEMECOLOR']))
-                    .set_position(position)
-                    )
+        if(len(fxs) is 0):
+            fxs.append((boxShrink(
+                    duration=clip.duration, size=textsize, fill=rgbToDec(data['THEMECOLOR']))
+                        .set_position(('left', 'bottom'))
+                        ))
         if st + d <= duration:
-            clips.append(CompositeVideoClip([bkg, clip, fx], size=clipsize)
-                        # .set_start(st)
-                        .set_duration(d)
-                        .crossfadein(1)
-                        .crossfadeout(1)
-                        )
+            clips.append(CompositeVideoClip([bkg, clip, *fxs], size=clipsize)
+                    # .set_start(st)
+                    .set_duration(d)
+                    .crossfadein(1)
+                    .crossfadeout(1)
+                    )
         st += d
     return clips
 
@@ -173,7 +182,7 @@ def final(text,
     if not color:
         color = data['FONTCOLOR']
     texts = [
-        e.TextClip(text,
+        TextClip(text,
             color=color,
             fontsize=60,
             size=clipsize,
@@ -182,7 +191,7 @@ def final(text,
             stroke_color=None,
             # align='north').set_position(('center', 'top')),
             ).set_position((0,-clipsize[1]//5)),
-        e.TextClip(data['ADDRESS'],
+        TextClip(data['ADDRESS'],
             color=color,
             fontsize=50,
             size=clipsize,
@@ -191,7 +200,7 @@ def final(text,
             stroke_color=None,
             # align='west').set_position(('left', 'center')),
             ).set_position((0,-clipsize[1]//10)),
-        e.TextClip(data['WEBSITE'],
+        TextClip(data['WEBSITE'],
             color=color,
             fontsize=60,
             size=clipsize,
@@ -200,7 +209,7 @@ def final(text,
             stroke_color=None,
             # align='south').set_position(('center', 'bottom')),
             ).set_position((0,clipsize[1]//10)),
-        e.TextClip(data['PHONE'],
+        TextClip(data['PHONE'],
             color=color,
             fontsize=60,
             size=clipsize,
@@ -211,12 +220,12 @@ def final(text,
             ).set_position((0,clipsize[1]//5)),
     ]
 
-    # fiag = ct.flyInAndGrow(size=size,
+    # fiag = flyInAndGrow(size=size,
     #         duration=duration,
     #         fill=rgbToDec(data['THEMECOLOR']),
     #         transparent=True)
 
-    dbo = ct.drawBoxOutline(
+    dbo = drawBoxOutline(
             size=(int(clipsize[0]*0.7), int(clipsize[1]*0.7)),
             duration=duration,
             fill=rgbToDec(data['THEMECOLOR']),
