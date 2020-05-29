@@ -37,7 +37,7 @@ def title(text,
         bgvid = ct.makeColor(clipsize,color=(0,0,0),opacity=0)
     else:
         bgvid = bg.resize(clipsize).set_position(position)
-    return (e.CompositeVideoClip([bgvid, t, boxclip], size=clipsize)
+    return (CompositeVideoClip([bgvid, t, boxclip], size=clipsize)
             .set_position('center')
             .set_fps(fps)
             .set_duration(duration)
@@ -64,36 +64,44 @@ def initial(text,
         color = data['FONTCOLOR']
     text = text.split('.')
     text = [t.strip() for t in text if t.strip()]
-    texts = [e.TextClip(t.strip(),
-                color=color,
-                fontsize=fontsize,
-                size=textsize,
-                font=font,
-                method=method,
-                stroke_color=None,
-                # align='west'
-                ).set_start(i*duration)
-                .set_duration(duration or 2 + pow(len(t.strip().split(' ')), .4))
+    texts = []
+    bkgs = []
+    st = 0
+    for t in text:
+        d = 2 + pow(len(t.split(' ')), .6)
+        if st + d > duration:
+            d = duration - st
+        tc = (e.TextClip(t,
+                    color=color,
+                    fontsize=fontsize,
+                    size=textsize,
+                    font=font,
+                    method=method,
+                    stroke_color=None,
+                    # align='west'
+                ).set_start(st)
+                .set_duration(d)
                 .set_position(position)
                 .resize(textsize)
                 .crossfadein(1)
-                .crossfadeout(1) for i, t in enumerate(text) if t.strip()]
-
-    bkgs = [e.ColorClip((t.w, t.h),color=ic.getcolor(data['THEMECOLOR'], 'RGBA'))
-                .set_duration(t.duration)
-                .set_start(t.start)
-                .set_position(t.pos)
+                .crossfadeout(1)
+                )
+        texts.append(tc)
+        bkgs.append(e.ColorClip((tc.w, tc.h),color=ic.getcolor(data['THEMECOLOR'], 'RGBA'))
+                .set_duration(tc.duration)
+                .set_start(tc.start)
+                .set_position(tc.pos)
                 .set_opacity(opacity)
                 .crossfadein(1)
                 .crossfadeout(1)
-                for i, t in enumerate(texts)]
-
+        )
+        st += d
     # zfc = ct.zoomFromCenter(size=textsize,
     #         duration=duration,
     #         fill=ic.getcolor(data['THEMECOLOR'], 'RGB'),
     #         transparent=True)
-
-    return (e.CompositeVideoClip([*bkgs, *texts], size=clipsize)
+    print('initial', bkgs, texts)
+    return (CompositeVideoClip([*bkgs, *texts], size=clipsize)
             .set_position(position)
             .set_fps(30))
 
@@ -137,8 +145,8 @@ def bullets(text,
                 duration=clip.duration, size=textsize, fill=ic.getcolor(data['THEMECOLOR'], 'RGB'))
                     .set_position(position)
                     )
-        if st + d < duration:
-            clips.append(e.CompositeVideoClip([bkg, clip, fx], size=clipsize)
+        if st + d <= duration:
+            clips.append(CompositeVideoClip([bkg, clip, fx], size=clipsize)
                         # .set_start(st)
                         .set_duration(d)
                         .crossfadein(1)
@@ -212,7 +220,7 @@ def final(text,
             transparent=True)
 
 
-    return (e.CompositeVideoClip([dbo, *texts], size=size)
+    return (CompositeVideoClip([dbo, *texts], size=size)
             .set_fps(fps)
             .set_duration(duration)
             .set_position((0,0))
