@@ -102,9 +102,10 @@ class Otto:
                     .set_duration(self.duration)
         )
         timestr = strftime('%Y%m%d-%H%M%S')
-        filename = os.path.join(self.dir, 'output', f'{timestr}_{self.name}.mp4')
+        filename = os.path.join(self.dir, 'output', f'{timestr}_{self.name}_{int(self.duration)}_{self.moviesize[0]}x{self.moviesize[1]}.mp4')
 
-        finalVideo.write_videofile(filename, fps=30)
+        finalVideo.write_videofile(filename, fps=30, threads=8,)
+
 
 if __name__ == '__main__':
 
