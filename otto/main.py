@@ -37,9 +37,9 @@ async def process(request: Request):#vid_request: Video_Request):#
     # print(vid_request)
     # v = render.Otto(data=vid_request.json())
 
-    form = json.loads(json.dumps((await request.form()), default=lambda o: o.__dict__, indent=4))['_dict']
-    print(form)
-    v = render.Otto(data=form)
+    # form = json.loads(json.dumps((await request.form()), default=lambda o: o.__dict__, indent=4))['_dict']
+    # print(form)
+    # v = render.Otto(data=form)
     with open("config_otto.json", "r") as config_file:
         config = json.load(config_file)
 
@@ -47,10 +47,10 @@ async def process(request: Request):#vid_request: Video_Request):#
     returnDict = urlToJson(config['formpath'])
 
     # # v = render.Otto()
-    file_path = await v.render()
+    #file_path = await v.render()
     # v.render()
     # return {'status': True }
-    return FileResponse( file_path )
+    #return FileResponse( file_path )
     # return StreamingResponse(fake_video_streamer())
     return returnDict
 
