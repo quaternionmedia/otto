@@ -8,6 +8,7 @@ from templates import *
 import os
 from subprocess import run
 from colortransitions import *
+from cliparse import options, args
 from log import logger as ll
 
 class Otto:
@@ -38,7 +39,7 @@ class Otto:
     def audioClip(self, audiopath):
         return AudioFileClip(audiopath)
 
-    def render(self, size=(1920,1080), outfile='out.mp4'):
+    def render(self, size=(1920,1080), outfile='out.mp4', frame=-1):
 
         # slides = kburns(self.photos)
         slides = (VideoFileClip('videos/kbout.mp4')
@@ -60,7 +61,6 @@ class Otto:
         self.clips.append(initial(text=self.data['INITIAL'],
             data=self.data,
             clipsize=self.moviesize,
-            textsize=t,
             textsize=initsize,
             fontsize=self.moviesize[1]//15,
             position='center',
@@ -107,10 +107,6 @@ class Otto:
             c.set_start(i*self.slideduration)
 
         self.totalduration = len(self.clips)* self.slideduration
-        allclips = e.concatenate_videoclips(self.clips)
-        logodl = gd.download(self.data['LOGO'])
-        logobg = ct.makeColor(self.moviesize,color=(0,0,0),opacity=0)
-        logoimg = (e.ImageClip(logodl)
         allclips = concatenate_videoclips(self.clips)
         logodl = download(self.data['LOGO'])
         logobg = makeColor(self.moviesize,color=(0,0,0),opacity=0)
@@ -120,19 +116,20 @@ class Otto:
                 .margin(right=8, top=8, opacity=0)
                 .set_position(('right','bottom'))
         )
-        logo = e.CompositeVideoClip([logobg,logoimg],
         logo = CompositeVideoClip([logobg,logoimg],
             size=self.moviesize).fx(slide_in, 1.5,'right')
         # ending = final(text=self.data['NAME'], data=self.data, duration=self.slideduration).set_start(self.totalduration - self.slideduration)
-        finalVideo = (e.CompositeVideoClip([slides, allclips, logo])
         finalVideo = (CompositeVideoClip([allclips])
                     .set_audio(self.audios[0])
                     .set_duration(self.totalduration)
         )
-        timestr = strftime('%Y%m%d-%H%M%S')
-        filename = os.path.join(self.dir, 'output', f'{timestr}_{self.name}.mp4')
+        # timestr = strftime('%Y%m%d-%H%M%S')
+        # filename = os.path.join(self.dir, 'output', f'{timestr}_{self.name}.mp4')
+        if(options.frame>=0):
+            finalVideo.save_frame(f'output/{fileout}_frame{options.frame}.png', t=options.frame)
 
-        finalVideo.write_videofile(filename, fps=30)
+        if(options.render):
+            finalVideo.write_videofile(fileout, fps=30, threads=16)
 
 if __name__ == '__main__':
     timestr = strftime('%Y%m%d-%H%M%S')
