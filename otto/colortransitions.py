@@ -141,39 +141,54 @@ def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         return surface.get_npimage(transparent=transparent)
     return makeClip(cs).set_duration(duration)
 
-def boxShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
-    def cs(t):
+def boxShrink(duration=defaultdur,
+        size=clipsize,
+        fill=defaultfill,
+        transparent=transparent,
+        startpos=(0,0),
+        endpos=(0,0),
+        startwh=(0,0),
+        endwh=(0,0),
+        shirnkdur=1,
+        direction=-1 #0-360, -1 is defaults
+        ):
+
+    #need to declare here b/c the returned function can only t passed in
+    spos = startpos
+    epos = endpos
+    swh = startwh
+    ewh = endwh
+
+    def bs(t):
         surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
-        send = 1
         w = clipsize[0]
         h = clipsize[1]
-        sw = w
-        sh = h
-        ew = int(w * 0.2)
-        eh = int(h * 0.7)
-        sx = w//2
-        sy = h//2
-        ex = w//10
-        ey = h//2
-        x = sx
-        y = sy
 
-        if(t <= send):
-            x = translate(t, 0, send, sx, ex)
-            y = translate(t, 0, send, sy, ey)
-            w = translate(t, 0, send, sw, ew)
-            h = translate(t, 0, send, sh, eh)
+        if(direction is -1):
+            startpos=(w//2, h//2)
+            startwh=(w, h)
+            endpos = (w//10, h//2)
+            endwh = (int(w * 0.2), int(h * 0.7))
+
+        x = spos[0]
+        y = spos[1]
+
+        if(t <= shirnkdur):
+            x = translate(t, 0, shirnkdur, spos[0], epos[0])
+            y = translate(t, 0, shirnkdur, spos[1], epos[1])
+            w = translate(t, 0, shirnkdur, swh[0], ewh[0])
+            h = translate(t, 0, shirnkdur, swh[1], ewh[1])
         else:
-            x = ex
-            y = ey
-            w = ew
-            h = eh
+            x = epos[0]
+            y = epos[1]
+            w = ewh[0]
+            h = ewh[1]
 
         circle = gizeh.rectangle(lx=w, ly=h, xy=(x,y), fill=fill)
         circle.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
-    return makeClip(cs).set_duration(duration)
+    return makeClip(bs).set_duration(duration)
 
 def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def dbo(t):
