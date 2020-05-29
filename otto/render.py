@@ -57,6 +57,7 @@ class Otto:
             data=self.data,
             clipsize=self.moviesize,
             textsize=t,
+            textsize=initsize,
             fontsize=self.moviesize[1]//15,
             position='center',
             fxs=[boxShrink(size=initsize,
