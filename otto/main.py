@@ -1,9 +1,9 @@
 from typing import List
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel, AnyUrl
 from fastapi.responses import HTMLResponse
 import render
-import os
+import os, json
 
 class Video_Request(BaseModel):
     name: str
@@ -27,9 +27,11 @@ class Video_Request(BaseModel):
 app = FastAPI()
 
 @app.post('/render')
-async def process():#vid_request: Video_Request):
-    # v = render.Otto(Video_Request.json())
-    v = render.Otto()
+async def process(request: Request):#vid_request: Video_Request):
+    form = json.loads(json.dumps((await request.form()), default=lambda o: o.__dict__, indent=4))['_dict']
+    print(form)
+    v = render.Otto(data=form)
+    # v = render.Otto()
     # file = await v.render()
     v.render()
     return {'status': True }
@@ -41,23 +43,23 @@ async def main():
     content = """
 <body>
 <form action="/render" enctype="multipart/form-data" method="post">
-Name: <input name="name" type="text"><br>
-Logo: <input name="logo" type="text"><br>
-Address: <input name="address" type="text"><br>
-Phone: <input name="phone" type="text"><br>
-Hours: <input name="hours" type="text"><br>
-Website: <input name="website" type="text"><br>
-Initial: <input name="initial" type="text"><br>
-Bullets: <input name="bullets" type="text"><br>
-Optional: <input name="optional" type="text"><br>
-Video: <input name="videos" type="text"><br>
-Audio: <input name="audios" type="text"><br>
-Media: <input name="media" type="text"><br>
-Call: <input name="call" type="text"><br>
-Closing: <input name="closing" type="text"><br>
-Font Color: <input name="fontcolor" type="text"><br>
-Theme Color: <input name="themecolor" type="text"><br>
-Font: <input name="font" type="text"><br>
+Name: <input name="NAME" type="text"><br>
+Logo: <input name="LOGO" type="text"><br>
+Address: <input name="ADDRESS" type="text"><br>
+Phone: <input name="PHONE" type="text"><br>
+Hours: <input name="HOURS" type="text"><br>
+Website: <input name="WEBSITE" type="text"><br>
+Initial: <input name="INITIAL" type="text"><br>
+Bullets: <input name="BULLETS" type="text"><br>
+Optional: <input name="OPTIONAL" type="text"><br>
+Video: <input name="VIDEOS" type="text"><br>
+Audio: <input name="AUDIOS" type="text"><br>
+Media: <input name="MEDIA" type="text"><br>
+Call: <input name="CALL" type="text"><br>
+Closing: <input name="CLOSING" type="text"><br>
+Font Color: <input name="FONTCOLOR" type="text"><br>
+Theme Color: <input name="THEMECOLOR" type="text"><br>
+Font: <input name="FONT" type="text"><br>
 <input type="submit">
 </form>
 </body>

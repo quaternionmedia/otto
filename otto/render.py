@@ -8,12 +8,15 @@ from templates import *
 import os
 
 class Otto:
-    def __init__(self, data=None):
+    def __init__(self, data=None, path=None):
         self.dir =  os.path.dirname(os.path.abspath(__file__))
 
-        if(data is None):
-            data = os.path.join(self.dir, 'examples/talavideo.json')
-        self.data = gd.openJson(data)
+        if (path is None) and (data is None):
+            self.data = gd.openJson(os.path.join(self.dir, 'examples/talavideo.json'))
+        if (path is None) and (data is not None):
+            self.data = data
+        if (path is not None) and (data is None):
+            self.data = gd.openJson(path)
         self.name = self.data['NAME'].replace(' ', '_')
         self.photos = [gd.download(m, location='data') for m in self.data['MEDIA']]
         self.moviesize=(1920,1080)
