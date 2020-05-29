@@ -7,6 +7,7 @@ otto/audios/*
 /_trash
 *.mp4
 *.mp3
+/deps/*
 
 node_modules
 */dist/*

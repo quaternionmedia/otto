@@ -2,7 +2,7 @@ import render
 import os, json
 from typing import List
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, Response, JSONResponse
+from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, AnyUrl
@@ -31,18 +31,20 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 @app.post('/render')
-async def process(vid_request: Video_Request):#request: Request):#
-    # form = json.loads(json.dumps((await request.form()), default=lambda o: o.__dict__, indent=4))['_dict']
-    print(vid_request)
+async def process(request: Request):#vid_request: Video_Request):#
 
-    # print(form)
-    # v = render.Otto(data=form)
+    # print(vid_request)
+    # v = render.Otto(data=vid_request.json())
+
+    form = json.loads(json.dumps((await request.form()), default=lambda o: o.__dict__, indent=4))['_dict']
+    print(form)
+    v = render.Otto(data=form)
 
     # # v = render.Otto()
-    # # file = await v.render()
+    file_path = await v.render()
     # v.render()
     # return {'status': True }
-    return {'status': True }
+    return FileResponse( file_path )
     # return StreamingResponse(fake_video_streamer())
 
 
@@ -52,11 +54,13 @@ async def main(request: Request):
     # return Response(content=content, )
 
     data = None
-    with open('examples/talavideo.json') as json_file:
-        data = Video_Request.parse_obj(json.load(json_file))
-    # return JSONResponse(content=data.dict())
+    # with open('examples/talavideo.json') as json_file:
+    #     data = Video_Request.parse_obj(json.load(json_file))
+    # # return JSONResponse(content=data.dict())
+    data = Video_Request.parse_file('examples/talavideo.json')
+    # print(data.json())
 
-    return templates.TemplateResponse("video_request.html", {"request": request, "vid_request": data.dict()})
+    return templates.TemplateResponse("video_request.html", {"request": request, "vid_request": data})
 
 
 if __name__ == '__main__':
