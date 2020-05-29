@@ -48,25 +48,36 @@ RUN pip3 install \
 RUN apt-get install -y \
   libmagick++-dev
 
-RUN curl https://imagemagick.org/download/ImageMagick.tar.gz -o ./ImageMagick.tar.gz
-RUN tar xvzf ImageMagick.tar.gz
-RUN cd ImageMagick-7.0.10-14 && ./configure && make
+COPY ./deps/ImageMagick-7.0.10-14.tar.gz /
+RUN tar xvzf ImageMagick-7.0.10-14.tar.gz
 RUN cd ImageMagick-7.0.10-14 && make install
-
 RUN ldconfig /usr/local/lib
 ENV MAGICK_HOME="/ImageMagick-7.0.10-14"
 ENV PATH="$MAGICK_HOME/bin:$PATH"
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$MAGICK_HOME/lib"
 
-RUN git clone git://github.com/Trekky12/kburns-slideshow.git
+# FROM git://github.com/Trekky12/kburns-slideshow.git
+COPY ./deps/kburns-slideshow.tar.gz /
+RUN tar xvzf kburns-slideshow.tar.gz
 COPY ./otto/examples/config_otto.json /kburns-slideshow/config.json
 RUN chmod +x /kburns-slideshow/main.py && ln -s /kburns-slideshow/main.py /usr/local/bin/kburns
 
-WORKDIR /opt/code
+
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ttf-mscorefonts-installer && fc-cache -f && mkdir ~/.fonts
-COPY ./otto/examples/segoeuibl.ttf /usr/share/fonts/
-RUN fc-cache -fv
+COPY ./deps/segoeuibl.ttf /usr/share/fonts/
+RUN fc-cache -f
 
-RUN mkdir -p  /opt/code/audios/ /opt/code/videos/ /opt/code/output/ /opt/code/data/
+RUN pip3 install \
+  fastapi \
+  uvicorn \
+  pydantic \
+  typing \
+  jinja2
 
-CMD ["python3"]
+WORKDIR /opt/code
+# COPY ./deps/*.mp3 audios/
+# COPY ./deps/*.mp4 videos/
+
+#CMD ["python3"]
+ENTRYPOINT ["uvicorn", "main:app", "--reload"]
+CMD ["--host", "0.0.0.0", "--port", "80"]

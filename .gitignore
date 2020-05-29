@@ -1,9 +1,13 @@
 # project based
 data/*
-src/data/*
-src/output/*
-src/videos/*
-src/audios/*
+otto/data/*
+otto/output/*
+otto/videos/*
+otto/audios/*
+/_trash
+*.mp4
+*.mp3
+/deps/*
 
 node_modules
 */dist/*
@@ -38,10 +42,7 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
-/_trash
 
 # System Files
 .DS_Store
 Thumbs.db
-
-*.mp4

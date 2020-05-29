@@ -4,6 +4,9 @@ from csv import reader
 from json import loads
 import moviepy.editor as e
 
+import urllib.request as request
+import json
+
 def download(url, location='data'):
     if url.find('.jpg') > 0:
         basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode().strip()
@@ -40,3 +43,16 @@ def openJson(path):
 
 def scale(n, size=(1920,1080)):
     return int(size[0]/n), int(size[1]/n)
+
+
+
+def urlToJson(path):
+
+    # Open API URL
+    with request.urlopen(path) as response:
+        if response.getcode() == 200:
+            source = response.read()
+            data = json.loads(source)
+        else:
+            print('An error occurred while attempting to retrieve data from the API.')
+    return data

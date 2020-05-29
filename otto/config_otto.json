@@ -3,6 +3,8 @@
     "ffprobe": "ffprobe",
     "aubio": "aubioonset",
 
+    "formpath": "https://spreadsheets.google.com/feeds/list/1_TOmKIfzVLib4EJp7PeTWzb2dawgftAbYpOKqUlUKmU/o9w76in/public/values?alt=json",
+
     "IMAGE_EXTENSIONS": ["jpg", "jpeg", "png"],
     "VIDEO_EXTENSIONS": ["mp4", "mpg", "avi"],
     "AUDIO_EXTENSIONS": ["mp3", "ogg", "flac"],

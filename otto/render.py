@@ -12,10 +12,15 @@ from cliparse import args
 from log import logger as ll
 
 class Otto:
-    def __init__(self, data=None):
+    def __init__(self, data=None, path=None):
         self.dir =  os.path.dirname(os.path.abspath(__file__))
-        self.data = openJson(data or os.path.join(self.dir, 'examples', 'talavideo.json'))
-        
+
+        if (path is None) and (data is None):
+            self.data = openJson(os.path.join(self.dir, 'examples', 'talavideo.json')
+        if (path is None) and (data is not None):
+            self.data = data
+        if (path is not None) and (data is None):
+            self.data = openJson(path)
         self.name = self.data['NAME'].replace(' ', '_')
         self.photos = [download(m, location='data') for m in self.data['MEDIA']]
         self.photos.insert(0, self.data['VIDEOS'][0])
@@ -74,7 +79,7 @@ class Otto:
                 ).crossfadeout(1)]
                 )
             )
-                
+
         if self.duration > 20:
             bulletsize = (int(self.moviesize[0]), int(self.moviesize[1]))
             self.clips.extend(bullets(text=self.data['BULLETS'],
