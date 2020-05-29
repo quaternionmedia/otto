@@ -100,7 +100,7 @@ class Otto:
         timestr = strftime('%Y%m%d-%H%M%S')
         filename = os.path.join(self.dir, 'output', f'{timestr}_{self.name}.mp4')
 
-        finalVideo.write_videofile(filename, fps=1)
+        finalVideo.write_videofile(filename, fps=30)
         return filename
 
 if __name__ == '__main__':

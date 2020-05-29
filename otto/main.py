@@ -20,7 +20,7 @@ class Video_Request(BaseModel):
     OPTIONAL: str = ""
     VIDEOS: List[str] = ["videos/talavid.mp4"]
     AUDIOS: List[str] = ["audios/talaaudio.mp3"]
-    MEDIA: List[str]
+    MEDIA: List[str] = []
     CALL: str
     CLOSING: str
     FONTCOLOR: str = "#FFFFFF"
@@ -33,13 +33,12 @@ templates = Jinja2Templates(directory="templates")
 
 @app.post('/render')
 async def process(request: Request):#vid_request: Video_Request):#
+    form = await request.form()
+    dform = dict(form)
+    print(dform['MEDIA'])
+    # v = render.Otto(data=dform)
+    # return dform
 
-    # print(vid_request)
-    # v = render.Otto(data=vid_request.json())
-
-    # form = json.loads(json.dumps((await request.form()), default=lambda o: o.__dict__, indent=4))['_dict']
-    # print(form)
-    # v = render.Otto(data=form)
     with open("config_otto.json", "r") as config_file:
         config = json.load(config_file)
 
@@ -57,17 +56,11 @@ async def process(request: Request):#vid_request: Video_Request):#
 
 @app.get("/")
 async def main(request: Request):
-    # content = """"""
-    # return Response(content=content, )
 
     data = None
-    # with open('examples/talavideo.json') as json_file:
-    #     data = Video_Request.parse_obj(json.load(json_file))
-    # # return JSONResponse(content=data.dict())
     data = Video_Request.parse_file('examples/talavideo.json')
-    # print(data.json())
 
-    return templates.TemplateResponse("video_request.html", {"request": request, "vid_request": data})
+    return templates.TemplateResponse("video_request.html", {"request": request, "vid_request": data.dict()})
 
 
 if __name__ == '__main__':
