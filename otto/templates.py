@@ -118,7 +118,7 @@ def bullets(text,
     clips = []
     st = 0
     for t in text:
-        d = duration or 2 + pow(len(t.split(' ')), .5)
+        d = duration/len(text) if text else 2 + pow(len(t.split(' ')), .5)
         clip = (e.TextClip(t,
                     color=color,
                     fontsize=fontsize,

@@ -14,9 +14,10 @@ class Otto:
         
         self.name = self.data['NAME'].replace(' ', '_')
         self.photos = [gd.download(m, location='data') for m in self.data['MEDIA']]
+        self.photos.insert(0, self.data['VIDEOS'][0])
         self.moviesize=(1920,1080)
-        self.duration = self.data.get('DURATION') or 60
-        self.slideduration = self.duration / len(self.data['MEDIA'])
+        self.duration = float(self.data.get('DURATION')) or 60.0
+        self.slideduration = max(min(self.duration / len(self.data['MEDIA']), 8), 2)
         self.videos = [self.movieclip(m) for m in self.data['VIDEOS']]
         self.audios = [self.audioClip(a) for a in self.data['AUDIOS']]
         self.clips = []
@@ -61,7 +62,7 @@ class Otto:
                 clipsize=self.moviesize,
                 textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
                 fontsize=self.moviesize[1]//13,
-                duration=min(5, self.duration - 20),)
+                duration=self.duration - 20,)
             )
         if self.duration > 10:
             self.clips.append(initial(text=self.data['CALL'],
