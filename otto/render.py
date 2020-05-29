@@ -8,7 +8,7 @@ from templates import *
 import os
 from subprocess import run
 from colortransitions import *
-from cliparse import options, args
+from cliparse import args
 from log import logger as ll
 
 class Otto:
@@ -27,7 +27,7 @@ class Otto:
         self.audios = [self.audioClip(a) for a in self.data['AUDIOS']]
         self.clips = []
 
-        if(options.verbose):
+        if(args.verbose):
             ll.debug(self)
 
     def scale(self, n):
@@ -123,35 +123,34 @@ class Otto:
                     .set_audio(self.audios[0])
                     .set_duration(self.totalduration)
         )
-        # timestr = strftime('%Y%m%d-%H%M%S')
-        # filename = os.path.join(self.dir, 'output', f'{timestr}_{self.name}.mp4')
-        if(options.frame>=0):
-            finalVideo.save_frame(f'output/{fileout}_frame{options.frame}.png', t=options.frame)
 
-        if(options.render):
-            finalVideo.write_videofile(fileout, fps=30, threads=16)
+        if(args.frame>=0):
+            finalVideo.save_frame(f'{fileout}.png', t=args.frame)
+
+        if(args.render):
+            finalVideo.write_videofile(f'{fileout}.mp4', fps=30, threads=8)
 
 if __name__ == '__main__':
     timestr = strftime('%Y%m%d-%H%M%S')
-    fileout = f'output/{timestr}_ottorender.mp4'
+    fileout = f'output/{timestr}_ottorender'
 
     ll.info("otto started")
     v = Otto()
 
-    if(options.verbose):
+    if(args.verbose):
         ll.info("verbosly starting")
 
-    if(options.frame>=0):
-        ll.info(f"rendering frame :{options.frame})")
-        v.render(outfile=fileout, frame=options.frame)
+    if(args.frame>=0):
+        ll.info(f"rendering frame:{args.frame}")
+        v.render(outfile=fileout, frame=args.frame)
         ll.info("render frame complete")
 
-    if(options.render):
+    if(args.render):
         ll.info("render starting")
         v.render(outfile=fileout)
         ll.info("render complete")
 
-    if(options.open):
+    if(args.open):
         ll.info("opening")
         run(['vlc', fileout])
         ll.info("opened")
