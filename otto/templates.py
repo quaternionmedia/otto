@@ -4,6 +4,10 @@ from colortransitions import *
 from PIL.ImageColor import getcolor
 from getdata import scale
 
+def rgbToDec(rgb):
+    color = getcolor(rgb, 'RGB')
+    color = [c / 255 for c in color]
+    return color
 
 def title(text,
             data=None,
@@ -29,7 +33,7 @@ def title(text,
         stroke_color=None)
             .set_position(position)
     )
-    boxclip = boxReveal(duration=duration, size=textsize, fill=getcolor(data['THEMECOLOR'], 'RGB')).set_position(position)
+    boxclip = boxReveal(duration=duration, size=textsize, fill=rgbToDec(data['THEMECOLOR'])).set_position(position)
     if(bg is None):
         bgvid = makeColor(clipsize,color=(0,0,0),opacity=0)
     else:
@@ -62,46 +66,52 @@ def initial(text,
         color = data['FONTCOLOR']
     text = text.split('.')
     text = [t.strip() for t in text if t.strip()]
-    texts = [TextClip(t.strip(),
-                color=color,
-                fontsize=fontsize,
-                size=textsize,
-                font=font,
-                method=method,
-                stroke_color=None,
-                # align='west'
-                ).set_start(i*duration)
-                .set_duration(duration or 2 + pow(len(t.strip().split(' ')), .4))
+    texts = []
+    bkgs = []
+    st = 0
+    for t in text:
+        d = 2 + pow(len(t.split(' ')), .6)
+        if st + d > duration:
+            d = duration - st
+        tc = (TextClip(t,
+                    color=color,
+                    fontsize=fontsize,
+                    size=textsize,
+                    font=font,
+                    method=method,
+                    stroke_color=None,
+                    # align='west'
+                ).set_start(st)
+                .set_duration(d)
                 .set_position(position)
                 .resize(textsize)
                 .crossfadein(1)
-                .crossfadeout(1) for i, t in enumerate(text) if t.strip()]
-
-    bkgs = [ColorClip((t.w, t.h),color=getcolor(data['THEMECOLOR'], 'RGBA'))
-                .set_duration(t.duration)
-                .set_start(t.start)
-                .set_position(t.pos)
+                .crossfadeout(1)
+                )
+        texts.append(tc)
+        bkgs.append(ColorClip((tc.w, tc.h),color=rgbToDec(data['THEMECOLOR']))
+                .set_duration(tc.duration)
+                .set_start(tc.start)
+                .set_position(tc.pos)
                 .set_opacity(opacity)
                 .crossfadein(1)
                 .crossfadeout(1)
-                for i, t in enumerate(texts)]
-
+        )
+        st += d
     if(len(fxs) is 0):
-        t = textsize
+      t = textsize
 
-        fx = [boxShrink(size=(t[0], t[1]),
-                duration=duration,
-                fill=getcolor(data['THEMECOLOR'], 'RGB'),
-                transparent=True,
-                direction=0,
-                startpos=(t[0]//2, t[1]//2),
-                endpos=(t[0]//2, 9*t[1]//10),
-                startwh=(t[0],t[1]),
-                endwh=(int(t[0]*0.8), int(t[1]*0.1))
-                ).crossfadeout(1)]
-
-
-
+      fx = [boxShrink(size=(t[0], t[1]),
+              duration=duration,
+              fill=rgbToDec(data['THEMECOLOR']),
+              transparent=True,
+              direction=0,
+              startpos=(t[0]//2, t[1]//2),
+              endpos=(t[0]//2, 9*t[1]//10),
+              startwh=(t[0],t[1]),
+              endwh=(int(t[0]*0.8), int(t[1]*0.1))
+              ).crossfadeout(1)]
+    print('initial', bkgs, texts)
     return (CompositeVideoClip([*bkgs, *texts, *fxs], size=clipsize)
             .set_position(position)
             .set_fps(30))
@@ -128,7 +138,7 @@ def bullets(text,
     clips = []
     st = 0
     for t in text:
-        d = duration or 2 + pow(len(t.split(' ')), .5)
+        d = 2 + pow(len(t.split(' ')), .6)
         clip = (TextClip(t,
                     color=color,
                     fontsize=fontsize,
@@ -139,15 +149,16 @@ def bullets(text,
                     )
                     .set_position(position)
         )
-        bkg = (ColorClip((clip.w, clip.h),color=getcolor(data['THEMECOLOR'], 'RGB'))
+        bkg = (ColorClip((clip.w, clip.h),color=rgbToDec(data['THEMECOLOR']))
                     .set_position(clip.pos)
                     .set_opacity(opacity))
         if(len(fxs) is 0):
             fxs.append((boxShrink(
-                    duration=clip.duration, size=textsize, fill=getcolor(data['THEMECOLOR'], 'RGB'))
+                    duration=clip.duration, size=textsize, fill=rgbToDec(data['THEMECOLOR']))
                         .set_position(('left', 'bottom'))
                         ))
-        clips.append(CompositeVideoClip([bkg, clip, *fxs], size=clipsize)
+        if st + d <= duration:
+            clips.append(CompositeVideoClip([bkg, clip, *fxs], size=clipsize)
                     # .set_start(st)
                     .set_duration(d)
                     .crossfadein(1)
@@ -160,7 +171,7 @@ def final(text,
             data=None,
             color=None,
             fontsize=20,
-            size=(1920,1080),
+            clipsize=(1920,1080),
             font='Segoe UI Bold',
             method='caption',
             start=0,
@@ -174,54 +185,54 @@ def final(text,
         TextClip(text,
             color=color,
             fontsize=60,
-            size=size,
+            size=clipsize,
             font=font,
             method=method,
             stroke_color=None,
             # align='north').set_position(('center', 'top')),
-            ).set_position((0,-size[1]//5)),
+            ).set_position((0,-clipsize[1]//5)),
         TextClip(data['ADDRESS'],
             color=color,
             fontsize=50,
-            size=size,
+            size=clipsize,
             font=font,
             method=method,
             stroke_color=None,
             # align='west').set_position(('left', 'center')),
-            ).set_position((0,-size[1]//10)),
+            ).set_position((0,-clipsize[1]//10)),
         TextClip(data['WEBSITE'],
             color=color,
             fontsize=60,
-            size=size,
+            size=clipsize,
             font=font,
             method=method,
             stroke_color=None,
             # align='south').set_position(('center', 'bottom')),
-            ).set_position((0,size[1]//10)),
+            ).set_position((0,clipsize[1]//10)),
         TextClip(data['PHONE'],
             color=color,
             fontsize=60,
-            size=size,
+            size=clipsize,
             font=font,
             method='label',
             stroke_color=None,
             # align='east').set_position(('right', 'center')),
-            ).set_position((0,size[1]//5)),
+            ).set_position((0,clipsize[1]//5)),
     ]
 
     # fiag = flyInAndGrow(size=size,
     #         duration=duration,
-    #         fill=getcolor(data['THEMECOLOR'], 'RGB'),
+    #         fill=rgbToDec(data['THEMECOLOR']),
     #         transparent=True)
 
     dbo = drawBoxOutline(
-            size=(int(size[0]*0.7), int(size[1]*0.7)),
+            size=(int(clipsize[0]*0.7), int(clipsize[1]*0.7)),
             duration=duration,
-            fill=getcolor(data['THEMECOLOR'], 'RGB'),
+            fill=rgbToDec(data['THEMECOLOR']),
             transparent=True)
 
 
-    return (CompositeVideoClip([dbo, *texts], size=size)
+    return (CompositeVideoClip([dbo, *texts], size=clipsize)
             .set_fps(fps)
             .set_duration(duration)
             .set_position((0,0))
