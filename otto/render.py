@@ -1,11 +1,13 @@
-from moviepy.editor import concatenate_videoclips, ColorClip, ImageClip, VideoFileClip
+from moviepy.editor import concatenate_videoclips, ColorClip, ImageClip, AudioFileClip, VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
 from time import strftime
 from kburns import kburns2 as kburns
-import getdata as gd
+from getdata import *
 from templates import *
 import os
+from subprocess import run
+from colortransitions import *
 
 class Otto:
     def __init__(self, data=None):
@@ -13,9 +15,9 @@ class Otto:
 
         if(data is None):
             data = os.path.join(self.dir, 'examples/talavideo.json')
-        self.data = gd.openJson(data)
+        self.data = openJson(data)
         self.name = self.data['NAME'].replace(' ', '_')
-        self.photos = [gd.download(m, location='data') for m in self.data['MEDIA']]
+        self.photos = [download(m, location='data') for m in self.data['MEDIA']]
         self.moviesize=(1920,1080)
         self.totalduration = 0
         self.slideduration = 5
@@ -27,10 +29,10 @@ class Otto:
         return int(self.moviesize[0]/n), int(self.moviesize[1]/n)
 
     def movieclip(self, moviepath):
-        return e.VideoFileClip(moviepath).set_duration(self.slideduration)
+        return VideoFileClip(moviepath).set_duration(self.slideduration)
 
     def audioClip(self, audiopath):
-        return e.AudioFileClip(audiopath)
+        return AudioFileClip(audiopath)
 
     def render(self, size=(1920,1080), outfile='out.mp4'):
 
@@ -50,19 +52,41 @@ class Otto:
             )
         )
 
+        initsize = int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)
         self.clips.append(initial(text=self.data['INITIAL'],
             data=self.data,
             clipsize=self.moviesize,
-            textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
-            fontsize=self.moviesize[1]//13,
-            position='center'))
+            textsize=t,
+            fontsize=self.moviesize[1]//15,
+            position='center',
+            fxs=[boxShrink(size=initsize,
+                    duration=self.slideduration,
+                    fill=getcolor(self.data['THEMECOLOR'], 'RGB'),
+                    transparent=True,
+                    direction=0,
+                    startpos=(initsize[0]//2, initsize[1]//2),
+                    endpos=(initsize[0]//2, 9*initsize[1]//10),
+                    startwh=initsize,
+                    endwh=(int(initsize[0]*0.8), int(initsize[1]*0.1))
+                    ).crossfadeout(1)]))
 
+        bulletsize = (int(self.moviesize[0]), int(self.moviesize[1]))
         self.clips.extend(bullets(text=self.data['BULLETS'],
             data=self.data,
             clipsize=self.moviesize,
-            textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
+            textsize=bulletsize,
             duration=self.slideduration,
-            fontsize=self.moviesize[1]//13))
+            fontsize=self.moviesize[1]//13,
+            fxs=[boxShrink(size=(int(bulletsize[0]), bulletsize[1]),
+                    duration=self.slideduration,
+                    fill=getcolor(self.data['THEMECOLOR'], 'RGB'),
+                    transparent=True,
+                    direction=0,
+                    startpos=(bulletsize[0]//2, bulletsize[1]//2),
+                    endpos=(bulletsize[0]//10, bulletsize[1]//2),
+                    startwh=(bulletsize),
+                    endwh=(int(bulletsize[0]*0.1), int(bulletsize[1]*0.8))
+                    ).crossfadeout(1)]))
 
         self.clips.append(initial(text=self.data['CALL'],
             data=self.data,
@@ -82,15 +106,21 @@ class Otto:
         logodl = gd.download(self.data['LOGO'])
         logobg = ct.makeColor(self.moviesize,color=(0,0,0),opacity=0)
         logoimg = (e.ImageClip(logodl)
+        allclips = concatenate_videoclips(self.clips)
+        logodl = download(self.data['LOGO'])
+        logobg = makeColor(self.moviesize,color=(0,0,0),opacity=0)
+        logoimg = (ImageClip(logodl)
                 .set_duration(self.totalduration)
                 .resize(height=self.moviesize[1]//5)
                 .margin(right=8, top=8, opacity=0)
                 .set_position(('right','bottom'))
         )
         logo = e.CompositeVideoClip([logobg,logoimg],
+        logo = CompositeVideoClip([logobg,logoimg],
             size=self.moviesize).fx(slide_in, 1.5,'right')
         # ending = final(text=self.data['NAME'], data=self.data, duration=self.slideduration).set_start(self.totalduration - self.slideduration)
         finalVideo = (e.CompositeVideoClip([slides, allclips, logo])
+        finalVideo = (CompositeVideoClip([allclips])
                     .set_audio(self.audios[0])
                     .set_duration(self.totalduration)
         )
