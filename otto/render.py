@@ -69,7 +69,7 @@ class Otto:
                 duration=min(5, self.duration - 15),
                 fxs=[boxShrink(size=initsize,
                     duration=self.slideduration,
-                    fill=getcolor(self.data['THEMECOLOR'], 'RGB'),
+                    fill=rgbToDec(self.data['THEMECOLOR']),
                     transparent=True,
                     direction=0,
                     startpos=(initsize[0]//2, initsize[1]//2),
@@ -91,7 +91,7 @@ class Otto:
                 fxs=[boxShrink(
                     size=(int(bulletsize[0]), bulletsize[1]),
                     duration=self.slideduration,
-                    fill=getcolor(self.data['THEMECOLOR'], 'RGB'),
+                    fill=rgbToDec(self.data['THEMECOLOR']),
                     transparent=True,
                     direction=0,
                     startpos=(bulletsize[0]//2, bulletsize[1]//2),
