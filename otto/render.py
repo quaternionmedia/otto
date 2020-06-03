@@ -16,7 +16,7 @@ class Otto:
         self.dir =  os.path.dirname(os.path.abspath(__file__))
 
         if (path is None) and (data is None):
-            self.data = openJson(os.path.join(self.dir, 'examples', 'talavideo.json')
+            self.data = openJson(os.path.join(self.dir, 'examples', 'talavideo.json'))
         if (path is None) and (data is not None):
             self.data = data
         if (path is not None) and (data is None):

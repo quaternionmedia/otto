@@ -7,6 +7,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, AnyUrl
 from getdata import urlToJson
+from uvicorn import run
 
 class Video_Request(BaseModel):
     NAME: str
@@ -35,7 +36,7 @@ templates = Jinja2Templates(directory="templates")
 async def process(request: Request):#vid_request: Video_Request):#
     form = await request.form()
     dform = dict(form)
-    print(dform['MEDIA'])
+    # print(dform['MEDIA'])
     # v = render.Otto(data=dform)
     # return dform
 
