@@ -18,7 +18,7 @@ def kburns(media, duration=5, moviesize=(1920,1080)):
                         'start': 0,
                         'end': duration*2,
                     })
-            else:
+            elif m.endswith(('.jpg', '.jpeg', '.png')):
                 slides.append({
                     'file': m,
                     'slide_duration': duration + 1,

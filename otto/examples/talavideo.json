@@ -8,9 +8,8 @@
   "INITIAL": "As we re-open, we want to assure our clients we will be taking the necessary steps to ensure the safety of both our valued customers and our entire staff.",
   "BULLETS": "\u2022 Masks for both staff and clients \u2022 Disposable capes \u2022  Sanitize all stations and implements after every service \u2022 Hand sanitizer supplied \u2022 Touch-less temperature scanning \u2022 Gloves \u2022 One client per stylist at a time, no one in a waiting room \u2022 No walk in’s, appointment only",
   "OPTIONAL": "",
-  "VIDEOS":["videos/talavid.mp4"],
-  "AUDIOS":["audios/talaaudio.mp3"],
-  "MEDIA":["https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-9/50666024_367519593831457_8497733438135074816_n.jpg?_nc_cat=103&_nc_sid=6e5ad9&_nc_ohc=jJYoTbuUyW8AX8eAylT&_nc_ht=scontent-sjc3-1.xx&oh=a1605d822c45ba52719775d835b4c75f&oe=5EE39597",
+  "MEDIA": ["videos/talavid.mp4",
+    "https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-9/50666024_367519593831457_8497733438135074816_n.jpg?_nc_cat=103&_nc_sid=6e5ad9&_nc_ohc=jJYoTbuUyW8AX8eAylT&_nc_ht=scontent-sjc3-1.xx&oh=a1605d822c45ba52719775d835b4c75f&oe=5EE39597",
     "https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-9/s960x960/94337112_626856977897716_1212415992886460416_o.jpg?_nc_cat=105&_nc_sid=2d5d41&_nc_ohc=WDq3pyYGugcAX-sgeGU&_nc_ht=scontent-sjc3-1.xx&_nc_tp=7&oh=ebe4b3b945908b34cc7179730f673d62&oe=5EE39C57",
     "https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-9/95568515_633860660530681_8200575165004775424_n.jpg?_nc_cat=109&_nc_sid=110474&_nc_ohc=KsxUDu-Dl6wAX9q3ttj&_nc_ht=scontent-sjc3-1.xx&oh=4856dd2f8662bbf35378d6db82200a5b&oe=5EE247A7",
     "https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-9/p720x720/95699199_633251033924977_9037320113790910464_o.jpg?_nc_cat=105&_nc_sid=110474&_nc_ohc=uG49pwq8GvEAX_iENQp&_nc_ht=scontent-sjc3-1.xx&_nc_tp=6&oh=e428e79a8d4afc5798771952808c5347&oe=5EE2504A",
@@ -27,10 +26,11 @@
     "https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-9/46121208_334270187156398_7243366249105719296_n.jpg?_nc_cat=100&_nc_sid=110474&_nc_ohc=xV03gRGsmZMAX_26gpo&_nc_ht=scontent-sjc3-1.xx&oh=2197e4462d148b92550db4ceb84cdd4c&oe=5EE32260",
     "https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-9/45270535_330573430859407_6441098175330648064_n.jpg?_nc_cat=103&_nc_sid=110474&_nc_ohc=O3JdZ84bbt0AX8i9BM0&_nc_ht=scontent-sjc3-1.xx&oh=62329459a05cde4fcce5c5dfed54edf6&oe=5EE379A1",
     "https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-9/45276506_330571774192906_4374561045813919744_n.jpg?_nc_cat=105&_nc_sid=110474&_nc_ohc=OKypV8DXun0AX_XzKHk&_nc_ht=scontent-sjc3-1.xx&oh=b41e649491bc326a9b519f48bff28652&oe=5EE48DB5"],
+  "AUDIO": ["audios/talaaudio.mp3"],
   "CALL": "Please call for an appointment\n(475) 269-2562",
   "CLOSING": "Tala Hair Studio\n(475) 269-2562\ntalahairstudio.com",
   "FONTCOLOR": "#FFFFFF",
   "THEMECOLOR": "#CC5500",
   "FONT": "Segoe_UI_Bold",
-  "DURATION": "12"
+  "DURATION": "15"
 }

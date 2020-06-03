@@ -22,13 +22,11 @@ class Otto:
         if (path is not None) and (data is None):
             self.data = openJson(path)
         self.name = self.data['NAME'].replace(' ', '_')
-        self.photos = [download(m, location='data') for m in self.data['MEDIA']]
-        self.photos.insert(0, self.data['VIDEOS'][0])
+        self.media = [download(m, location='data') if m.startswith('http') else m for m in self.data['MEDIA']]
         self.moviesize=(1920,1280)
         self.duration = float(self.data.get('DURATION')) or 60.0
         self.slideduration = max(min(self.duration / len(self.data['MEDIA']), 8), 2)
-        self.videos = [self.movieclip(m) for m in self.data['VIDEOS']]
-        self.audios = [self.audioClip(a) for a in self.data['AUDIOS']]
+        self.audio = [self.audioClip(a) for a in self.data['AUDIO']]
         self.clips = []
 
         if(args.verbose):
@@ -44,7 +42,7 @@ class Otto:
         return AudioFileClip(audiopath)
 
     def render(self, size=(1920,1080), outfile='out.mp4', frame=-1):
-        slides = kburns(self.photos, duration=self.slideduration, moviesize=self.moviesize)
+        slides = kburns(self.media, duration=self.slideduration, moviesize=self.moviesize)
         slides = (VideoFileClip('videos/kbout.mp4')
                 .crossfadein(1)
                 .crossfadeout(1)
@@ -55,7 +53,6 @@ class Otto:
             textsize=self.scale(2),
             position='center',
             duration=min(5, self.duration),
-            # bg=self.videos[0],
             )
         )
         if self.duration > 15:
@@ -137,7 +134,7 @@ class Otto:
         logo = CompositeVideoClip([logobg,logoimg],
             size=self.moviesize).fx(slide_in, 1.5,'right')
         finalVideo = (CompositeVideoClip([slides, allclips, logo])
-                    .set_audio(self.audios[0])
+                    .set_audio(self.audio[0])
                     .set_duration(self.duration)
         )
         timestr = strftime('%Y%m%d-%H%M%S')
