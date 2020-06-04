@@ -1,0 +1,9 @@
+FastAPI
+aiofiles
+moviepy
+gizeh
+ffmpeg-python
+numpy
+jinja2
+pydantic
+uvicorn
