@@ -19,9 +19,7 @@ class Video_Request(BaseModel):
     INITIAL: str
     BULLETS: str
     OPTIONAL: str = ""
-    VIDEOS: List[str] = ["videos/talavid.mp4"]
-    AUDIOS: List[str] = ["audios/talaaudio.mp3"]
-    MEDIA: List[str] = []
+    MEDIA: List[str] = ["videos/talavid.mp4", "audios/talaaudio.mp3"]
     CALL: str
     CLOSING: str
     FONTCOLOR: str = "#FFFFFF"
