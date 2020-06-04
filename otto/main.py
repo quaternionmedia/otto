@@ -9,7 +9,7 @@ from pydantic import BaseModel, AnyUrl
 from getdata import urlToJson
 from uvicorn import run
 
-class Video_Request(BaseModel):
+class VideoForm(BaseModel):
     NAME: str
     LOGO: str #AnyUrl
     ADDRESS: str
@@ -31,7 +31,7 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 @app.post('/render')
-async def process(request: Request):#vid_request: Video_Request):#
+async def process(request: Request):#video_data: VideoForm):#
     form = await request.form()
     dform = dict(form)
     # print(dform['MEDIA'])
@@ -57,9 +57,9 @@ async def process(request: Request):#vid_request: Video_Request):#
 async def main(request: Request):
 
     data = None
-    data = Video_Request.parse_file('examples/talavideo.json')
+    data = VideoForm.parse_file('examples/talavideo.json')
 
-    return templates.TemplateResponse("video_request.html", {"request": request, "vid_request": data.dict()})
+    return templates.TemplateResponse("VideoForm.html", {"request": request, "video_data": data.dict()})
 
 
 if __name__ == '__main__':
