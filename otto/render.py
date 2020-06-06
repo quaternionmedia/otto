@@ -160,7 +160,7 @@ if __name__ == '__main__':
 
     if(args.frame>=0):
         ll.info(f"rendering frame:{args.frame}")
-        v.render(outfile=fileout, frame=args.frame)
+        v.render(outfile=fileout, frame=args.frame, size=tuple(args.size))
         ll.info("render frame complete")
 
     if(args.render):
