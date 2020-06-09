@@ -29,6 +29,7 @@ class Otto:
         self.clips = []
 
         if(args.verbose):
+            from .log import logger as ll
             ll.debug(self)
 
     def scale(self, n):
