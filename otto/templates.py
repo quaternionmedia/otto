@@ -3,6 +3,7 @@ from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from PIL.ImageColor import getcolor
 from .getdata import scale
 from .colortransitions import *
+from .defaults import defaults
 
 def rgbToDec(rgb):
     color = getcolor(rgb, 'RGB')
@@ -22,8 +23,8 @@ def title(text,
             opacity=.4,
             fps=30,
             bg=None):
-    if not color:
-        color = data['FONTCOLOR']
+    data = data or defaults
+    color = color or data['FONTCOLOR']
     t = (TextClip(text.strip(),
         color=color,
         fontsize=fontsize,
@@ -62,8 +63,8 @@ def initial(text,
             fps=30,
             fxs=[]
             ):
-    if not color:
-        color = data['FONTCOLOR']
+    data = data or defaults
+    color = color or data['FONTCOLOR']
     text = text.split('.')
     text = [t.strip() for t in text if t.strip()]
     texts = []
@@ -130,8 +131,8 @@ def bullets(text,
             opacity=.4,
             fps=30,
             fxs=[]):
-    if not color:
-        color = data['FONTCOLOR']
+    data = data or defaults
+    color = color or data['FONTCOLOR']
     text = text.split('\u2022')
     text = [t.strip() for t in text if t.strip()]
     print('bullet texts', text, )
@@ -179,8 +180,8 @@ def final(text,
             position='center',
             opacity=.4,
             fps=30,):
-    if not color:
-        color = data['FONTCOLOR']
+    data = data or defaults
+    color = color or data['FONTCOLOR']
     texts = [
         TextClip(text,
             color=color,
