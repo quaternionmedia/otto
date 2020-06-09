@@ -7,8 +7,8 @@ parser.add_argument('--dry', '-n', action='store_false', dest='render', default=
                     help='for dry run (no render)')
 
 #renderFrame
-parser.add_argument('--frame', '-f', action='store', type=int, dest='frame', default=-1,
-                    help='followed by a number (-f 9) to render that frame')
+parser.add_argument('--frame', '-f', action='store', type=float, dest='frame', default=-1,
+                    help='followed by a time in seconds (-f 9.2) to render that frame')
 
 #open
 parser.add_argument('--open', '-o', action='store_true', dest='open', default=False,

@@ -1,0 +1,44 @@
+<body>
+  <form name="request" action="/render" enctype="multipart/form-data" method="post">
+    Name: <input name="NAME" type="text"><br>
+    Logo: <input name="LOGO" type="text"><br>
+    Address: <input name="ADDRESS" type="text"><br>
+    Phone: <input name="PHONE" type="text"><br>
+    Hours: <input name="HOURS" type="text"><br>
+    Website: <input name="WEBSITE" type="text"><br>
+    Initial: <input name="INITIAL" type="textarea"><br>
+    Bullets: <input name="BULLETS" type="textarea"><br>
+    Optional: <input name="OPTIONAL" type="textarea"><br>
+    Audio: <input name="AUDIO" type="textarea"><br>
+    Media: <input name="MEDIA" type="textarea"><br>
+    Call: <input name="CALL" type="text"><br>
+    Closing: <input name="CLOSING" type="text"><br>
+    Font Color: <input name="FONTCOLOR" type="text"><br>
+    Theme Color: <input name="THEMECOLOR" type="text"><br>
+    Font: <input name="FONT" type="text"><br>
+    Duration: <input name="DURATION" type="text"><br>
+    <input type="submit">
+  </form>
+  <script type="text/javascript">
+    d = document.forms['request'];
+    video_data = {{video_data|tojson}};
+    d.NAME.value = video_data.NAME;
+    d.LOGO.value = video_data.LOGO;
+    d.ADDRESS.value = video_data.ADDRESS;
+    d.PHONE.value = video_data.PHONE;
+    d.HOURS.value = video_data.HOURS;
+    d.WEBSITE.value = video_data.WEBSITE;
+    d.INITIAL.value = video_data.INITIAL;
+    d.BULLETS.value = video_data.BULLETS;
+    d.OPTIONAL.value = video_data.OPTIONAL;
+    d.AUDIO.value = video_data.AUDIO;
+    d.MEDIA.value = video_data.MEDIA;
+    d.CALL.value = video_data.CALL;
+    d.CLOSING.value = video_data.CLOSING;
+    d.FONTCOLOR.value = video_data.FONTCOLOR;
+    d.THEMECOLOR.value = video_data.THEMECOLOR;
+    d.FONT.value = video_data.FONT;
+    d.DURATION.value = video_data.DURATION;
+    console.log(video_data);
+  </script>
+</body>

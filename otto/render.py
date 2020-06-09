@@ -41,10 +41,11 @@ class Otto:
     def audioClip(self, audiopath):
         return AudioFileClip(audiopath)
 
-    def render(self, size=None, outfile='out.mp4', frame=-1):
+    def render(self, size=None):
         if size:
             self.moviesize = size
-        slides = kburns(self.media, duration=self.slideduration, moviesize=self.moviesize)
+        if args.render:
+            slides = kburns(self.media, duration=self.slideduration, moviesize=self.moviesize)
         slides = (VideoFileClip('videos/kbout.mp4')
                 .crossfadein(1)
                 .crossfadeout(1)
@@ -135,40 +136,38 @@ class Otto:
         )
         logo = CompositeVideoClip([logobg,logoimg],
             size=self.moviesize).fx(slide_in, 1.5,'right')
-        finalVideo = (CompositeVideoClip([slides, allclips, logo])
+        return (CompositeVideoClip([slides, allclips, logo])
                     .set_audio(self.audio[0])
                     .set_duration(self.duration)
         )
-        timestr = strftime('%Y%m%d-%H%M%S')
-        filename = os.path.join(self.dir, 'output', f'{timestr}_{self.name}_{int(self.duration)}_{self.moviesize[0]}x{self.moviesize[1]}.mp4')
-        if(args.frame>=0):
-            finalVideo.save_frame(f'{fileout}.png', t=args.frame)
-
-        if(args.render):
-            finalVideo.write_videofile(filename, fps=30, threads=8,)
 
 
 if __name__ == '__main__':
-    timestr = strftime('%Y%m%d-%H%M%S')
-    fileout = f'output/{timestr}_ottorender'
-
     ll.info("otto started")
     v = Otto()
-
     if(args.verbose):
         ll.info("verbosly starting")
 
+    timestr = strftime('%Y%m%d-%H%M%S')
+    if args.size:
+        finalVideo = v.render(size=tuple(args.size))
+    else:
+        finalVideo = v.render()
+
+    filename = os.path.join(
+        v.dir,
+        'output',
+        f'{timestr}_{v.name}_{int(v.duration)}_{args.size[0] or v.moviesize[0]}x{args.size[1] or v.moviesize[1]}'
+    )
+
     if(args.frame>=0):
         ll.info(f"rendering frame:{args.frame}")
-        v.render(outfile=fileout, frame=args.frame)
+        finalVideo.save_frame(f'{filename}.png', t=args.frame)
         ll.info("render frame complete")
 
     if(args.render):
         ll.info("render starting")
-        if args.size:
-            v.render(outfile=fileout, size=tuple(args.size))
-        else:
-            v.render(outfile=fileout)
+        finalVideo.write_videofile(f'{filename}.mp4', fps=30, threads=8,)
         ll.info("render complete")
 
     if(args.open):
