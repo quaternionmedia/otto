@@ -1,8 +1,8 @@
 from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-from colortransitions import *
 from PIL.ImageColor import getcolor
-from getdata import scale
+from .getdata import scale
+from .colortransitions import *
 
 def rgbToDec(rgb):
     color = getcolor(rgb, 'RGB')

@@ -2,14 +2,13 @@ from moviepy.editor import concatenate_videoclips, ColorClip, ImageClip, AudioFi
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
 from time import strftime
-from kburns import kburns
-from getdata import *
-from templates import *
 import os
 from subprocess import run
-from colortransitions import *
-from cliparse import args
-from log import logger as ll
+from .kburns import kburns
+from .getdata import *
+from .templates import *
+from .colortransitions import *
+from .cliparse import args
 
 class Otto:
     def __init__(self, data=None, path=None):
