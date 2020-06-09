@@ -158,7 +158,7 @@ def bullets(text,
                     duration=clip.duration, size=textsize, fill=rgbToDec(data['THEMECOLOR']))
                         .set_position(('left', 'bottom'))
                         ))
-        if st + d <= duration:
+        if not duration or st + d <= duration:
             clips.append(CompositeVideoClip([bkg, clip, *fxs], size=clipsize)
                     # .set_start(st)
                     .set_duration(d)
