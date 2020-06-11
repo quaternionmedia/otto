@@ -5,7 +5,8 @@ with open("README.md", "r") as fh:
 
 INSTALL_REQUIRES = [
     'moviepy',
-    'pillow'
+    'pillow',
+    'gizeh',
 ]
 setuptools.setup(
     name="otto", # Replace with your own username

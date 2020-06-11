@@ -1,9 +1,9 @@
 from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from PIL.ImageColor import getcolor
-from .getdata import scale
-from .colortransitions import *
-from .defaults import defaults
+from otto.getdata import scale
+from otto.colortransitions import *
+from otto.defaults import defaults
 
 def rgbToDec(rgb):
     color = getcolor(rgb, 'RGB')

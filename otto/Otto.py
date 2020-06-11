@@ -4,11 +4,11 @@ from moviepy.video.compositing.transitions import slide_in
 from time import strftime
 import os
 from subprocess import run
-from .kburns import kburns
-from .getdata import *
-from .templates import *
-from .colortransitions import *
-from .cliparse import args
+from otto.kburns import kburns
+from otto.getdata import *
+from otto.templates import *
+from otto.colortransitions import *
+from otto.log import logger as ll
 
 class Otto:
     def __init__(self, data=None, path=None):
@@ -29,7 +29,6 @@ class Otto:
         self.clips = []
 
         if(args.verbose):
-            from .log import logger as ll
             ll.debug(self)
 
     def scale(self, n):
@@ -143,6 +142,7 @@ class Otto:
 
 
 if __name__ == '__main__':
+    from cliparse import args
     ll.info("otto started")
     v = Otto()
     if(args.verbose):

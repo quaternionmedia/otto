@@ -4,9 +4,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
-from getdata import urlToJson
 from uvicorn import run
-from models import VideoForm
+from otto.getdata import urlToJson
+from otto.models import VideoForm
 
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory='static', html=True), name="static")

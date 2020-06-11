@@ -3,7 +3,7 @@ from json import loads, dumps
 import moviepy.editor as e
 from sys import path
 from os.path import join
-from .getdata import download
+from otto.getdata import download
 
 def kburns(media, duration=5, moviesize=(1920,1080)):
         config = loads(open(join('examples', 'example.json'), 'r').read())
