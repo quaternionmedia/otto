@@ -11,7 +11,7 @@ from otto.colortransitions import *
 from otto.log import logger as ll
 
 class Otto:
-    def __init__(self, data=None, path=None):
+    def __init__(self, data=None, path=None, verbose=False):
         self.dir =  os.path.dirname(os.path.abspath(__file__))
 
         if (path is None) and (data is None):
@@ -28,7 +28,7 @@ class Otto:
         self.audio = [self.audioClip(a) for a in self.data['AUDIO']]
         self.clips = []
 
-        if(args.verbose):
+        if(verbose):
             ll.debug(self)
 
     def scale(self, n):
@@ -40,10 +40,10 @@ class Otto:
     def audioClip(self, audiopath):
         return AudioFileClip(audiopath)
 
-    def render(self, size=None):
+    def render(self, size=None, dry=False, verbose=False):
         if size:
             self.moviesize = size
-        if args.render:
+        if not dry:
             slides = kburns(self.media, duration=self.slideduration, moviesize=self.moviesize)
         slides = (VideoFileClip('videos/kbout.mp4')
                 .crossfadein(1)
