@@ -1,16 +1,19 @@
-import render
+# import render
 import os, json
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
+from starlette.responses import FileResponse
 from uvicorn import run
 from otto.getdata import urlToJson
 from otto.models import VideoForm
+from otto import templates
+from importlib import import_module
 
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory='static', html=True), name="static")
-templates = Jinja2Templates(directory="templates")
+jt = Jinja2Templates(directory="templates")
 
 @app.post('/render')
 async def process(request: Request):#video_data: VideoForm):#
@@ -34,6 +37,19 @@ async def process(request: Request):#video_data: VideoForm):#
     # return StreamingResponse(fake_video_streamer())
     return returnDict
 
+@app.get('/template/{template}')
+async def renderTemplate(template: str, text='asdf'):
+    # if import_module(f'otto.templates.{template}'):
+    print('rendering frame from template')
+    t = getattr(templates, template)
+    if t:
+        try:
+            t(text=text).save_frame('temp.png')
+            return FileResponse('temp.png')
+        except Exception as e:
+            print('error making template', template, kwargs, t)
+            return HTTPException(status_code=500)
+    else: return HTTPException(status_code=405)
 
 @app.get("/")
 async def main(request: Request):
@@ -41,7 +57,7 @@ async def main(request: Request):
     data = None
     data = VideoForm.parse_file('examples/talavideo.json')
 
-    return templates.TemplateResponse("VideoForm.html", {"request": request, "video_data": data.dict()})
+    return jt.TemplateResponse("VideoForm.html", {"request": request, "video_data": data.dict()})
 
 
 if __name__ == '__main__':
