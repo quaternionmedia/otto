@@ -8,26 +8,29 @@ import urllib.request as request
 import json
 
 def download(url, location='data'):
-    if url.find('.jpg') > 0:
-        basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode().strip()
-    elif url.find('.png') > 0:
-        basename = run(['basename', url.split('.png')[0] + '.png'], capture_output=True).stdout.decode().strip()
-    elif url.find('mp3'):
-        basename = run(['basename', url.split('.mp3')[0] + '.mp3'], capture_output=True).stdout.decode().strip()
-        location = 'audios'
-    elif url.find('mp4'):
-        basename = run(['basename', url.split('.mp4')[0] + '.mp4'], capture_output=True).stdout.decode().strip()
-        location = 'videos'
+    if not url.startswith('http'):
+        return url
     else:
-        basename = run(['basename', url.split('/')[-1]]).strip()
-    filename = path.join(location, basename) if location else basename
-    if not path.isfile(filename):
-        if location:
-            run(['wget', '--content-disposition', '-O', filename, url])
+        if url.find('.jpg') > 0:
+            basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode().strip()
+        elif url.find('.png') > 0:
+            basename = run(['basename', url.split('.png')[0] + '.png'], capture_output=True).stdout.decode().strip()
+        elif url.find('mp3'):
+            basename = run(['basename', url.split('.mp3')[0] + '.mp3'], capture_output=True).stdout.decode().strip()
+            location = 'audios'
+        elif url.find('mp4'):
+            basename = run(['basename', url.split('.mp4')[0] + '.mp4'], capture_output=True).stdout.decode().strip()
+            location = 'videos'
         else:
-            run(['wget', '--content-disposition', url])
-    return filename
-
+            basename = run(['basename', url.split('/')[-1]]).strip()
+        filename = path.join(location, basename) if location else basename
+        if not path.isfile(filename):
+            if location:
+                run(['wget', '--content-disposition', '-O', filename, url])
+            else:
+                run(['wget', '--content-disposition', url])
+        return filename
+    
 
 def openCsv(path):
     csvreader = reader(open(path, 'r'))
