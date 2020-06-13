@@ -38,16 +38,16 @@ async def process(request: Request):#video_data: VideoForm):#
     return returnDict
 
 @app.get('/template/{template}')
-async def renderTemplate(template: str, text='asdf'):
+async def renderTemplate(request: Request, template: str, text='asdf'):
     # if import_module(f'otto.templates.{template}'):
-    print('rendering frame from template')
-    t = getattr(templates, template)
-    if t:
+    tmp = getattr(templates, template)
+    if tmp:
         try:
-            t(text=text).save_frame('temp.png')
+            q = request.query_params
+            tmp(**q).save_frame('temp.png', t=q['t'])
             return FileResponse('temp.png')
         except Exception as e:
-            print('error making template', template, kwargs, t)
+            print('error making template', template)
             return HTTPException(status_code=500)
     else: return HTTPException(status_code=405)
 

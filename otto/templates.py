@@ -22,7 +22,8 @@ def title(text,
             position='center',
             opacity=.4,
             fps=30,
-            bg=None):
+            bg=None,
+            **kwargs):
     data = data or defaults
     color = color or data['FONTCOLOR']
     t = (TextClip(text.strip(),
@@ -61,7 +62,8 @@ def initial(text,
             position='center',
             opacity=.4,
             fps=30,
-            fxs=[]
+            fxs=[],
+            **kwargs
             ):
     data = data or defaults
     color = color or data['FONTCOLOR']
@@ -130,7 +132,8 @@ def bullets(text,
             position=('center', 'center'),
             opacity=.4,
             fps=30,
-            fxs=[]):
+            fxs=[],
+            **kwargs):
     data = data or defaults
     color = color or data['FONTCOLOR']
     text = text.split('\u2022')
@@ -179,7 +182,8 @@ def final(text,
             duration=5,
             position='center',
             opacity=.4,
-            fps=30,):
+            fps=30,
+            **kwargs):
     data = data or defaults
     color = color or data['FONTCOLOR']
     texts = [
