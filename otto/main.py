@@ -10,6 +10,7 @@ from otto.getdata import urlToJson
 from otto.models import VideoForm
 from otto import templates
 from importlib import import_module
+from moviepy.video.compositing.concatenate import concatenate_videoclips
 
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory='static', html=True), name="static")
@@ -44,7 +45,10 @@ async def renderTemplate(request: Request, template: str, text='asdf'):
     if tmp:
         try:
             q = request.query_params
-            tmp(**q).save_frame('temp.png', t=q['t'])
+            clip = tmp(**q)
+            if isinstance(clip, list):
+                clip = concatenate_videoclips(clip)
+            clip.save_frame('temp.png', t=q['t'])
             return FileResponse('temp.png')
         except Exception as e:
             print('error making template', template)
