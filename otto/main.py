@@ -51,9 +51,8 @@ async def renderTemplate(request: Request, template: str, text='asdf'):
             clip.save_frame('temp.png', t=q['t'])
             return FileResponse('temp.png')
         except Exception as e:
-            print('error making template', template)
-            return HTTPException(status_code=500)
-    else: return HTTPException(status_code=405)
+            raise HTTPException(status_code=500, detail='error making template')
+    else: raise HTTPException(status_code=422, detail='no such template')
 
 @app.get("/")
 async def main(request: Request):
