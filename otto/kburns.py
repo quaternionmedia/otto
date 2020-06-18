@@ -52,9 +52,9 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
         clippath = f'output/{j}.mp4'
         kbpaths.append(clippath)
 
-        t = Thread(target=write, args=(clip,clippath))
-        t.start()
-        threads.append(t)
+        thread = Thread(target=write, args=(clip,clippath))
+        thread.start()
+        threads.append(thread)
 
     for k,p in enumerate(kbpaths):
         threads[k].join()
