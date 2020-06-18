@@ -5,7 +5,7 @@ from sys import path
 from os.path import join
 from otto.getdata import download
 from random import choice, randrange
-from threading import Thread
+from threading import Thread, _shutdown
 
 def kburns(media, duration=5, moviesize=(1920,1080)):
         config = loads(open(join('examples', 'example.json'), 'r').read())
@@ -31,13 +31,12 @@ def kburns(media, duration=5, moviesize=(1920,1080)):
         run(['kburns', join('videos', 'kbout.mp4'), '-f', join('examples', 'export.json')])
 
 
-def write(c,path,duration,padding):
-    dirs = ((randrange(-7,7,1),randrange(-7,7,1)))
-    zoom = randrange(2, 4, 1)/100 * choice([1, -1])
-    print(dirs, zoom)
+def write(c,path,duration,padding,direction,zoom):
+
+    # print(dirs, zoom)
     clip = (CompositeVideoClip([(ImageClip(c)
                                     .set_duration(duration+padding)
-                                    .set_position(lambda t: (int(t*dirs[0]),int(t*dirs[1])))
+                                    .set_position(lambda t: (int(t*direction[0]),int(t*direction[1])))
                                     .resize(lambda t : 1+zoom*t if zoom > 0 else (1-zoom)+zoom*t)
                                     )]))
     clip.write_videofile(path,fps=30,threads=8)
@@ -53,12 +52,15 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
         clippath = f'output/{j}.mp4'
         kbpaths.append(clippath)
         # write(clip,clippath)
-        thread = Thread(target=write, args=(c,clippath,duration,padding))
+        dirs = ((randrange(-7,7,1),randrange(-7,7,1)))
+        zoom = randrange(2, 4, 1)/100 * choice([1, -1])
+        thread = Thread(target=write, args=(c,clippath,duration,padding,dirs,zoom,))
         thread.start()
         threads.append(thread)
 
+    _shutdown()
+
     for k,p in enumerate(kbpaths):
-        threads[k].join()
         kbclips.append((VideoFileClip(p)
                         .set_start(k*duration)
                         .crossfadein(padding)
