@@ -1,5 +1,5 @@
 from pydantic import BaseModel, AnyUrl
-from typing import List
+from typing import List, Dict
 
 class VideoForm(BaseModel):
     NAME: str
@@ -18,3 +18,7 @@ class VideoForm(BaseModel):
     THEMECOLOR: str = '#CC5500'
     FONT: str = 'Segoe_UI_Bold'
 
+
+class Edl(BaseModel):
+    edl: List
+    time: float = None

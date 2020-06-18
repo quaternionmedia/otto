@@ -1,5 +1,6 @@
 from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+from moviepy.video.compositing.concatenate import concatenate_videoclips
 from PIL.ImageColor import getcolor
 from otto.getdata import scale
 from otto.colortransitions import *
@@ -169,7 +170,7 @@ def bullets(text,
                     .crossfadeout(1)
                     )
         st += d
-    return clips
+    return concatenate_videoclips(clips)
 
 def final(text,
             address=None,

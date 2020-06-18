@@ -1,41 +1,30 @@
 # import render
 import os, json
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Body
 from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from starlette.responses import FileResponse
 from uvicorn import run
 from otto.getdata import urlToJson
-from otto.models import VideoForm
+from otto.models import VideoForm, Edl
 from otto import templates
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
+from moviepy.editor import VideoFileClip
 
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory='static', html=True), name="static")
 jt = Jinja2Templates(directory="templates")
 
-@app.post('/render')
-async def process(request: Request):#video_data: VideoForm):#
+@app.post('/form')
+async def render_form(request: Request):#video_data: VideoForm):#
     form = await request.form()
     dform = dict(form)
     # print(dform['MEDIA'])
-    # v = render.Otto(data=dform)
-    # return dform
-
     with open("config_otto.json", "r") as config_file:
         config = json.load(config_file)
-
-
     returnDict = urlToJson(config['formpath'])
-
-    # # v = render.Otto()
-    #file_path = await v.render()
-    # v.render()
-    # return {'status': True }
-    #return FileResponse( file_path )
-    # return StreamingResponse(fake_video_streamer())
     return returnDict
 
 @app.get('/template/{template}')
@@ -54,7 +43,34 @@ async def renderTemplate(request: Request, template: str, text='asdf'):
             raise HTTPException(status_code=500, detail='error making template')
     else: raise HTTPException(status_code=422, detail='no such template')
 
-@app.get("/")
+@app.post('/render')
+async def render(edl: Edl = Body(...)):
+    clips = []
+    print('making edl', edl)
+    try:
+        for clip in edl.edl:
+            print('making clip', clip, type(clip))
+            if clip['type'] == 'template':
+                tmp = getattr(templates, clip['name'])
+                print('making template', tmp )
+                clips.append(
+                    tmp(**clip['data'])
+                )
+            elif clip['type'] == 'video':
+                clips.append(
+                    VideoFileClip(clip['name'])
+                    .subclip(clip['inpoint'])
+                    .set_duration(clip['duration'])
+                )
+        print('made clips', clips)
+        video = concatenate_videoclips(clips)
+        print('made video', video)
+        video.write_videofile('render.mp4', fps=30)
+    except Exception as e:
+        print('error making video', e)
+        raise HTTPException(status_code=500, detail='error rendering video')
+
+@app.get('/')
 async def main(request: Request):
 
     data = None
