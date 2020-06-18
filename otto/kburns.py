@@ -1,9 +1,10 @@
 from subprocess import run
 from json import loads, dumps
-import moviepy.editor as e
+from moviepy.editor import CompositeVideoClip, ImageClip, VideoFileClip
 from sys import path
 from os.path import join
 from otto.getdata import download
+from random import choice, randrange
 
 def kburns(media, duration=5, moviesize=(1920,1080)):
         config = loads(open(join('examples', 'example.json'), 'r').read())
@@ -29,32 +30,36 @@ def kburns(media, duration=5, moviesize=(1920,1080)):
         run(['kburns', join('videos', 'kbout.mp4'), '-f', join('examples', 'export.json')])
 
 
+def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
+    kbpaths = []
+    kbclips = []
 
-from random import choice, randrange
-import moviepy.editor as e
-
-# FIXME - all zooms use the final random settings
-def kburns2(clips, padding=1, duration=5, moviesize=(1920,1080)):
-    kb = []
-    t = 0
-    for c in clips:
-        # zoom = randrange(2, 4, 1)/100 * choice([1, -1])
-        # print('kburns', c, zoom,)
-        kb.append( e.CompositeVideoClip([e.ImageClip(c)])
-                    # .resize(moviesize)
-                    .set_duration(duration + padding)
-                    # .resize(lambda t : 1+zoom*t if zoom > 0 else (1-zoom)+zoom*t)
-                    .set_start(t)
-                    .crossfadein(padding))
-        t += kb[-1].duration - padding
-    for k in kb:
+    for j,c in enumerate(clips):
+        dirs = ((randrange(-7,7,1),randrange(-7,7,1)))
         zoom = randrange(2, 4, 1)/100 * choice([1, -1])
-        k.resize(lambda t : 1+zoom*t if zoom > 0 else (1-zoom)+zoom*t)
-    return e.CompositeVideoClip(kb).crossfadeout(1)
+        clip = (CompositeVideoClip([(ImageClip(c)
+                                        .set_duration(duration+padding)
+                                        .set_position(lambda t: (t*dirs[0],t*dirs[1]))
+                                        .resize(lambda t : 1+zoom*t if zoom > 0 else (1-zoom)+zoom*t)
+                                        )]))
+        clippath = f'output/{j}.mp4'
+        kbpaths.append(clippath)
+        clip.write_videofile(clippath, fps=30, threads=8)
+        clip.close()
+
+    for k,p in enumerate(kbpaths):
+        kbclips.append((VideoFileClip(p)
+                        .set_start(k*duration)
+                        .crossfadein(padding)
+                        .crossfadeout(padding)
+                        ))
+
+    return CompositeVideoClip(kbclips).crossfadeout(1)
+
 
 if __name__ == '__main__':
     config = loads(open('examples/talavideo.json', 'r').read())
-    photos = config['VIDEOS']
-    photos += [download(p) for p in config['MEDIA']]
+    photos = [download(p) for p in config['MEDIA'][1:]]
     print('running kburns with', photos)
-    kburns(photos, duration=60/(len(photos) + 1))
+    kb = kburns2(photos, duration=60/(len(photos) + 1))
+    kb.write_videofile('output/kbtest.mp4', fps=30, threads=8,)
