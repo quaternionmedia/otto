@@ -31,9 +31,17 @@ def kburns(media, duration=5, moviesize=(1920,1080)):
         run(['kburns', join('videos', 'kbout.mp4'), '-f', join('examples', 'export.json')])
 
 
-def write(c,path):
-    c.write_videofile(path,fps=30,threads=8)
-    c.close()
+def write(c,path,duration,padding):
+    dirs = ((randrange(-7,7,1),randrange(-7,7,1)))
+    zoom = randrange(2, 4, 1)/100 * choice([1, -1])
+    print(dirs, zoom)
+    clip = (CompositeVideoClip([(ImageClip(c)
+                                    .set_duration(duration+padding)
+                                    .set_position(lambda t: (int(t*dirs[0]),int(t*dirs[1])))
+                                    .resize(lambda t : 1+zoom*t if zoom > 0 else (1-zoom)+zoom*t)
+                                    )]))
+    clip.write_videofile(path,fps=30,threads=8)
+    clip.close()
 
 def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
     kbpaths = []
@@ -42,17 +50,10 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
     threads = []
 
     for j,c in enumerate(clips):
-        dirs = ((randrange(-7,7,1),randrange(-7,7,1)))
-        zoom = randrange(2, 4, 1)/100 * choice([1, -1])
-        clip = (CompositeVideoClip([(ImageClip(c)
-                                        .set_duration(duration+padding)
-                                        .set_position(lambda t: (t*dirs[0],t*dirs[1]))
-                                        .resize(lambda t : 1+zoom*t if zoom > 0 else (1-zoom)+zoom*t)
-                                        )]))
         clippath = f'output/{j}.mp4'
         kbpaths.append(clippath)
-
-        thread = Thread(target=write, args=(clip,clippath))
+        # write(clip,clippath)
+        thread = Thread(target=write, args=(c,clippath,duration,padding))
         thread.start()
         threads.append(thread)
 
@@ -69,7 +70,7 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
 
 if __name__ == '__main__':
     config = loads(open('examples/talavideo.json', 'r').read())
-    photos = [download(p) for p in config['MEDIA'][1:4]]
+    photos = [download(p) for p in config['MEDIA'][1:5]]
     print('running kburns with', photos)
     kb = kburns2(photos, duration=10/(len(photos) + 1))
     kb.write_videofile('output/kbtest.mp4', fps=30, threads=8,)
