@@ -5,6 +5,7 @@ from sys import path
 from os.path import join
 from otto.getdata import download
 from random import choice, randrange
+from threading import Thread
 
 def kburns(media, duration=5, moviesize=(1920,1080)):
         config = loads(open(join('examples', 'example.json'), 'r').read())
@@ -30,9 +31,15 @@ def kburns(media, duration=5, moviesize=(1920,1080)):
         run(['kburns', join('videos', 'kbout.mp4'), '-f', join('examples', 'export.json')])
 
 
+def write(c,path):
+    c.write_videofile(path,fps=30,threads=8)
+    c.close()
+
 def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
     kbpaths = []
     kbclips = []
+
+    threads = []
 
     for j,c in enumerate(clips):
         dirs = ((randrange(-7,7,1),randrange(-7,7,1)))
@@ -44,10 +51,13 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
                                         )]))
         clippath = f'output/{j}.mp4'
         kbpaths.append(clippath)
-        clip.write_videofile(clippath, fps=30, threads=8)
-        clip.close()
+
+        t = Thread(target=write, args=(clip,clippath))
+        t.start()
+        threads.append(t)
 
     for k,p in enumerate(kbpaths):
+        threads[k].join()
         kbclips.append((VideoFileClip(p)
                         .set_start(k*duration)
                         .crossfadein(padding)
@@ -59,7 +69,7 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
 
 if __name__ == '__main__':
     config = loads(open('examples/talavideo.json', 'r').read())
-    photos = [download(p) for p in config['MEDIA'][1:]]
+    photos = [download(p) for p in config['MEDIA'][1:4]]
     print('running kburns with', photos)
-    kb = kburns2(photos, duration=60/(len(photos) + 1))
+    kb = kburns2(photos, duration=10/(len(photos) + 1))
     kb.write_videofile('output/kbtest.mp4', fps=30, threads=8,)
