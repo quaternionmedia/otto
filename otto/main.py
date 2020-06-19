@@ -9,10 +9,10 @@ from uvicorn import run
 from otto.getdata import urlToJson, timestr
 from otto.models import VideoForm, Edl
 from otto import templates
+from otto.render import render
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip
-from render import render
 
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory='static', html=True), name="static")
