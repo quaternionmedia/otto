@@ -3,6 +3,7 @@ from os import path
 from csv import reader
 from json import loads
 import moviepy.editor as e
+from time import strftime
 
 import urllib.request as request
 import json
@@ -30,7 +31,7 @@ def download(url, location='data'):
             else:
                 run(['wget', '--content-disposition', url])
         return filename
-    
+
 
 def openCsv(path):
     csvreader = reader(open(path, 'r'))
@@ -47,6 +48,8 @@ def openJson(path):
 def scale(n, size=(1920,1080)):
     return int(size[0]/n), int(size[1]/n)
 
+def timestr(format='%Y%m%d-%H%M%S'):
+    return strftime(format)
 
 
 def urlToJson(path):

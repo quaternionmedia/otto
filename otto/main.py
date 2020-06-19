@@ -1,17 +1,18 @@
 # import render
 import os, json
-from fastapi import FastAPI, Request, HTTPException, Body
+from fastapi import FastAPI, Request, HTTPException, Body, BackgroundTasks
 from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from starlette.responses import FileResponse
 from uvicorn import run
-from otto.getdata import urlToJson
+from otto.getdata import urlToJson, timestr
 from otto.models import VideoForm, Edl
 from otto import templates
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip
+from render import render
 
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory='static', html=True), name="static")
@@ -43,32 +44,15 @@ async def renderTemplate(request: Request, template: str, text='asdf'):
             raise HTTPException(status_code=500, detail='error making template')
     else: raise HTTPException(status_code=422, detail='no such template')
 
-@app.post('/render')
-async def render(edl: Edl = Body(...)):
-    clips = []
-    print('making edl', edl)
-    try:
-        for clip in edl.edl:
-            print('making clip', clip, type(clip))
-            if clip['type'] == 'template':
-                tmp = getattr(templates, clip['name'])
-                print('making template', tmp )
-                clips.append(
-                    tmp(**clip['data'])
-                )
-            elif clip['type'] == 'video':
-                clips.append(
-                    VideoFileClip(clip['name'])
-                    .subclip(clip['inpoint'])
-                    .set_duration(clip['duration'])
-                )
-        print('made clips', clips)
-        video = concatenate_videoclips(clips)
-        print('made video', video)
-        video.write_videofile('render.mp4', fps=30)
-    except Exception as e:
-        print('error making video', e)
-        raise HTTPException(status_code=500, detail='error rendering video')
+# @app.post('/render')
+# async def queueRender(edl: Edl = Body(...), render: BackgroundTasks):
+#     ts = timestr()
+#     print('rendering edl', edl, ts)
+#     try:
+#         render(edl, ts)
+#     except Exception as e:
+#         print('error making video', e)
+#         raise HTTPException(status_code=500, detail='error rendering video')
 
 @app.get('/')
 async def main(request: Request):

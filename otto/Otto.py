@@ -1,7 +1,6 @@
 from moviepy.editor import concatenate_videoclips, ColorClip, ImageClip, AudioFileClip, VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.transitions import slide_in
-from time import strftime
 import os
 from subprocess import run
 from otto.kburns import kburns
@@ -147,8 +146,7 @@ if __name__ == '__main__':
     v = Otto()
     if(args.verbose):
         ll.info("verbosly starting")
-
-    timestr = strftime('%Y%m%d-%H%M%S')
+    ts = timestr()
     if args.size:
         finalVideo = v.render(size=tuple(args.size))
     else:
@@ -157,7 +155,7 @@ if __name__ == '__main__':
     filename = os.path.join(
         v.dir,
         'output',
-        f'{timestr}_{v.name}_{int(v.duration)}_{args.size[0] or v.moviesize[0]}x{args.size[1] or v.moviesize[1]}'
+        f'{ts}_{v.name}_{int(v.duration)}_{args.size[0] or v.moviesize[0]}x{args.size[1] or v.moviesize[1]}'
     )
 
     if(args.frame>=0):
