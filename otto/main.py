@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request, HTTPException, Body, BackgroundTasks
 from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
+from jinja2 import Environment
 from starlette.responses import FileResponse
 from uvicorn import run
 from otto.getdata import urlToJson, timestr
@@ -13,21 +14,11 @@ from otto.render import render
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip
+from otto import defaults
 
 app = FastAPI()
-# app.mount("/static", StaticFiles(directory='static', html=True), name="static")
-jt = Jinja2Templates(directory="templates")
 
-@app.post('/form')
-async def render_form(request: Request):#video_data: VideoForm):#
-    form = await request.form()
-    dform = dict(form)
-    # print(dform['MEDIA'])
-    with open("config_otto.json", "r") as config_file:
-        config = json.load(config_file)
-    returnDict = urlToJson(config['formpath'])
-    return returnDict
-
+env = Environment()
 @app.get('/template/{template}')
 async def renderTemplate(request: Request, template: str, text='asdf'):
     # if import_module(f'otto.templates.{template}'):
@@ -54,14 +45,13 @@ async def renderTemplate(request: Request, template: str, text='asdf'):
 #         print('error making video', e)
 #         raise HTTPException(status_code=500, detail='error rendering video')
 
-@app.get('/')
+@app.get('/form')
 async def main(request: Request):
 
-    data = None
-    data = VideoForm.parse_file('examples/talavideo.json')
-
-    return jt.TemplateResponse("VideoForm.html", {"request": request, "video_data": data.dict()})
+    data = VideoForm(**defaults.sample_form)
+    template = env.from_string(defaults.video_form)
+    return HTMLResponse(template.render({"request": request, "video_data": data.dict()}))
 
 
 if __name__ == '__main__':
-    run(app, host='0.0.0.0', port=8000)
+    run(app, host='0.0.0.0', port=9000)
