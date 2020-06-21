@@ -4,11 +4,12 @@ from moviepy.editor import CompositeVideoClip, ImageClip, VideoFileClip
 from sys import path
 from os.path import join
 from otto.getdata import download
+from otto.defaults import kburns_config
 from random import choice, randrange
 from threading import Thread, _shutdown
 
 def kburns(media, duration=5, moviesize=(1920,1080)):
-        config = loads(open(join('examples', 'example.json'), 'r').read())
+        config = kburns_config
         config['config']['output_width'] = moviesize[0]
         config['config']['output_height'] = moviesize[1]
         slides = []
