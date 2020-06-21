@@ -1,6 +1,6 @@
 # import render
 import os, json
-from fastapi import FastAPI, Request, HTTPException, Body, BackgroundTasks
+from fastapi import FastAPI, Request, HTTPException, Body, BackgroundTasks, Depends
 from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
@@ -9,12 +9,12 @@ from starlette.responses import FileResponse
 from uvicorn import run
 from otto.getdata import urlToJson, timestr
 from otto.models import VideoForm, Edl
-from otto import templates
 from otto.render import render
+from otto import templates
+from otto import defaults
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip
-from otto import defaults
 
 app = FastAPI()
 
@@ -51,6 +51,11 @@ async def main(request: Request):
     data = VideoForm(**defaults.sample_form)
     template = env.from_string(defaults.video_form)
     return HTMLResponse(template.render({"request": request, "video_data": data.dict()}))
+
+@app.post('/form')
+async def video_from_form(form: VideoForm = Depends(VideoForm.as_form)):
+    print('generating video from form', form)
+
 
 
 if __name__ == '__main__':

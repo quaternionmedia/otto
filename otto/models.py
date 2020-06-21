@@ -1,6 +1,8 @@
 from pydantic import BaseModel, AnyUrl
 from typing import List, Dict
+from otto.as_form import as_form
 
+@as_form
 class VideoForm(BaseModel):
     NAME: str
     LOGO: str = '' #AnyUrl
