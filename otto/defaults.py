@@ -29,7 +29,7 @@ kburns_config = {
     }
 }
 
-sample_form = {
+sample_forms = [{'name': 'salon', 'form': {
   "NAME": "Tala Hair Studio",
   "LOGO": "data/talalogo.png",
   "ADDRESS": "865 River Road, Suite 301,\nShelton CT 06484",
@@ -64,7 +64,26 @@ sample_form = {
   "THEMECOLOR": "#CC5500",
   "FONT": "Segoe_UI_Bold",
   "DURATION": "15"
+}},
+{'name': 'car', 'form': {
+  "NAME": "Steve's Auto Care",
+  "LOGO": "steves.png",
+  "ADDRESS": "11820 San Pablo Avenue\nEl Cerrito, CA",
+  "PHONE": "510.237.3906",
+  "HOURS": "Mon-Sat 8:00am - 6:00pm",
+  "WEBSITE": "stevesautocare.net",
+  "INITIAL": "Our priority is providing you with high quality service. Specializing in Asian imports, domestic vehicles, and hybrids.",
+  "BULLETS": "\u2022 All Factory-Scheduled Maintenance including 30-60-90-120k-Mile Intervals. \u2022 High Quality Diagnosis and Repair \u2022 Tire Sales \u2022 Wheel Alignment \u2022 Pre-purchase Inspections \u2022 Smog Checks \u2022 Brake Service and Repair \u2022 Radiator and Cooling Systems \u2022 AC Service and Repair \u2022 Free Shuttle Service",
+  "OPTIONAL": "We promise to treat our customers' cars as if they were our own. Don't take our word for it, check out our reviews. Our reputation speaks for itself.",
+  "MEDIA":["https://stevesautocare.net/wp-content/uploads/2014/12/10DSCN29061.jpg", "https://stevesautocare.net/wp-content/uploads/2016/03/Steve1.jpg", "https://stevesautocare.net/wp-content/uploads/2013/01/HomeLocation.jpg", "https://stevesautocare.net/wp-content/uploads/2013/01/Raul.jpg", "https://stevesautocare.net/wp-content/uploads/2013/01/Community.jpg", "https://stevesautocare.net/wp-content/uploads/2019/06/DSC_3970-800x536.jpg", "https://stevesautocare.net/wp-content/uploads/2014/12/112.jpg", "https://stevesautocare.net/wp-content/uploads/2014/12/5StevesBays1.jpg", "https://stevesautocare.net/wp-content/uploads/2016/06/working-together-in-shop.jpg"],
+  "CALL": "Call us today to schedule your next service or repair.",
+  "CLOSING": "NAME PHONE ADDRESS WEBSITE",
+  "FONTCOLOR": "#FFFFFF",
+  "THEMECOLOR": "#1BA057",
+  "FONT": "Segoe UI Black"
 }
+}
+]
 
 video_form = """
 <body>
