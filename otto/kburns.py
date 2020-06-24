@@ -8,7 +8,7 @@ from otto.defaults import kburns_config
 from random import choice, randrange
 from threading import Thread, _shutdown
 
-def kburns(media, duration=5, moviesize=(1920,1080)):
+def kburns(media, duration=5, moviesize=(1920,1080), filename='kbout.mp4'):
         config = kburns_config
         config['config']['output_width'] = moviesize[0]
         config['config']['output_height'] = moviesize[1]
@@ -27,9 +27,10 @@ def kburns(media, duration=5, moviesize=(1920,1080)):
                     'slide_duration': duration + 1,
                 })
         config['slides'] = slides
-        with open(join('examples', 'export.json'), 'w') as f:
+        config_path = join('output', 'kb_config.json')
+        with open(config_path, 'w') as f:
             f.write(dumps(config))
-        run(['kburns', join('videos', 'kbout.mp4'), '-f', join('examples', 'export.json')])
+        run(['kburns', filename, '-f', config_path])
 
 
 def write(c,path,duration,padding,direction,zoom):
@@ -50,7 +51,7 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
     threads = []
 
     for j,c in enumerate(clips):
-        clippath = f'output/{j}.mp4'
+        clippath = join('videos/', f'{j}.mp4')
         kbpaths.append(clippath)
         # write(clip,clippath)
         dirs = ((randrange(-7,7,1),randrange(-7,7,1)))

@@ -43,8 +43,9 @@ class Otto:
         if size:
             self.moviesize = size
         if not dry:
-            slides = kburns(self.media, duration=self.slideduration, moviesize=self.moviesize)
-        slides = (VideoFileClip('videos/kbout.mp4')
+            filename = os.path.join('videos', f'{timestr()}_kbout.mp4')
+            slides = kburns(self.media, duration=self.slideduration, moviesize=self.moviesize, filename=filename)
+        slides = (VideoFileClip(filename)
                 .crossfadein(1)
                 .crossfadeout(1)
         )
