@@ -4,7 +4,8 @@ from otto.as_form import as_form
 
 @as_form
 class VideoForm(BaseModel):
-    NAME: str
+    project: str = ''
+    NAME: str = ''
     LOGO: str = '' #AnyUrl
     ADDRESS: str = ''
     PHONE: str = ''
