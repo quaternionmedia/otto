@@ -40,6 +40,7 @@ sample_forms = [{'name': 'salon', 'form': {
   "BULLETS": "\u2022 Masks for both staff and clients \u2022 Disposable capes \u2022  Sanitize all stations and implements after every service \u2022 Hand sanitizer supplied \u2022 Touch-less temperature scanning \u2022 Gloves \u2022 One client per stylist at a time, no one in a waiting room \u2022 No walk in’s, appointment only",
   "OPTIONAL": "",
   "MEDIA": [
+    "https://storage.googleapis.com/tower-bucket/alfred/tala/talaaudio.mp3",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/talavid.mp4",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/45270535_330573430859407_6441098175330648064_n.jpg",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/45276506_330571774192906_4374561045813919744_n.jpg",
@@ -60,7 +61,7 @@ sample_forms = [{'name': 'salon', 'form': {
     "https://storage.googleapis.com/tower-bucket/alfred/tala/95568515_633860660530681_8200575165004775424_n.jpg",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/95699199_633251033924977_9037320113790910464_o.jpg",
   ],
-  "AUDIO": ["audios/talaaudio.mp3"],
+  # "AUDIO": ["audios/talaaudio.mp3"],
   "CALL": "Please call for an appointment\n(475) 269-2562",
   "CLOSING": "Tala Hair Studio\n(475) 269-2562\ntalahairstudio.com",
   "FONTCOLOR": "#FFFFFF",

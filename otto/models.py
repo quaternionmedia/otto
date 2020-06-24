@@ -20,6 +20,7 @@ class VideoForm(BaseModel):
     FONTCOLOR: str = '#FFFFFF'
     THEMECOLOR: str = '#CC5500'
     FONT: str = 'Segoe_UI_Bold'
+    DURATION: float = 5
 
 
 class Edl(BaseModel):

@@ -24,7 +24,7 @@ class Otto:
         self.moviesize=(1920,1280)
         self.duration = float(self.data.get('DURATION')) or 60.0
         self.slideduration = max(min(self.duration / len(self.data['MEDIA']), 8), 2)
-        self.audio = [ self.audioClip(a) if a.endswith('.mp3', '.wav', '.flac') else None for a in self.media ]
+        self.audio = [ self.audioClip(a) if a.endswith(('.mp3', '.wav', '.flac')) else None for a in self.media ]
         self.clips = []
 
         if(verbose):
