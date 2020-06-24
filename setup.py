@@ -1,4 +1,5 @@
 import setuptools
+from otto._version import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -10,7 +11,7 @@ INSTALL_REQUIRES = [
 ]
 setuptools.setup(
     name="otto", # Replace with your own username
-    version="0.0.0",
+    version=__version__,
     author="Quaternion Media",
     author_email="info@quaternion.media",
     description="automatic video creation",
