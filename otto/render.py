@@ -1,9 +1,9 @@
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip
-from otto import templates
+from otto import Otto, templates
 
 
-def render(edl, filename='render.mp4', logger='bar'):
+def renderEdl(edl, filename='render.mp4', logger='bar'):
     clips = []
     for clip in edl:
         print('making clip', clip, type(clip))
@@ -23,3 +23,7 @@ def render(edl, filename='render.mp4', logger='bar'):
     video = concatenate_videoclips(clips)
     print('made video', video)
     video.write_videofile(filename, fps=30, logger=logger)
+
+def renderForm(form, filename='render.mp4', logger='bar'):
+    v = Otto(form)
+    v.render().write_videofile(filename=filename, fps=30, logger=logger)

@@ -9,9 +9,8 @@ from starlette.responses import FileResponse
 from uvicorn import run
 from otto.getdata import urlToJson, timestr
 from otto.models import VideoForm, Edl
-from otto.render import render
-from otto import templates
-from otto import defaults
+from otto.render import renderEdl, renderForm
+from otto import Otto, templates, defaults
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip
@@ -47,14 +46,10 @@ async def renderTemplate(request: Request, template: str, text='asdf'):
 
 @app.get('/form')
 async def main(request: Request):
-
     data = VideoForm(**defaults.sample_form)
     template = env.from_string(defaults.video_form)
     return HTMLResponse(template.render({"request": request, "video_data": data.dict()}))
 
-@app.post('/form')
-async def video_from_form(form: VideoForm = Depends(VideoForm.as_form)):
-    print('generating video from form', form)
 
 
 
