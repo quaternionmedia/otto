@@ -46,7 +46,7 @@ async def renderTemplate(request: Request, template: str, text='asdf'):
 
 @app.get('/form')
 async def main(request: Request):
-    data = VideoForm(**defaults.sample_form)
+    data = VideoForm(**defaults.sample_forms[0])
     template = env.from_string(defaults.video_form)
     return HTMLResponse(template.render({"request": request, "video_data": data.dict()}))
 
