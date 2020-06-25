@@ -20,6 +20,7 @@ media/
 /website/cypress/videos/
 __*__
 /videos
+otto/examples/*
 database/
 *.jpg
 # compiled output
@@ -46,3 +47,6 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# pip files
+otto.egg*

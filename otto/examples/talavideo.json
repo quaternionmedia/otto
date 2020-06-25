@@ -1,6 +1,6 @@
 {
   "NAME": "Tala Hair Studio",
-  "LOGO": "https://scontent-sjc3-1.xx.fbcdn.net/v/t1.0-9/p960x960/40455104_299308637319220_436204347529887744_o.png?_nc_cat=106&_nc_sid=85a577&_nc_ohc=719tF6_D-DAAX8Idh--&_nc_ht=scontent-sjc3-1.xx&oh=2de08146ad8ee5282663c914f9c0d1fe&oe=5EE15697",
+  "LOGO": "data/talalogo.png",
   "ADDRESS": "865 River Road, Suite 301,\nShelton CT 06484",
   "PHONE": "(475) 269-2562",
   "HOURS": "Mon-Sat 8:00am - 6:00pm",

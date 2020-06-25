@@ -1,8 +1,10 @@
 from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-from colortransitions import *
+from moviepy.video.compositing.concatenate import concatenate_videoclips
 from PIL.ImageColor import getcolor
-from getdata import scale
+from otto.getdata import scale
+from otto.colortransitions import *
+from otto.defaults import defaults
 
 def rgbToDec(rgb):
     color = getcolor(rgb, 'RGB')
@@ -15,15 +17,16 @@ def title(text,
             fontsize=None,
             clipsize=(1920,1080),
             textsize=(1920//2, 1080//2),
-            font='Segoe UI Black',
+            font='Segoe-UI-Black',
             method='caption',
             duration=5,
             position='center',
             opacity=.4,
             fps=30,
-            bg=None):
-    if not color:
-        color = data['FONTCOLOR']
+            bg=None,
+            **kwargs):
+    data = data or defaults
+    color = color or data['FONTCOLOR']
     t = (TextClip(text.strip(),
         color=color,
         fontsize=fontsize,
@@ -53,17 +56,18 @@ def initial(text,
             fontsize=None,
             clipsize=(1920,1080),
             textsize=(1920//2, 1080//2),
-            font='Segoe UI Black',
+            font='Segoe-UI-Black',
             method='caption',
             start=0,
             duration=5,
             position='center',
             opacity=.4,
             fps=30,
-            fxs=[]
+            fxs=[],
+            **kwargs
             ):
-    if not color:
-        color = data['FONTCOLOR']
+    data = data or defaults
+    color = color or data['FONTCOLOR']
     text = text.split('.')
     text = [t.strip() for t in text if t.strip()]
     texts = []
@@ -122,16 +126,17 @@ def bullets(text,
             fontsize=None,
             textsize=(1920//2, 1080//2),
             clipsize=(1920,1080),
-            font='Segoe UI Black',
+            font='Segoe-UI-Black',
             method='caption',
             start=0,
             duration=None,
             position=('center', 'center'),
             opacity=.4,
             fps=30,
-            fxs=[]):
-    if not color:
-        color = data['FONTCOLOR']
+            fxs=[],
+            **kwargs):
+    data = data or defaults
+    color = color or data['FONTCOLOR']
     text = text.split('\u2022')
     text = [t.strip() for t in text if t.strip()]
     print('bullet texts', text, )
@@ -157,7 +162,7 @@ def bullets(text,
                     duration=clip.duration, size=textsize, fill=rgbToDec(data['THEMECOLOR']))
                         .set_position(('left', 'bottom'))
                         ))
-        if st + d <= duration:
+        if not duration or st + d <= duration:
             clips.append(CompositeVideoClip([bkg, clip, *fxs], size=clipsize)
                     # .set_start(st)
                     .set_duration(d)
@@ -165,22 +170,26 @@ def bullets(text,
                     .crossfadeout(1)
                     )
         st += d
-    return clips
+    return concatenate_videoclips(clips)
 
 def final(text,
+            address=None,
+            website=None,
+            phone=None,
             data=None,
             color=None,
             fontsize=20,
             clipsize=(1920,1080),
-            font='Segoe UI Bold',
+            font='Segoe-UI-Bold',
             method='caption',
             start=0,
             duration=5,
             position='center',
             opacity=.4,
-            fps=30,):
-    if not color:
-        color = data['FONTCOLOR']
+            fps=30,
+            **kwargs):
+    data = data or defaults
+    color = color or data['FONTCOLOR']
     texts = [
         TextClip(text,
             color=color,
@@ -191,7 +200,7 @@ def final(text,
             stroke_color=None,
             # align='north').set_position(('center', 'top')),
             ).set_position((0,-clipsize[1]//5)),
-        TextClip(data['ADDRESS'],
+        TextClip(address or data['ADDRESS'],
             color=color,
             fontsize=50,
             size=clipsize,
@@ -200,7 +209,7 @@ def final(text,
             stroke_color=None,
             # align='west').set_position(('left', 'center')),
             ).set_position((0,-clipsize[1]//10)),
-        TextClip(data['WEBSITE'],
+        TextClip(website or data['WEBSITE'],
             color=color,
             fontsize=60,
             size=clipsize,
@@ -209,7 +218,7 @@ def final(text,
             stroke_color=None,
             # align='south').set_position(('center', 'bottom')),
             ).set_position((0,clipsize[1]//10)),
-        TextClip(data['PHONE'],
+        TextClip(phone or data['PHONE'],
             color=color,
             fontsize=60,
             size=clipsize,

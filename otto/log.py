@@ -1,10 +1,11 @@
 import logging
-import sys
+import sys, os
 from time import strftime
 
-
 timestr = strftime('%Y%m%d-%H%M%S')
-fileout = f'output/{timestr}_otto.log'
+if not os.path.isdir('output'):
+    os.mkdir('output')
+fileout = os.path.join('output', f'{timestr}_otto.log')
 
 logger = logging.getLogger('otto')
 logger.setLevel(logging.INFO)

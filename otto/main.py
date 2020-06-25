@@ -1,48 +1,52 @@
-import render
+# import render
 import os, json
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, Form, BackgroundTasks, Depends
 from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
-from getdata import urlToJson
+from jinja2 import Environment
+from starlette.responses import FileResponse
 from uvicorn import run
-from models import VideoForm
+from otto.getdata import urlToJson, timestr
+from otto.models import VideoForm, Edl
+from otto.render import renderEdl, renderForm
+from otto import Otto, templates, defaults
+from importlib import import_module
+from moviepy.video.compositing.concatenate import concatenate_videoclips
+from moviepy.editor import VideoFileClip
 
 app = FastAPI()
-# app.mount("/static", StaticFiles(directory='static', html=True), name="static")
-templates = Jinja2Templates(directory="templates")
+
+env = Environment()
+@app.get('/template/{template}')
+async def renderTemplate(request: Request, template: str, text='asdf'):
+    # if import_module(f'otto.templates.{template}'):
+    tmp = getattr(templates, template)
+    if tmp:
+        try:
+            q = request.query_params
+            clip = tmp(**q)
+            if isinstance(clip, list):
+                clip = concatenate_videoclips(clip)
+            clip.save_frame('temp.png', t=q['t'])
+            return FileResponse('temp.png')
+        except Exception as e:
+            raise HTTPException(status_code=500, detail='error making template')
+    else: raise HTTPException(status_code=422, detail='no such template')
 
 @app.post('/render')
-async def process(request: Request):#video_data: VideoForm):#
-    form = await request.form()
-    dform = dict(form)
-    # print(dform['MEDIA'])
-    # v = render.Otto(data=dform)
-    # return dform
+async def queueRender(renderer: BackgroundTasks, form: VideoForm = Depends(VideoForm.as_form)):
+    ts = f'{timestr()}.mp4'
+    print('rendering from form', form, ts)
+    renderer.add_task(renderForm, dict(form), filename=os.path.join('videos', ts))
+    return True
 
-    with open("config_otto.json", "r") as config_file:
-        config = json.load(config_file)
-
-
-    returnDict = urlToJson(config['formpath'])
-
-    # # v = render.Otto()
-    #file_path = await v.render()
-    # v.render()
-    # return {'status': True }
-    #return FileResponse( file_path )
-    # return StreamingResponse(fake_video_streamer())
-    return returnDict
-
-
-@app.get("/")
+@app.get('/form')
 async def main(request: Request):
-
-    data = None
-    data = VideoForm.parse_file('examples/talavideo.json')
-
-    return templates.TemplateResponse("VideoForm.html", {"request": request, "video_data": data.dict()})
+    data = VideoForm(**defaults.sample_forms[0]['form'])
+    template = env.from_string(defaults.video_form)
+    return HTMLResponse(template.render({"request": request, "video_data": data.dict()}))
 
 
 if __name__ == '__main__':
-    run(app, host='0.0.0.0', port=8000)
+    run(app, host='0.0.0.0', port=9000)

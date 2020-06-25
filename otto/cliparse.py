@@ -18,7 +18,7 @@ parser.add_argument('--open', '-o', action='store_true', dest='open', default=Fa
 parser.add_argument('--verbose', '-v', action='store_true', dest='verbose', default=False,
                     help='for verbose')
 
-parser.add_argument('--size', '-s', dest='size', nargs='+', type=int, 
+parser.add_argument('--size', '-s', dest='size', nargs='+', type=int, default=[640,480],
                     help='size of rendered movie')
 
 args = parser.parse_args()

@@ -1,8 +1,11 @@
 from pydantic import BaseModel, AnyUrl
-from typing import List
+from typing import List, Dict
+from otto.as_form import as_form
 
+@as_form
 class VideoForm(BaseModel):
-    NAME: str
+    project: str = ''
+    NAME: str = ''
     LOGO: str = '' #AnyUrl
     ADDRESS: str = ''
     PHONE: str = ''
@@ -17,4 +20,9 @@ class VideoForm(BaseModel):
     FONTCOLOR: str = '#FFFFFF'
     THEMECOLOR: str = '#CC5500'
     FONT: str = 'Segoe_UI_Bold'
+    DURATION: float = 5
 
+
+class Edl(BaseModel):
+    edl: List
+    time: float = None
