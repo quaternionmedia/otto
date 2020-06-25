@@ -1,6 +1,6 @@
 # import render
 import os, json
-from fastapi import FastAPI, Request, HTTPException, Body, BackgroundTasks, Depends
+from fastapi import FastAPI, Request, HTTPException, Form, BackgroundTasks, Depends
 from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
@@ -34,15 +34,12 @@ async def renderTemplate(request: Request, template: str, text='asdf'):
             raise HTTPException(status_code=500, detail='error making template')
     else: raise HTTPException(status_code=422, detail='no such template')
 
-# @app.post('/render')
-# async def queueRender(edl: Edl = Body(...), render: BackgroundTasks):
-#     ts = timestr()
-#     print('rendering edl', edl, ts)
-#     try:
-#         render(edl, ts)
-#     except Exception as e:
-#         print('error making video', e)
-#         raise HTTPException(status_code=500, detail='error rendering video')
+@app.post('/render')
+async def queueRender(renderer: BackgroundTasks, form: VideoForm = Depends(VideoForm.as_form)):
+    ts = f'{timestr()}.mp4'
+    print('rendering from form', form, ts)
+    renderer.add_task(renderForm, dict(form), filename=os.path.join('videos', ts))
+    return True
 
 @app.get('/form')
 async def main(request: Request):
