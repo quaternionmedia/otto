@@ -14,25 +14,31 @@ from otto import Otto, templates, defaults
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip
+from typing import List
 
 app = FastAPI()
 
 env = Environment()
 @app.get('/template/{template}')
-async def renderTemplate(request: Request, template: str, text='asdf'):
+async def renderTemplate(request: Request, template: str, text='asdf', width: int = 1920, height: int = 1080):
     # if import_module(f'otto.templates.{template}'):
+    q = request.query_params
+    clipsize = (width, height)
+    print('making template', q, clipsize)
     tmp = getattr(templates, template)
+    print('making tmp', tmp)
     if tmp:
         try:
-            q = request.query_params
-            clip = tmp(**q)
+            clip = tmp(**q, clipsize=clipsize)
             if isinstance(clip, list):
                 clip = concatenate_videoclips(clip)
-            clip.save_frame('temp.png', t=q['t'])
+            clip.save_frame('temp.png', t=q['t'], withmask=True)
             return FileResponse('temp.png')
         except Exception as e:
             raise HTTPException(status_code=500, detail='error making template')
-    else: raise HTTPException(status_code=422, detail='no such template')
+            print('error making template', e)
+    else:
+        raise HTTPException(status_code=422, detail='no such template')
 
 @app.post('/render')
 async def queueRender(renderer: BackgroundTasks, form: VideoForm = Depends(VideoForm.as_form)):

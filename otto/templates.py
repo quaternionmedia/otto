@@ -16,7 +16,7 @@ def title(text,
             color=None,
             fontsize=None,
             clipsize=(1920,1080),
-            textsize=(1920//2, 1080//2),
+            textsize=None,
             font='Segoe-UI-Black',
             method='caption',
             duration=5,
@@ -27,6 +27,7 @@ def title(text,
             **kwargs):
     data = data or defaults
     color = color or data['FONTCOLOR']
+    textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
     t = (TextClip(text.strip(),
         color=color,
         fontsize=fontsize,
@@ -55,7 +56,7 @@ def initial(text,
             color=None,
             fontsize=None,
             clipsize=(1920,1080),
-            textsize=(1920//2, 1080//2),
+            textsize=None,
             font='Segoe-UI-Black',
             method='caption',
             start=0,
@@ -68,6 +69,7 @@ def initial(text,
             ):
     data = data or defaults
     color = color or data['FONTCOLOR']
+    textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
     text = text.split('.')
     text = [t.strip() for t in text if t.strip()]
     texts = []
@@ -124,7 +126,7 @@ def bullets(text,
             data=None,
             color=None,
             fontsize=None,
-            textsize=(1920//2, 1080//2),
+            textsize=None,
             clipsize=(1920,1080),
             font='Segoe-UI-Black',
             method='caption',
@@ -137,6 +139,7 @@ def bullets(text,
             **kwargs):
     data = data or defaults
     color = color or data['FONTCOLOR']
+    textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
     text = text.split('\u2022')
     text = [t.strip() for t in text if t.strip()]
     print('bullet texts', text, )
@@ -178,7 +181,7 @@ def final(text,
             phone=None,
             data=None,
             color=None,
-            fontsize=20,
+            fontsize=None,
             clipsize=(1920,1080),
             font='Segoe-UI-Bold',
             method='caption',
@@ -190,10 +193,11 @@ def final(text,
             **kwargs):
     data = data or defaults
     color = color or data['FONTCOLOR']
+    fontsize = fontsize or pow(clipsize[1], .9)/6 - 10
     texts = [
         TextClip(text,
             color=color,
-            fontsize=60,
+            fontsize=fontsize*1.5,
             size=clipsize,
             font=font,
             method=method,
@@ -202,7 +206,7 @@ def final(text,
             ).set_position((0,-clipsize[1]//5)),
         TextClip(address or data['ADDRESS'],
             color=color,
-            fontsize=50,
+            fontsize=fontsize*.75,
             size=clipsize,
             font=font,
             method=method,
@@ -211,7 +215,7 @@ def final(text,
             ).set_position((0,-clipsize[1]//10)),
         TextClip(website or data['WEBSITE'],
             color=color,
-            fontsize=60,
+            fontsize=fontsize,
             size=clipsize,
             font=font,
             method=method,
@@ -220,7 +224,7 @@ def final(text,
             ).set_position((0,clipsize[1]//10)),
         TextClip(phone or data['PHONE'],
             color=color,
-            fontsize=60,
+            fontsize=fontsize,
             size=clipsize,
             font=font,
             method='label',
