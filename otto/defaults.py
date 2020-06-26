@@ -29,7 +29,18 @@ kburns_config = {
     }
 }
 
-sample_forms = [{'name': 'salon', 'form': {
+sample_forms = [
+{'name': 'qm', 'form': {'project': 'qm', 'NAME': 'Quaternion Media', 'LOGO': 'https://images.squarespace-cdn.com/content/v1/5b54f2433e2d096995211b77/1533416909660-HOZ9TMVFX1Q75JVS6PTN/ke17ZwdGBToddI8pDm48kB_F5ou5Nv4nCV7mv1jiGJIUqsxRUqqbr1mOJYKfIPR7LoDQ9mXPOjoJoqy81S2I8N_N4V1vUb5AoIIIbLZhVYy7Mythp_T-mtop-vrsUOmeInPi9iDjx9w8K4ZfjXt2dp5m48RpJIadfIbe6LRqv-P3y922665OPnItyVLLmO18CjLISwBs8eEdxAxTptZAUg/quaternionmedia-logo-white.png', 'ADDRESS': 'Earth', 'PHONE': '916.674.2776', 'HOURS': '24 / 7', 'WEBSITE': 'quaternion.media', 'INITIAL': 'Media, in every orientation', 'BULLETS': '• Video Production • Application Design • Code Development • 3D Printing • Audio Engineering • Live Music', 'OPTIONAL': '', 'MEDIA': [
+    'https://images.squarespace-cdn.com/content/v1/5b54f2433e2d096995211b77/1532462166264-B0RHJAKSGWK6IL27V2AZ/ke17ZwdGBToddI8pDm48kLBVOuabwD1NP5uoKu4cd9B7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1UWtY1iQz2CjAbKiEWQmLN-eC9lkVgaQwpd8vvKhPLIDOK6k9fd_rPPfRJoL7A9diPg/1658355_786812051377591_9050498053038641895_o.jpg',
+    'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1533409036663-FIZ0QVL8NFAU4I8NQ6DV/10498516_1527557630797908_1223917157036545027_o.jpg?format=1000w&content-type=image%2Fjpeg',
+    'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1533143399024-QUBW13C0M7N8KO7S5QRK/sunset+session+-+small.jpg?format=1500w&content-type=image%2Fjpeg',
+    'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1589845167247-1W1ADAEDDP27NQJM83JJ/Screenshot+from+2020-05-18+16-27-30.jpg?format=1000w&content-type=image%2Fjpeg',
+    'https://images.squarespace-cdn.com/content/v1/5b54f2433e2d096995211b77/1532462253833-3WHPJYWDNG0NXSR4PZ00/ke17ZwdGBToddI8pDm48kFmfxoboNKufWj-55Bgmc-J7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0iXS6XmVv7bUJ418E8Yoc1hjuviiiZmrL38w1ymUdqq4JaGeFUxjM-HeS7Oc-SSFcg/P8314378.jpg?format=1500w',
+    'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1532461756581-1SQS73W6IDSYCA8K385A/135306_10100145984398153_1750707807_o.jpg?format=1500w&content-type=image%2Fjpeg',
+    'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1533075356630-VM493KW5V1KYWGXYQ8PE/Theatrical+Projection+Design+by+Harpo0.jpg?format=1000w&content-type=image%2Fjpeg',
+    'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1536528027055-HQX04BLV1135JAHHBYOE/20180905_1142121-6.jpg?format=1000w&content-type=image%2Fjpeg'
+], 'CALL': 'What can we create for you?', 'CLOSING': '', 'FONTCOLOR': '#ffffff', 'THEMECOLOR': '#192643', 'FONT': 'Segoe_UI_Bold', 'DURATION': 20.0}},
+{'name': 'salon', 'form': {
   "NAME": "Tala Hair Studio",
   "LOGO": "https://storage.googleapis.com/tower-bucket/alfred/tala/40455104_299308637319220_436204347529887744_o.png",
   "ADDRESS": "865 River Road, Suite 301,\nShelton CT 06484",
