@@ -12,9 +12,9 @@ def download(url, location='data'):
     if not url.startswith('http'):
         return url
     else:
-        if url.find('.jpg') > 0:
+        if url.find('jpg') > 0:
             basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode().strip()
-        elif url.find('.png') > 0:
+        elif url.find('png') > 0:
             basename = run(['basename', url.split('.png')[0] + '.png'], capture_output=True).stdout.decode().strip()
         elif url.find('mp3'):
             basename = run(['basename', url.split('.mp3')[0] + '.mp3'], capture_output=True).stdout.decode().strip()
