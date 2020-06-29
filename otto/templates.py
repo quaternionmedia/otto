@@ -14,6 +14,7 @@ def rgbToDec(rgb):
 def title(text,
             data=None,
             color=None,
+            themecolor=None,
             fontsize=None,
             clipsize=(1920,1080),
             textsize=None,
@@ -27,6 +28,7 @@ def title(text,
             **kwargs):
     data = data or defaults
     color = color or data['FONTCOLOR']
+    themecolor = themecolor or data['THEMECOLOR']
     textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
     t = (TextClip(text.strip(),
         color=color,
@@ -37,7 +39,7 @@ def title(text,
         stroke_color=None)
             .set_position(position)
     )
-    boxclip = boxReveal(duration=duration, size=textsize, fill=rgbToDec(data['THEMECOLOR'])).set_position(position)
+    boxclip = boxReveal(duration=duration, size=textsize, fill=rgbToDec(themecolor)).set_position(position)
     if(bg is None):
         bgvid = makeColor(clipsize,color=(0,0,0),opacity=0)
     else:
@@ -54,6 +56,7 @@ def title(text,
 def initial(text,
             data=None,
             color=None,
+            themecolor=None,
             fontsize=None,
             clipsize=(1920,1080),
             textsize=None,
@@ -69,6 +72,7 @@ def initial(text,
             ):
     data = data or defaults
     color = color or data['FONTCOLOR']
+    themecolor = themecolor or data['THEMECOLOR']
     textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
     text = text.split('.')
     text = [t.strip() for t in text if t.strip()]
@@ -95,7 +99,7 @@ def initial(text,
                 .crossfadeout(1)
                 )
         texts.append(tc)
-        bkgs.append(ColorClip((tc.w, tc.h),color=rgbToDec(data['THEMECOLOR']))
+        bkgs.append(ColorClip((tc.w, tc.h),color=rgbToDec(themecolor))
                 .set_duration(tc.duration)
                 .set_start(tc.start)
                 .set_position(tc.pos)
@@ -109,7 +113,7 @@ def initial(text,
 
       fx = [boxShrink(size=(t[0], t[1]),
               duration=duration,
-              fill=rgbToDec(data['THEMECOLOR']),
+              fill=rgbToDec(themecolor),
               transparent=True,
               direction=0,
               startpos=(t[0]//2, t[1]//2),
@@ -125,6 +129,7 @@ def initial(text,
 def bullets(text,
             data=None,
             color=None,
+            themecolor=None,
             fontsize=None,
             textsize=None,
             clipsize=(1920,1080),
@@ -139,6 +144,7 @@ def bullets(text,
             **kwargs):
     data = data or defaults
     color = color or data['FONTCOLOR']
+    themecolor = themecolor or data['THEMECOLOR']
     textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
     text = text.split('\u2022')
     text = [t.strip() for t in text if t.strip()]
@@ -157,12 +163,12 @@ def bullets(text,
                     )
                     .set_position(position)
         )
-        bkg = (ColorClip((clip.w, clip.h),color=rgbToDec(data['THEMECOLOR']))
+        bkg = (ColorClip((clip.w, clip.h),color=rgbToDec(themecolor))
                     .set_position(clip.pos)
                     .set_opacity(opacity))
         if(len(fxs) is 0):
             fxs.append((boxShrink(
-                    duration=clip.duration, size=textsize, fill=rgbToDec(data['THEMECOLOR']))
+                    duration=clip.duration, size=textsize, fill=rgbToDec(themecolor))
                         .set_position(('left', 'bottom'))
                         ))
         if not duration or st + d <= duration:
@@ -181,6 +187,7 @@ def final(text,
             phone=None,
             data=None,
             color=None,
+            themecolor=None,
             fontsize=None,
             clipsize=(1920,1080),
             font='Segoe-UI-Bold',
@@ -193,6 +200,7 @@ def final(text,
             **kwargs):
     data = data or defaults
     color = color or data['FONTCOLOR']
+    themecolor = themecolor or data['THEMECOLOR']
     fontsize = fontsize or pow(clipsize[1], .9)/6 - 10
     texts = [
         TextClip(text,
@@ -235,13 +243,13 @@ def final(text,
 
     # fiag = flyInAndGrow(size=size,
     #         duration=duration,
-    #         fill=rgbToDec(data['THEMECOLOR']),
+    #         fill=rgbToDec(themecolor),
     #         transparent=True)
 
     dbo = drawBoxOutline(
             size=(int(clipsize[0]*0.7), int(clipsize[1]*0.7)),
             duration=duration,
-            fill=rgbToDec(data['THEMECOLOR']),
+            fill=rgbToDec(themecolor),
             transparent=True)
 
 
