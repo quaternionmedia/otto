@@ -29,9 +29,10 @@ def renderEdl(edl, media, audio=None, filename='render.mp4', moviesize=(1920,108
             .crossfadein(1)
             .crossfadeout(1)
     )
-    video = CompositeVideoClip([slides, video]).set_duration(video.duration)
+    video = CompositeVideoClip([slides, video])
     if audio:
         video = video.set_audio(AudioFileClip(audio))
+    video = video.set_duration(video.duration)
     video.write_videofile(filename, fps=30, logger=logger)
 
 def renderForm(form, filename='render.mp4', logger='bar'):
