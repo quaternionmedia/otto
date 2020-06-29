@@ -1,11 +1,11 @@
 from moviepy.video.compositing.concatenate import concatenate_videoclips
-from moviepy.editor import VideoFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from otto import Otto, templates
 from otto.getdata import timestr
 from otto.kburns import kburns
 
-def renderEdl(edl, media, filename='render.mp4', moviesize=(1920,1080), logger='bar'):
+def renderEdl(edl, media, audio=None, filename='render.mp4', moviesize=(1920,1080), logger='bar'):
     clips = []
     for clip in edl:
         print('making clip', clip, type(clip))
@@ -30,6 +30,8 @@ def renderEdl(edl, media, filename='render.mp4', moviesize=(1920,1080), logger='
             .crossfadeout(1)
     )
     video = CompositeVideoClip([slides, video]).set_duration(video.duration)
+    if audio:
+        video = video.set_audio(AudioFileClip(audio))
     video.write_videofile(filename, fps=30, logger=logger)
 
 def renderForm(form, filename='render.mp4', logger='bar'):
