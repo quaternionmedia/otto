@@ -39,7 +39,7 @@ sample_forms = [
     'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1532461756581-1SQS73W6IDSYCA8K385A/135306_10100145984398153_1750707807_o.jpg?format=1500w&content-type=image%2Fjpeg',
     'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1533075356630-VM493KW5V1KYWGXYQ8PE/Theatrical+Projection+Design+by+Harpo0.jpg?format=1000w&content-type=image%2Fjpeg',
     'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1536528027055-HQX04BLV1135JAHHBYOE/20180905_1142121-6.jpg?format=1000w&content-type=image%2Fjpeg'
-], 'CALL': 'What can we create for you?', 'CLOSING': '', "AUDIO": ["audios/talaaudio.mp3"], 'FONTCOLOR': '#ffffff', 'THEMECOLOR': '#192643', 'FONT': 'Segoe_UI_Bold', 'DURATION': 20.0}},
+], 'CALL': 'What can we create for you?', 'CLOSING': '', "AUDIO": ["https://storage.googleapis.com/tower-bucket/alfred/tala/talaaudio.mp3"], 'FONTCOLOR': '#ffffff', 'THEMECOLOR': '#192643', 'FONT': 'Segoe_UI_Bold', 'DURATION': 20.0}},
 {'name': 'salon', 'form': {
   "NAME": "Tala Hair Studio",
   "LOGO": "https://storage.googleapis.com/tower-bucket/alfred/tala/40455104_299308637319220_436204347529887744_o.png",
@@ -51,7 +51,6 @@ sample_forms = [
   "BULLETS": "\u2022 Masks for both staff and clients \u2022 Disposable capes \u2022  Sanitize all stations and implements after every service \u2022 Hand sanitizer supplied \u2022 Touch-less temperature scanning \u2022 Gloves \u2022 One client per stylist at a time, no one in a waiting room \u2022 No walk in’s, appointment only",
   "OPTIONAL": "",
   "MEDIA": [
-    "https://storage.googleapis.com/tower-bucket/alfred/tala/talaaudio.mp3",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/talavid.mp4",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/45270535_330573430859407_6441098175330648064_n.jpg",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/45276506_330571774192906_4374561045813919744_n.jpg",
@@ -72,7 +71,7 @@ sample_forms = [
     "https://storage.googleapis.com/tower-bucket/alfred/tala/95568515_633860660530681_8200575165004775424_n.jpg",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/95699199_633251033924977_9037320113790910464_o.jpg",
   ],
-  "AUDIO": ["audios/talaaudio.mp3"],
+  "AUDIO": ["https://storage.googleapis.com/tower-bucket/alfred/tala/talaaudio.mp3"],
   "CALL": "Please call for an appointment\n(475) 269-2562",
   "CLOSING": "Tala Hair Studio\n(475) 269-2562\ntalahairstudio.com",
   "FONTCOLOR": "#FFFFFF",
@@ -103,7 +102,7 @@ sample_forms = [
   ],
   "CALL": "Call us today to schedule your next service or repair.",
   "CLOSING": "NAME PHONE ADDRESS WEBSITE",
-  "AUDIO": ["audios/talaaudio.mp3"],
+  "AUDIO": ["https://storage.googleapis.com/tower-bucket/alfred/tala/talaaudio.mp3"],
   "FONTCOLOR": "#FFFFFF",
   "THEMECOLOR": "#1BA057",
   "FONT": "Segoe UI Black",
