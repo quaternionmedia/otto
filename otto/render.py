@@ -33,7 +33,7 @@ def renderEdl(edl, media, audio=None, filename='render.mp4', moviesize=(1920,108
     if audio:
         video = video.set_audio(AudioFileClip(audio))
     video = video.set_duration(video.duration)
-    video.write_videofile(filename, fps=30, logger=logger)
+    video.write_videofile(filename, fps=30, logger=logger, threads=8)
 
 def renderForm(form, filename='render.mp4', logger='bar'):
     v = Otto(form)
