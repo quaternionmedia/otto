@@ -14,7 +14,8 @@ class VideoForm(BaseModel):
     INITIAL: str = ''
     BULLETS: str = ''
     OPTIONAL: str = ''
-    MEDIA: List[str] = ['videos/talavid.mp4', 'audios/talaaudio.mp3']
+    MEDIA: List[str] = ['videos/talavid.mp4']
+    AUDIO: List[str] = ['data/talaaudio.mp3']
     CALL: str = ''
     CLOSING: str = ''
     FONTCOLOR: str = '#FFFFFF'

@@ -64,6 +64,7 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
 
     for k,p in enumerate(kbpaths):
         kbclips.append((VideoFileClip(p)
+                        .resize(moviesize)
                         .set_start(k*duration)
                         .crossfadein(padding)
                         .crossfadeout(padding)
