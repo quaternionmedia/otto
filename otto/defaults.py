@@ -39,7 +39,7 @@ sample_forms = [
     'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1532461756581-1SQS73W6IDSYCA8K385A/135306_10100145984398153_1750707807_o.jpg?format=1500w&content-type=image%2Fjpeg',
     'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1533075356630-VM493KW5V1KYWGXYQ8PE/Theatrical+Projection+Design+by+Harpo0.jpg?format=1000w&content-type=image%2Fjpeg',
     'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1536528027055-HQX04BLV1135JAHHBYOE/20180905_1142121-6.jpg?format=1000w&content-type=image%2Fjpeg'
-], 'CALL': 'What can we create for you?', 'CLOSING': '', 'FONTCOLOR': '#ffffff', 'THEMECOLOR': '#192643', 'FONT': 'Segoe_UI_Bold', 'DURATION': 20.0}},
+], 'CALL': 'What can we create for you?', 'CLOSING': '', "AUDIO": ["audios/talaaudio.mp3"], 'FONTCOLOR': '#ffffff', 'THEMECOLOR': '#192643', 'FONT': 'Segoe_UI_Bold', 'DURATION': 20.0}},
 {'name': 'salon', 'form': {
   "NAME": "Tala Hair Studio",
   "LOGO": "https://storage.googleapis.com/tower-bucket/alfred/tala/40455104_299308637319220_436204347529887744_o.png",
@@ -72,7 +72,7 @@ sample_forms = [
     "https://storage.googleapis.com/tower-bucket/alfred/tala/95568515_633860660530681_8200575165004775424_n.jpg",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/95699199_633251033924977_9037320113790910464_o.jpg",
   ],
-  # "AUDIO": ["audios/talaaudio.mp3"],
+  "AUDIO": ["audios/talaaudio.mp3"],
   "CALL": "Please call for an appointment\n(475) 269-2562",
   "CLOSING": "Tala Hair Studio\n(475) 269-2562\ntalahairstudio.com",
   "FONTCOLOR": "#FFFFFF",
@@ -103,6 +103,7 @@ sample_forms = [
   ],
   "CALL": "Call us today to schedule your next service or repair.",
   "CLOSING": "NAME PHONE ADDRESS WEBSITE",
+  "AUDIO": ["audios/talaaudio.mp3"],
   "FONTCOLOR": "#FFFFFF",
   "THEMECOLOR": "#1BA057",
   "FONT": "Segoe UI Black",
