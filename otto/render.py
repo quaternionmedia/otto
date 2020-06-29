@@ -7,13 +7,15 @@ from otto.kburns import kburns
 
 def renderEdl(edl, media, audio=None, filename='render.mp4', moviesize=(1920,1080), logger='bar'):
     clips = []
+    duration = 0
     for clip in edl:
         print('making clip', clip, type(clip))
+        duration += clip['duration']
         if clip['type'] == 'template':
             tmp = getattr(templates, clip['name'])
             print('making template', tmp )
             clips.append(
-                tmp(**clip['data'])
+                tmp(**clip['data'], duration=clip['duration'], moviesize=moviesize)
             )
         elif clip['type'] == 'video':
             clips.append(
@@ -32,7 +34,7 @@ def renderEdl(edl, media, audio=None, filename='render.mp4', moviesize=(1920,108
     video = CompositeVideoClip([slides, video])
     if audio:
         video = video.set_audio(AudioFileClip(audio))
-    video = video.set_duration(video.duration)
+    video = video.set_duration(duration)
     video.write_videofile(filename, fps=30, logger=logger, threads=8)
 
 def renderForm(form, filename='render.mp4', logger='bar'):
