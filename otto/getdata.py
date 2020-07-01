@@ -16,9 +16,9 @@ def download(url, location='data'):
             basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode().strip()
         elif url.find('png') > 0:
             basename = run(['basename', url.split('.png')[0] + '.png'], capture_output=True).stdout.decode().strip()
-        elif url.find('mp3'):
+        elif url.find('mp3') > 0:
             basename = run(['basename', url.split('.mp3')[0] + '.mp3'], capture_output=True).stdout.decode().strip()
-        elif url.find('mp4'):
+        elif url.find('mp4') > 0:
             basename = run(['basename', url.split('.mp4')[0] + '.mp4'], capture_output=True).stdout.decode().strip()
         else:
             basename = run(['basename', url.split('/')[-1]]).strip()
