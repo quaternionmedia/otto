@@ -19,7 +19,7 @@ def kburns(media, duration=5, moviesize=(1920,1080), filename='kbout.mp4'):
                         'file': media[0],
                         'force_no_audio': True,
                         'start': 0,
-                        'end': duration*2,
+                        'end': duration + 1,
                     })
             elif m.endswith(('jpg', 'jpeg', 'png')):
                 slides.append({
