@@ -20,8 +20,10 @@ def download(url, location='data'):
             basename = run(['basename', url.split('.mp3')[0] + '.mp3'], capture_output=True).stdout.decode().strip()
         elif url.find('mp4') > 0:
             basename = run(['basename', url.split('.mp4')[0] + '.mp4'], capture_output=True).stdout.decode().strip()
+        elif url.find('svg') > 0:
+            basename = run(['basename', url.split('.mp4')[0] + '.mp4'], capture_output=True).stdout.decode().strip()
         else:
-            basename = run(['basename', url.split('/')[-1]]).strip()
+            basename = run(['basename', url.split('/')[-1]], capture_output=True).stdout.decode().strip()
         filename = path.join(location, basename) if location else basename
         if not path.isfile(filename):
             if location:
