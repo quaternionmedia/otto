@@ -75,7 +75,7 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
 
 if __name__ == '__main__':
     config = loads(open('examples/talavideo.json', 'r').read())
-    photos = [download(p) for p in config['MEDIA'][1:5]]
+    photos = [download(p) for p in config['media'][1:5]]
     print('running kburns with', photos)
     kb = kburns2(photos, duration=10/(len(photos) + 1))
     kb.write_videofile('output/kbtest.mp4', fps=30, threads=8,)

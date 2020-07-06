@@ -27,8 +27,8 @@ def title(text,
             bg=None,
             **kwargs):
     data = data or defaults
-    color = color or data['FONTCOLOR']
-    themecolor = themecolor or data['THEMECOLOR']
+    color = color or data['fontcolor']
+    themecolor = themecolor or data['themecolor']
     textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
     t = (TextClip(text.strip(),
         color=color,
@@ -71,8 +71,8 @@ def initial(text,
             **kwargs
             ):
     data = data or defaults
-    color = color or data['FONTCOLOR']
-    themecolor = themecolor or data['THEMECOLOR']
+    color = color or data['fontcolor']
+    themecolor = themecolor or data['themecolor']
     textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
     text = text.split('.')
     text = [t.strip() for t in text if t.strip()]
@@ -143,8 +143,8 @@ def bullets(text,
             fxs=[],
             **kwargs):
     data = data or defaults
-    color = color or data['FONTCOLOR']
-    themecolor = themecolor or data['THEMECOLOR']
+    color = color or data['fontcolor']
+    themecolor = themecolor or data['themecolor']
     textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
     text = text.split('\u2022')
     text = [t.strip() for t in text if t.strip()]
@@ -199,8 +199,8 @@ def final(text,
             fps=30,
             **kwargs):
     data = data or defaults
-    color = color or data['FONTCOLOR']
-    themecolor = themecolor or data['THEMECOLOR']
+    color = color or data['fontcolor']
+    themecolor = themecolor or data['themecolor']
     fontsize = fontsize or pow(clipsize[1], .9)/6 - 10
     texts = [
         TextClip(text,
@@ -212,7 +212,7 @@ def final(text,
             stroke_color=None,
             # align='north').set_position(('center', 'top')),
             ).set_position((0,-clipsize[1]//5)),
-        TextClip(address or data['ADDRESS'],
+        TextClip(address or data['address'],
             color=color,
             fontsize=fontsize*.75,
             size=clipsize,
@@ -221,7 +221,7 @@ def final(text,
             stroke_color=None,
             # align='west').set_position(('left', 'center')),
             ).set_position((0,-clipsize[1]//10)),
-        TextClip(website or data['WEBSITE'],
+        TextClip(website or data['website'],
             color=color,
             fontsize=fontsize,
             size=clipsize,
@@ -230,7 +230,7 @@ def final(text,
             stroke_color=None,
             # align='south').set_position(('center', 'bottom')),
             ).set_position((0,clipsize[1]//10)),
-        TextClip(phone or data['PHONE'],
+        TextClip(phone or data['phone'],
             color=color,
             fontsize=fontsize,
             size=clipsize,
