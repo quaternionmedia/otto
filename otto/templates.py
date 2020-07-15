@@ -258,5 +258,5 @@ def final(text,
             .set_duration(duration)
             .set_position((0,0))
             .crossfadein(1)
-            # .crossfadeout(1)
+            .crossfadeout(1)
             )
