@@ -234,6 +234,8 @@ def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
             rightline = gizeh.rectangle(lx=stroke, ly=h, xy=(w-(stroke/2),y),fill=fill)
             leftline = gizeh.rectangle(lx=stroke, ly=h, xy=(stroke/2,y),fill=fill)
 
+        bkg = gizeh.rectangle(lx=w*2, ly=h*2, fill=(.1,.1,.1,.5))
+        bkg.draw(surface)
         topline.draw(surface)
         bottomline.draw(surface)
         rightline.draw(surface)
