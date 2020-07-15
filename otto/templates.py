@@ -191,6 +191,7 @@ def bullets(text,
                 # clips.append(CompositeVideoClip([''], duration=duration - st))
                 print('adding blank clip', st, duration - st)
                 clips.append(CompositeVideoClip([ColorClip(clipsize, color=(0,0,0,0))]).set_duration(duration - st))
+                break
             st += d
         final = concatenate_videoclips(clips)
         if duration:
