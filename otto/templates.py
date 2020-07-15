@@ -153,6 +153,8 @@ def bullets(text,
     st = 0
     for t in text:
         d = 2 + pow(len(t.split(' ')), .6)
+        if st + d >= duration:
+            d = min(3, duration - st)
         clip = (TextClip(t,
                     color=color,
                     fontsize=fontsize,
