@@ -124,6 +124,7 @@ def initial(text,
     print('initial', bkgs, texts)
     return (CompositeVideoClip([*bkgs, *texts, *fxs], size=clipsize)
             .set_position(position)
+            .set_duration(duration)
             .set_fps(30))
 
 def bullets(text,
@@ -153,8 +154,6 @@ def bullets(text,
     st = 0
     for t in text:
         d = 2 + pow(len(t.split(' ')), .6)
-        if st + d >= duration:
-            d = min(3, duration - st)
         clip = (TextClip(t,
                     color=color,
                     fontsize=fontsize,
@@ -180,8 +179,16 @@ def bullets(text,
                     .crossfadein(1)
                     .crossfadeout(1)
                     )
+            print('added clip', t, clip, st, d)
+        if duration and st + d > duration:
+            # clips.append(CompositeVideoClip([''], duration=duration - st))
+            print('adding blank clip', st, duration - st)
+            clips.append(CompositeVideoClip([ColorClip(clipsize, color=(0,0,0,0))]).set_duration(duration - st))
         st += d
-    return concatenate_videoclips(clips)
+    final = concatenate_videoclips(clips)
+    if duration:
+        final = final.set_duration(duration)
+    return final
 
 def final(text,
             address=None,
