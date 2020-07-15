@@ -28,6 +28,7 @@ def renderEdl(edl, media, audio=None, filename='render.mp4', moviesize=(1920,108
     print('made video', video, duration)
     kburns(media[:int(1 + duration//5)], moviesize=moviesize, filename=f'{filename}_kbout.mp4')
     slides = (VideoFileClip(f'{filename}_kbout.mp4')
+            .set_duration(duration)
             .crossfadein(1)
             .crossfadeout(1)
     )
