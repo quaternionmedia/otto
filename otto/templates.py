@@ -78,7 +78,7 @@ def initial(text,
         color = color or data['fontcolor']
         themecolor = themecolor or data['themecolor']
         textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
-        text = text.split('.')
+        text = text.split('. ')
         text = [t.strip() for t in text if t.strip()]
         texts = []
         bkgs = []
@@ -112,7 +112,7 @@ def initial(text,
                     .crossfadeout(1)
             )
             st += d
-        if(len(fxs) is 0):
+        if(len(fxs) == 0):
           t = textsize
 
           fx = [boxShrink(size=(t[0], t[1]),
@@ -174,7 +174,7 @@ def bullets(text,
             bkg = (ColorClip((clip.w, clip.h),color=rgbToDec(themecolor))
                         .set_position(clip.pos)
                         .set_opacity(opacity))
-            if(len(fxs) is 0):
+            if(len(fxs) == 0):
                 fxs.append((boxShrink(
                         duration=clip.duration, size=textsize, fill=rgbToDec(themecolor))
                             .set_position(('left', 'bottom'))
