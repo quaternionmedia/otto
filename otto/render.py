@@ -53,9 +53,6 @@ def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,108
                 VideoFileClip(clip['name'], target_resolution=(moviesize[1], moviesize[0]))
                 .subclip(clip.get('inpoint', 0))
                 .crossfadein(1)
-                # .crossfadeout(1)
-                # .set_duration(getattr(clip, 'duration', ))
-                # .set_start(clip['start'])
             )
             if clip.get('duration'):
                 c = c.set_duration(clip['duration'])

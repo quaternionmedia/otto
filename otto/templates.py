@@ -41,17 +41,13 @@ def title(text,
                 .set_position(position)
         )
         boxclip = boxReveal(duration=duration, size=textsize, fill=rgbToDec(themecolor)).set_position(position)
-        if(bg is None):
-            bgvid = makeColor(clipsize,color=(0,0,0),opacity=0)
-        else:
-            bgvid = resize(clipsize).set_position(position)
+        bgvid = makeColor(textsize, color=rgbToDec(bg) if bg else (0,0,0), opacity=.5 if bg else 0).set_position(position)
         return (CompositeVideoClip([bgvid, t, boxclip], size=clipsize)
-                .set_position('center')
+                .set_position(position)
                 .set_fps(fps)
                 .set_duration(duration)
                 .crossfadein(1)
                 .crossfadeout(1)
-                # .resize(size)
                 )
     except Exception as e:
         print('error making title', e)
