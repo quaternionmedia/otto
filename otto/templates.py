@@ -62,7 +62,7 @@ def initial(text,
             font='Segoe-UI-Black',
             method='caption',
             start=0,
-            duration=5,
+            duration=None,
             position='center',
             opacity=.4,
             fps=30,
@@ -79,9 +79,12 @@ def initial(text,
         texts = []
         bkgs = []
         st = 0
-        for t in text:
+        tlen = len(text) - 1
+        for i, t in enumerate(text):
             d = 2 + pow(len(t.split(' ')), .6)
             if st + d > duration:
+                d = duration - st
+            if i == tlen and duration and st + d < duration:
                 d = duration - st
             tc = (TextClip(t,
                         color=color,
