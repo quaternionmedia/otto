@@ -79,12 +79,13 @@ def initial(text,
         texts = []
         bkgs = []
         st = 0
+        d = 0
         tlen = len(text) - 1
         for i, t in enumerate(text):
             d = 2 + pow(len(t.split(' ')), .6)
-            if st + d > duration:
+            if duration and st + d > duration:
                 d = duration - st
-            if i == tlen and duration and st + d < duration:
+            if duration and i == tlen and st + d < duration:
                 d = duration - st
             tc = (TextClip(t,
                         color=color,
@@ -115,7 +116,7 @@ def initial(text,
           t = textsize
 
           fx = [boxShrink(size=(t[0], t[1]),
-                  duration=duration,
+                  duration=duration or d,
                   fill=rgbToDec(themecolor),
                   transparent=True,
                   direction=0,
@@ -127,7 +128,7 @@ def initial(text,
         print('initial', bkgs, texts)
         return (CompositeVideoClip([*bkgs, *texts, *fxs], size=clipsize)
                 .set_position(position)
-                .set_duration(duration)
+                .set_duration(duration or d)
                 .set_fps(30))
     except Exception as e:
         print('error making initial', e)
