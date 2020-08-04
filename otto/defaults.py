@@ -30,7 +30,7 @@ kburns_config = {
 }
 
 sample_forms = [
-{'name': 'qm', 'form': {'project': 'qm', 'name': 'Quaternion Media', 'logo': 'https://images.squarespace-cdn.com/content/v1/5b54f2433e2d096995211b77/1533416909660-HOZ9TMVFX1Q75JVS6PTN/ke17ZwdGBToddI8pDm48kB_F5ou5Nv4nCV7mv1jiGJIUqsxRUqqbr1mOJYKfIPR7LoDQ9mXPOjoJoqy81S2I8N_N4V1vUb5AoIIIbLZhVYy7Mythp_T-mtop-vrsUOmeInPi9iDjx9w8K4ZfjXt2dp5m48RpJIadfIbe6LRqv-P3y922665OPnItyVLLmO18CjLISwBs8eEdxAxTptZAUg/quaternionmedia-logo-white.png', 'address': 'Earth', 'phone': '916.674.2776', 'hours': '24 / 7', 'website': 'quaternion.media', 'initial': 'Media, in every orientation', 'bullets': '• Video Production • Application Design • Code Development • 3D Printing • Audio Engineering • Live Music', 'optional': '', 'media': [
+{'name': 'qm', 'form': {'project': 'qm', 'name': 'Quaternion Media', 'logo': 'https://images.squarespace-cdn.com/content/v1/5b54f2433e2d096995211b77/1533416909660-HOZ9TMVFX1Q75JVS6PTN/ke17ZwdGBToddI8pDm48kB_F5ou5Nv4nCV7mv1jiGJIUqsxRUqqbr1mOJYKfIPR7LoDQ9mXPOjoJoqy81S2I8N_N4V1vUb5AoIIIbLZhVYy7Mythp_T-mtop-vrsUOmeInPi9iDjx9w8K4ZfjXt2dp5m48RpJIadfIbe6LRqv-P3y922665OPnItyVLLmO18CjLISwBs8eEdxAxTptZAUg/quaternionmedia-logo-white.png', 'address': 'Earth', 'phone': '916.674.2776', 'hours': '24 / 7', 'website': 'quaternion.media', 'initial': 'Media, in every orientation', 'bullets': '• Video Production • Application Design • Code Development • 3D Printing • Audio Engineering • Live Music', 'media': [
     'https://images.squarespace-cdn.com/content/v1/5b54f2433e2d096995211b77/1532462166264-B0RHJAKSGWK6IL27V2AZ/ke17ZwdGBToddI8pDm48kLBVOuabwD1NP5uoKu4cd9B7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1UWtY1iQz2CjAbKiEWQmLN-eC9lkVgaQwpd8vvKhPLIDOK6k9fd_rPPfRJoL7A9diPg/1658355_786812051377591_9050498053038641895_o.jpg',
     'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1533409036663-FIZ0QVL8NFAU4I8NQ6DV/10498516_1527557630797908_1223917157036545027_o.jpg?format=1000w&content-type=image%2Fjpeg',
     'https://images.squarespace-cdn.com/content/5b54f2433e2d096995211b77/1533143399024-QUBW13C0M7N8KO7S5QRK/sunset+session+-+small.jpg?format=1500w&content-type=image%2Fjpeg',
@@ -49,7 +49,6 @@ sample_forms = [
   "website": "talahairstudio.com",
   "initial": "As we re-open, we want to assure our clients we will be taking the necessary steps to ensure the safety of both our valued customers and our entire staff.",
   "bullets": "\u2022 Masks for both staff and clients \u2022 Disposable capes \u2022  Sanitize all stations and implements after every service \u2022 Hand sanitizer supplied \u2022 Touch-less temperature scanning \u2022 Gloves \u2022 One client per stylist at a time, no one in a waiting room \u2022 No walk in’s, appointment only",
-  "optional": "",
   "media": [
     "https://storage.googleapis.com/tower-bucket/alfred/tala/talavid.mp4",
     "https://storage.googleapis.com/tower-bucket/alfred/tala/45270535_330573430859407_6441098175330648064_n.jpg",
@@ -86,9 +85,8 @@ sample_forms = [
   "phone": "510.237.3906",
   "hours": "Mon-Sat 8:00am - 6:00pm",
   "website": "stevesautocare.net",
-  "initial": "Our priority is providing you with high quality service. Specializing in Asian imports, domestic vehicles, and hybrids.",
+  "initial": "Our priority is providing you with high quality service. Specializing in Asian imports, domestic vehicles, and hybrids. We promise to treat our customers' cars as if they were our own. Don't take our word for it, check out our reviews. Our reputation speaks for itself.",
   "bullets": "\u2022 All Factory-Scheduled Maintenance including 30-60-90-120k-Mile Intervals. \u2022 High Quality Diagnosis and Repair \u2022 Tire Sales \u2022 Wheel Alignment \u2022 Pre-purchase Inspections \u2022 Smog Checks \u2022 Brake Service and Repair \u2022 Radiator and Cooling Systems \u2022 AC Service and Repair \u2022 Free Shuttle Service",
-  "optional": "We promise to treat our customers' cars as if they were our own. Don't take our word for it, check out our reviews. Our reputation speaks for itself.",
   "media":[
   'https://storage.googleapis.com/tower-bucket/alfred/car/10DSCN29061.jpg',
   'https://storage.googleapis.com/tower-bucket/alfred/car/112.jpg',
@@ -122,7 +120,6 @@ video_form = """
     Website: <input name="website" type="text"><br>
     Initial: <input name="initial" type="textarea"><br>
     Bullets: <input name="bullets" type="textarea"><br>
-    Optional: <input name="optional" type="textarea"><br>
     Audio: <input name="audio" type="textarea"><br>
     Media: <input name="media" type="textarea"><br>
     Call: <input name="call" type="text"><br>
@@ -144,7 +141,6 @@ video_form = """
     d.website.value = video_data.website;
     d.initial.value = video_data.initial;
     d.bullets.value = video_data.bullets;
-    d.optional.value = video_data.optional;
     d.audio.value = video_data.audio;
     d.media.value = video_data.media;
     d.call.value = video_data.call;
