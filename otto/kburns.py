@@ -16,7 +16,7 @@ def kburns(media, duration=5, moviesize=(1920,1080), filename='kbout.mp4'):
         for m in media:
             if m.endswith('mp4'):
                 slides.append({
-                        'file': media[0],
+                        'file': m,
                         'force_no_audio': True,
                         'start': 0,
                         'end': duration + 1,
