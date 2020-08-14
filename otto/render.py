@@ -2,12 +2,13 @@ from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip, AudioFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from otto import Otto, templates
-from otto.getdata import timestr
+from otto.getdata import timestr, download
 from otto.kburns import kburns
 
 def renderEdl(edl, media, audio=None, filename='render.mp4', moviesize=(1920,1080), logger='bar'):
     clips = []
     duration = 0
+    media = [ download(m) for m in media ]
     for clip in edl:
         print('making clip', clip, type(clip))
         duration += clip['duration']
