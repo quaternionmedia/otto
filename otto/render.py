@@ -1,6 +1,7 @@
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip, AudioFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+from moviepy.audio.AudioClip import CompositeAudioClip
 from otto import Otto, templates
 from otto.getdata import timestr, download
 from otto.kburns import kburns
@@ -51,20 +52,32 @@ def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,108
             )
         elif clip['type'] == 'video':
             c = (
-                VideoFileClip(clip['name'], target_resolution=(moviesize[1], moviesize[0]))
+                VideoFileClip(clip['name'], target_resolution=(moviesize[1], None))
                 .subclip(clip.get('inpoint', 0))
                 .crossfadein(1)
             )
+            # c = c.crop(x_center=c.w/2, y_center=c.h/2, width=moviesize[0], height=moviesize[1])
             if clip.get('duration'):
                 c = c.set_duration(clip['duration'])
             clips.append(c.crossfadeout(1))
+        elif clip['type'] == 'audio':
+            c = CompositeAudioClip([AudioFileClip(clip['name'], fps=48000)])
+            if clip.get('offset', 0) < 0:
+                c = c.subclip(-clip['offset'])
+            if clip.get('offset', 0) > 0:
+                c = c.set_start(clip['offset'])
+            if clip.get('inpoint'):
+                c = c.subclip(clip['inpoint'])
+            if clip.get('duration'):
+                c = c.set_duration(clip['duration'])
+            audio = c.audio_fadein(1).audio_fadeout(1)
     print('made clips', clips)
     video = CompositeVideoClip(clips)
     print('made video', video)
     if audio:
-        video = video.set_audio(AudioFileClip(audio))
+        video = video.set_audio(audio)
     video = video.crossfadeout(1).audio_fadeout(1)
-    video.write_videofile(filename, fps=30, logger=logger, threads=8)
+    video.write_videofile(filename, fps=30, logger=logger, threads=8, audio_fps=48000, audio_codec='aac', audio_bitrate='320k')
 
 def renderForm(form, filename='render.mp4', logger='bar'):
     v = Otto(form)
