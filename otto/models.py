@@ -13,8 +13,8 @@ class VideoForm(BaseModel):
     website: str = '' #AnyUrl = 'talahairstudio.com'
     initial: str = ''
     bullets: str = ''
-    media: List[str] = ['']
-    audio: List[str] = ['']
+    media: str = ''
+    audio: str = ''
     call: str = ''
     closing: str = ''
     fontcolor: str = '#FFFFFF'
