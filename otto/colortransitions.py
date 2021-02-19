@@ -106,15 +106,15 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
     return makeClip(fiag).set_duration(duration)
 
 def makeBezier(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
-    c1x, c1y, ax, ay, c2x, c2y = [0]*6
+    c1x, c1y, ax, ay, c2x, c2y = [0,0,0,0,1,1]
 
     nodes = np.asfortranarray([
         [c1x, ax, c2x],
         [c1y, ay, c2y]
     ])
     curve = bezier.Curve(nodes, degree=2)
-    print(curve)
-
+    print(curve.evaluate(0.75))
+    
     def bez(t):
         surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
 
