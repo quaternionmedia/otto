@@ -105,8 +105,8 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         return surface.get_npimage(transparent=transparent)
     return makeClip(fiag).set_duration(duration)
 
-def bezier(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
-    c1x, c1y, ax, ay, c2x, c2y = 0
+def makeBezier(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
+    c1x, c1y, ax, ay, c2x, c2y = [0]*6
 
     nodes = np.asfortranarray([
         [c1x, ax, c2x],
@@ -118,13 +118,13 @@ def bezier(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=tra
     def bez(t):
         surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
 
-        c1x, c1y, a1x, a1y, c2x, c2y, a2x, a2y = 0
+        c1x, c1y, a1x, a1y, c2x, c2y, a2x, a2y = [0]*8
         w = size[0]
         h = size[1]
         x = size[0]/2
         y = size[1]/2
 
-        //curve stuff here
+        # curve stuff here
 
         rect = gizeh.rectangle(lx=w, ly=h,xy=(x,y),fill=fill)
         rect.draw(surface)
@@ -193,7 +193,7 @@ def boxShrink(duration=defaultdur,
         w = clipsize[0]
         h = clipsize[1]
 
-        if(direction is -1):
+        if(direction == -1):
             startpos=(w//2, h//2)
             startwh=(w, h)
             endpos = (w//10, h//2)
@@ -276,14 +276,14 @@ def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transpa
 
 if __name__ == '__main__':
     clips = [
-                drawBoxOutline(),
-                circleShrink(),
-                growBox(),
-                boxReveal(),
-                flyInAndGrow(),
-                zoomFromCenter(),
-                boxShrink()
-
+                # drawBoxOutline(),
+                # circleShrink(),
+                # growBox(),
+                # boxReveal(),
+                # flyInAndGrow(),
+                # zoomFromCenter(),
+                # boxShrink()
+                makeBezier()
                 ]
 
     final_clips = e.concatenate_videoclips(clips)
