@@ -8,3 +8,4 @@ jinja2
 pydantic
 uvicorn
 python-multipart
+bezier

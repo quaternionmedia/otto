@@ -1,5 +1,7 @@
 import gizeh
 import moviepy.editor as e
+import bezier
+import numpy as np
 
 clipsize = (800,600)
 defaultdur = 5
@@ -102,6 +104,33 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         rect.draw(surface)
         return surface.get_npimage(transparent=transparent)
     return makeClip(fiag).set_duration(duration)
+
+def bezier(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
+    c1x, c1y, ax, ay, c2x, c2y = 0
+
+    nodes = np.asfortranarray([
+        [c1x, ax, c2x],
+        [c1y, ay, c2y]
+    ])
+    curve = bezier.Curve(nodes, degree=2)
+    print(curve)
+
+    def bez(t):
+        surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
+
+        c1x, c1y, a1x, a1y, c2x, c2y, a2x, a2y = 0
+        w = size[0]
+        h = size[1]
+        x = size[0]/2
+        y = size[1]/2
+
+        //curve stuff here
+
+        rect = gizeh.rectangle(lx=w, ly=h,xy=(x,y),fill=fill)
+        rect.draw(surface)
+        return surface.get_npimage(transparent=transparent)
+    return makeClip(bez).set_duration(duration)
+        
 
 def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
     def zfc(t):
