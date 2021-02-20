@@ -25,4 +25,4 @@ class VideoForm(BaseModel):
 
 class Edl(BaseModel):
     edl: List
-    time: float = None
+    duration: float = None
