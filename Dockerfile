@@ -24,26 +24,8 @@ RUN apt-get install -y \
   ffmpeg \
   wget
 
-
-#zerotier-one \  cairo-dev \  openssh \  openrc
-
-RUN pip3 install \
-  FastAPI \
-  aiofiles \
-  python-multipart \
-  tinydb \
-  pyjwt \
-  passlib[bcrypt] \
-  pymongo \
-  moviepy \
-  gizeh \
-  ffmpeg-python
-
-RUN pip3 install \
-  numpy
-
-#COPY requirements.txt /
-#RUN pip3 install -r /requirements.txt
+COPY requirements.txt /
+RUN pip3 install -r /requirements.txt
 
 RUN apt-get install -y \
   libmagick++-dev
