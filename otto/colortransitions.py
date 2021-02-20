@@ -37,9 +37,9 @@ def makeColor(
         position=(0,0), #tuple (x,y) from top left
         opacity=0.5,
         start=0,
-        duration=5
-        ):
-        return (e.ColorClip(size,color=color)
+        duration=5,
+        **kwargs):
+        return (e.ColorClip(tuple(size),color=tuple(color))
                     .set_position(position)
                     .set_opacity(opacity)
                     .set_start(start)
