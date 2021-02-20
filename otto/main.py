@@ -7,12 +7,13 @@ from fastapi.templating import Jinja2Templates
 from jinja2 import Environment
 from starlette.responses import FileResponse
 from uvicorn import run
-from otto.getdata import urlToJson, timestr
+from otto.getdata import urlToJson, timestr, download
 from otto.models import VideoForm, Edl
 from otto.render import renderEdl, renderForm
 from otto import Otto, templates, defaults
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
+from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.editor import VideoFileClip
 from typing import List
 
@@ -53,6 +54,43 @@ async def main(request: Request):
     template = env.from_string(defaults.video_form)
     return HTMLResponse(template.render({"request": request, "video_data": data.dict()}))
 
+
+@app.post('/preview')
+async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080):
+    print('previewing', edl, 'at frame', t)
+    try:
+        active_clips = [c for c in edl.edl if t >= c.get('start', 0) + c.get('offset', 0)]
+        clips = []
+        for c in active_clips:
+            if c['type'] == 'video':
+                clip = VideoFileClip(download(c['name']), target_resolution=(height, width))
+            elif c['type'] == 'template':
+                tmp = getattr(templates, c['name'])
+                clip = tmp(**c['data'], clipsize=(width, height), duration=c['duration'])
+                if isinstance(clip, list):
+                    clip = concatenate_videoclips(clip)
+            if c.get('offset', 0) < 0:
+                clip = clip.subclip(-c['offset'])
+            if c.get('offset', 0) > 0:
+                clip = clip.set_start(c['offset'])
+            if c.get('inpoint'):
+                clip = clip.subclip(c['inpoint'])
+            if c.get('duration'):
+                clip = clip.set_duration(c['duration'])
+            if c.get('start'):
+                clip = clip.set_start(c['start'])
+            if clip:
+                clips.append(clip.crossfadein(1).crossfadeout(1))
+                
+        video = CompositeVideoClip(clips)
+        frame_name = os.path.join('data', timestr() + '.png')
+        for c in clips:
+            print('clip', c)
+        video.save_frame(frame_name, t=t, withmask=True)
+        return frame_name
+    except Exception as e:
+        print('error previewing frame', e)
+        raise HTTPException(status_code=500, detail='error previewing frame')
 
 if __name__ == '__main__':
     run(app, host='0.0.0.0', port=9000)
