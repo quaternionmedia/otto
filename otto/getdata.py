@@ -6,7 +6,7 @@ import moviepy.editor as e
 from time import strftime
 import json
 from requests import head
-from uuid import uuid4
+from hashlib import sha256
 
 content_types = ['image/jpeg', 'video/mp4', 'image/png', 'audio/mpeg']
 extensions = ['jpg', 'mp4', 'png', 'mp3']
@@ -30,7 +30,7 @@ def download(url, location='data'):
             if ct not in content_types:
                 raise Exception('type not allowed', h.headers.get('content-type'))
             ext = extensions[content_types.index(ct)]
-            basename = f'{str(uuid4())}.{ext}'
+            basename = f'{sha256(url.encode()).hexdigest()}.{ext}'
             filename = path.join(location, basename) if location else basename
             if not path.isfile(filename):
                 run(['wget', '-O', filename, url])
