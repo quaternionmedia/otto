@@ -11,6 +11,9 @@ from hashlib import sha256
 content_types = ['image/jpeg', 'video/mp4', 'image/png', 'audio/mpeg']
 extensions = ['jpg', 'mp4', 'png', 'mp3']
 
+def hash(s):
+    return sha256(s.encode()).hexdigest()
+
 def download(url, location='data'):
     if not url.startswith('http'):
         return url
@@ -30,7 +33,7 @@ def download(url, location='data'):
             if ct not in content_types:
                 raise Exception('type not allowed', h.headers.get('content-type'))
             ext = extensions[content_types.index(ct)]
-            basename = f'{sha256(url.encode()).hexdigest()}.{ext}'
+            basename = f'{hash(url)}.{ext}'
             filename = path.join(location, basename) if location else basename
             if not path.isfile(filename):
                 run(['wget', '-O', filename, url])
