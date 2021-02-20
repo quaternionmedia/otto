@@ -42,7 +42,7 @@ def title(text,
         )
         boxclip = boxReveal(duration=duration, size=textsize, fill=rgbToDec(themecolor)).set_position(position)
         bgvid = makeColor(textsize, color=rgbToDec(bg) if bg else (0,0,0), opacity=.5 if bg else 0).set_position(position)
-        return (CompositeVideoClip([bgvid, t, boxclip], size=clipsize)
+        return (CompositeVideoClip([bgvid, t, boxclip] if bg else [t, boxclip], size=clipsize)
                 .set_position(position)
                 .set_fps(fps)
                 .set_duration(duration)
@@ -66,6 +66,7 @@ def initial(text,
             position='center',
             opacity=.4,
             fps=30,
+            bg=None,
             fxs=[],
             **kwargs
             ):
@@ -103,14 +104,15 @@ def initial(text,
                     .crossfadeout(1)
                     )
             texts.append(tc)
-            bkgs.append(ColorClip((tc.w, tc.h),color=rgbToDec(themecolor))
-                    .set_duration(tc.duration)
-                    .set_start(tc.start)
-                    .set_position(tc.pos)
-                    .set_opacity(opacity)
-                    .crossfadein(1)
-                    .crossfadeout(1)
-            )
+            if bg:
+                bkgs.append(ColorClip((tc.w, tc.h),color=rgbToDec(bg))
+                        .set_duration(tc.duration)
+                        .set_start(tc.start)
+                        .set_position(tc.pos)
+                        .set_opacity(opacity)
+                        .crossfadein(1)
+                        .crossfadeout(1)
+                )
             st += d
         if(len(fxs) == 0):
           t = textsize
@@ -282,3 +284,61 @@ def final(text,
                 )
     except Exception as e:
         print('error making final', e)
+
+def textBox(text,
+            data=None,
+            color=None,
+            themecolor=None,
+            fontsize=None,
+            clipsize=(1920,1080),
+            textsize=None,
+            font='Segoe-UI-Black',
+            method='caption',
+            start=0,
+            duration=None,
+            position='center',
+            opacity=.4,
+            fps=30,
+            bg=None,
+            align='center',
+            fxs=[],
+            **kwargs
+            ):
+    try:
+        data = data or defaults
+        color = color or data['fontcolor']
+        themecolor = themecolor or data['themecolor']
+        textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
+        text = text.strip()
+        bkgs = []
+        tc = (TextClip(text,
+                    color=color,
+                    fontsize=fontsize,
+                    size=textsize,
+                    font=font,
+                    method=method,
+                    stroke_color=None,
+                    align=align,
+                ).set_start(start)
+                .set_duration(duration)
+                .set_position(position)
+                .resize(textsize)
+                .crossfadein(1)
+                .crossfadeout(1)
+                )
+        if bg:
+            bkgs.append(ColorClip((tc.w, tc.h),color=rgbToDec(bg))
+                    .set_duration(tc.duration)
+                    .set_start(tc.start)
+                    .set_position(tc.pos)
+                    .set_opacity(opacity)
+                    .crossfadein(1)
+                    .crossfadeout(1)
+            )
+        print('textBox', bkgs)
+        return (CompositeVideoClip([*bkgs, tc], size=clipsize)
+                .set_position(position)
+                .set_duration(duration)
+                .set_fps(30))
+    except Exception as e:
+        print('error making textBox', e)
