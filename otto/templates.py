@@ -327,6 +327,7 @@ def textBox(text,
                 .crossfadeout(1)
                 )
         if fxs:
+            tc = CompositeVideoClip([tc], size=clipsize)
             for fx in fxs:
                 effect = getattr(colortransitions, fx.get('name'))
                 tc = tc.set_position(lambda t: (effect(**fx['data']).evaluate(t).tolist()[0][0] if t < 1 else 0, 0), relative=True)
@@ -342,9 +343,6 @@ def textBox(text,
             )
             
         print('textBox', bkgs, fxs)
-        return (CompositeVideoClip([bkgs, tc] if bg else [tc], size=clipsize)
-                .set_position(position)
-                .set_duration(duration)
-                .set_fps(30))
+        return tc
     except Exception as e:
         print('error making textBox', e)
