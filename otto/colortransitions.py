@@ -112,8 +112,15 @@ def makeBezier(duration=defaultdur, size=clipsize, fill=defaultfill, transparent
         [c1x, ax, c2x],
         [c1y, ay, c2y]
     ])
-    curve = bezier.Curve(nodes, degree=2)
-    print(curve.evaluate(0.75))
+    return bezier.Curve(nodes, degree=2)
+
+def makeBezier(
+    c1x, c1y, ax, ay, c2x, c2y,
+    duration=defaultdur, 
+    size=clipsize, 
+    fill=defaultfill, 
+    transparent=transparent,
+    ):
     
     def bez(t):
         surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
@@ -281,7 +288,7 @@ if __name__ == '__main__':
                 # flyInAndGrow(),
                 # zoomFromCenter(),
                 # boxShrink()
-                makeBezier()
+                makeBezier(0,0,0,0,1,1)
                 ]
 
     final_clips = e.concatenate_videoclips(clips)
