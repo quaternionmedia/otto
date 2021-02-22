@@ -311,7 +311,7 @@ def textBox(text,
         themecolor = themecolor or data['themecolor']
         textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
         text = text.strip()
-        tc = (TextClip(text,
+        tc = CompositeVideoClip([TextClip(text,
                     color=color,
                     fontsize=fontsize,
                     size=textsize,
@@ -322,12 +322,11 @@ def textBox(text,
                 ).set_start(start)
                 .set_duration(duration)
                 .set_position(position)
-                .resize(textsize)
+                # .resize(textsize)
                 .crossfadein(1)
                 .crossfadeout(1)
-                )
+                ], size=clipsize)
         if fxs:
-            tc = CompositeVideoClip([tc], size=clipsize)
             for fx in fxs:
                 effect = getattr(colortransitions, fx.get('name'))
                 tc = tc.set_position(lambda t: (effect(**fx['data']).evaluate(t).tolist()[0][0] if t < 1 else 0, 0), relative=True)
