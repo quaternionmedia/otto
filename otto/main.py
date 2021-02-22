@@ -14,7 +14,7 @@ from otto import Otto, templates, defaults
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-from moviepy.editor import VideoFileClip
+from moviepy.editor import VideoFileClip, ImageClip
 from typing import List
 
 app = FastAPI()
@@ -69,6 +69,8 @@ async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080
                 clip = tmp(**c['data'], clipsize=(width, height), duration=c['duration'])
                 if isinstance(clip, list):
                     clip = concatenate_videoclips(clip)
+            elif c['type'] == 'image':
+                clip = ImageClip(c['name'])
             if c.get('offset', 0) < 0:
                 clip = clip.subclip(-c['offset'])
             if c.get('offset', 0) > 0:
@@ -79,6 +81,10 @@ async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080
                 clip = clip.set_duration(c['duration'])
             if c.get('start'):
                 clip = clip.set_start(c['start'])
+            if c.get('position'):
+                clip = clip.set_position(c['position'])
+            if c.get('resize'):
+                clip = clip.resize(c['resize'])
             if clip:
                 clips.append(clip.crossfadein(1).crossfadeout(1))
                 

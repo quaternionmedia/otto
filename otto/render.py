@@ -1,5 +1,5 @@
 from moviepy.video.compositing.concatenate import concatenate_videoclips
-from moviepy.editor import VideoFileClip, AudioFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip, ImageClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.audio.AudioClip import CompositeAudioClip
 from otto import Otto, templates
@@ -72,6 +72,8 @@ def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,108
             if clip.get('duration'):
                 c = c.set_duration(clip['duration'])
             audio = c.audio_fadein(1).audio_fadeout(1)
+        elif clip['type'] == 'image':
+            c = CompositeVideoClip([ImageClip(clip['name'])])
     print('made clips', clips)
     video = CompositeVideoClip(clips)
     print('made video', video)
