@@ -118,12 +118,11 @@ def makeBezier(duration=defaultdur, size=clipsize, fill=defaultfill, transparent
     def bez(t):
         surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
 
-        c1x, c1y, a1x, a1y, c2x, c2y, a2x, a2y = [0]*8
         w = size[0]
         h = size[1]
 
-        x = curve.evaluate(t)[0][0]
-        y = curve.evaluate(t)[1][0]
+        x = curve.evaluate(float(t))[0][0]*w/2
+        y = curve.evaluate(float(t))[1][0]*h/2
 
         rect = gizeh.rectangle(lx=w, ly=h,xy=(x,y),fill=fill)
         rect.draw(surface)
