@@ -69,6 +69,8 @@ def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,108
             c = c.set_duration(clip['duration'])
         if clip.get('position'):
             c = c.set_position(clip['position'])
+        if clip.get('start'):
+            c = c.set_start(clip['start'])
         clips.append(c.crossfadein(1).crossfadeout(1))
     print('made clips', clips)
     video = CompositeVideoClip(clips)

@@ -70,7 +70,7 @@ async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080
                 if isinstance(clip, list):
                     clip = concatenate_videoclips(clip)
             elif c['type'] == 'image':
-                clip = ImageClip(c['name'])
+                clip = CompositeVideoClip([ImageClip(c['name'])], size=clipsize)
             if c.get('offset', 0) < 0:
                 clip = clip.subclip(-c['offset'])
             if c.get('offset', 0) > 0:
