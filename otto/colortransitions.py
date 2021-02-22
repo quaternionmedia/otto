@@ -105,9 +105,8 @@ def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
         return surface.get_npimage(transparent=transparent)
     return makeClip(fiag).set_duration(duration)
 
-def makeBezier(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
-    c1x, c1y, ax, ay, c2x, c2y = [0,0,0,0,1,1]
-
+def bezier2(c1x, c1y, ax, ay, c2x, c2y):
+    # return 2nd order bezier of parameters
     nodes = np.asfortranarray([
         [c1x, ax, c2x],
         [c1y, ay, c2y]
@@ -121,6 +120,7 @@ def makeBezier(
     fill=defaultfill, 
     transparent=transparent,
     ):
+    curve = bezier2(c1x, c1y, ax, ay, c2x, c2y)
     
     def bez(t):
         surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
