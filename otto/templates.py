@@ -4,6 +4,7 @@ from moviepy.video.compositing.concatenate import concatenate_videoclips
 from PIL.ImageColor import getcolor
 from otto.getdata import scale
 from otto.colortransitions import *
+from otto import colortransitions
 from otto.defaults import defaults
 
 def rgbToDec(rgb):
@@ -301,7 +302,7 @@ def textBox(text,
             fps=30,
             bg=None,
             align='center',
-            fxs=[],
+            fxs=None,
             **kwargs
             ):
     try:
@@ -310,7 +311,6 @@ def textBox(text,
         themecolor = themecolor or data['themecolor']
         textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
         text = text.strip()
-        bkgs = []
         tc = (TextClip(text,
                     color=color,
                     fontsize=fontsize,
@@ -326,6 +326,11 @@ def textBox(text,
                 .crossfadein(1)
                 .crossfadeout(1)
                 )
+        if fxs:
+            for fx in fxs:
+                effect = getattr(colortransitions, fx.get('name'))
+                tc = tc.set_position(lambda t: (effect(**fx['data']).evaluate(t).tolist()[0][0] if t < 1 else 0, 0), relative=True)
+        bkgs = []
         if bg:
             bkgs.append(ColorClip((tc.w, tc.h),color=rgbToDec(bg))
                     .set_duration(tc.duration)
@@ -335,8 +340,9 @@ def textBox(text,
                     .crossfadein(1)
                     .crossfadeout(1)
             )
-        print('textBox', bkgs)
-        return (CompositeVideoClip([*bkgs, tc], size=clipsize)
+            
+        print('textBox', bkgs, fxs)
+        return (CompositeVideoClip([bkgs, tc] if bg else [tc], size=clipsize)
                 .set_position(position)
                 .set_duration(duration)
                 .set_fps(30))
