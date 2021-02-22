@@ -47,33 +47,29 @@ def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,108
         if clip['type'] == 'template':
             tmp = getattr(templates, clip['name'])
             print('making template', tmp )
-            clips.append(
-                tmp(**clip['data'], duration=clip['duration']).set_start(clip['start'])
-            )
+            c = tmp(**clip['data'], duration=clip['duration'])
         elif clip['type'] == 'video':
             clip['name'] = download(clip['name'])
-            c = (
-                VideoFileClip(clip['name'], target_resolution=(moviesize[1], None))
-                .subclip(clip.get('inpoint', 0))
-                .crossfadein(1)
-            )
-            # c = c.crop(x_center=c.w/2, y_center=c.h/2, width=moviesize[0], height=moviesize[1])
-            if clip.get('duration'):
-                c = c.set_duration(clip['duration'])
-            clips.append(c.crossfadeout(1))
+            c = VideoFileClip(clip['name'], target_resolution=(moviesize[1], None))
         elif clip['type'] == 'audio':
             c = CompositeAudioClip([AudioFileClip(clip['name'], fps=48000)])
-            if clip.get('offset', 0) < 0:
-                c = c.subclip(-clip['offset'])
-            if clip.get('offset', 0) > 0:
-                c = c.set_start(clip['offset'])
-            if clip.get('inpoint'):
-                c = c.subclip(clip['inpoint'])
-            if clip.get('duration'):
-                c = c.set_duration(clip['duration'])
             audio = c.audio_fadein(1).audio_fadeout(1)
         elif clip['type'] == 'image':
             c = CompositeVideoClip([ImageClip(clip['name'])])
+        if clip.get('resize'):
+            c = c.resize(clip['resize'])
+        
+        if clip.get('offset', 0) < 0:
+            c = c.subclip(-clip['offset'])
+        if clip.get('offset', 0) > 0:
+            c = c.set_start(clip['offset'])
+        if clip.get('inpoint'):
+            c = c.subclip(clip['inpoint'])
+        if clip.get('duration'):
+            c = c.set_duration(clip['duration'])
+        if clip.get('position'):
+            c = c.set_position(clip['position'])
+        clips.append(c.crossfadein(1).crossfadeout(1))
     print('made clips', clips)
     video = CompositeVideoClip(clips)
     print('made video', video)
