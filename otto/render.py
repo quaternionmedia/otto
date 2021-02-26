@@ -47,7 +47,7 @@ def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,108
         if clip['type'] == 'template':
             tmp = getattr(templates, clip['name'])
             print('making template', tmp )
-            c = tmp(**clip['data'], duration=clip['duration'])
+            c = tmp(**clip['data'], duration=clip['duration'], clipsize=moviesize)
         elif clip['type'] == 'video':
             clip['name'] = download(clip['name'])
             c = VideoFileClip(clip['name'], target_resolution=(moviesize[1], None))

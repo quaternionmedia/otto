@@ -3,7 +3,7 @@ import moviepy.editor as e
 import bezier
 import numpy as np
 
-clipsize = (800,600)
+defaultClipsize = (800,600)
 defaultdur = 5
 defaultfill = (0,0,0.7)
 defaultbg = (0,0,0,0)
@@ -32,7 +32,7 @@ def makeClip(f):
     return clip
 
 def makeColor(
-        clipsize=clipsize, #tuple (x,y)
+        clipsize=defaultClipsize, #tuple (x,y)
         color=(1,1,1), #tuple (r,g,b)
         position=(0,0), #tuple (x,y) from top left
         opacity=0.5,
@@ -49,7 +49,7 @@ def makeColor(
                     .crossfadeout(1)
                     )
 
-def growBox(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
+def growBox(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent):
     surface = gizeh.Surface(clipsize[0],clipsize[1],bg_color=defaultbg)
     def gb(t):
         x = clipsize[0]/2
@@ -70,7 +70,7 @@ def growBox(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparen
         return surface.get_npimage(transparent=transparent)
     return makeClip(gb).set_duration(duration)
 
-def boxReveal(duration=5, clipsize=(800,600), padding=(100,20), fill=(0,0,.5)):
+def boxReveal(duration=5, clipsize=defaultClipsize, padding=(100,20), fill=(0,0,.5)):
     w = clipsize[0]+padding[0]*2
     def br(t):
         surface = gizeh.Surface(w,clipsize[1]+padding[1]*2,bg_color=(0,0,0,0))
@@ -80,7 +80,7 @@ def boxReveal(duration=5, clipsize=(800,600), padding=(100,20), fill=(0,0,.5)):
         return surface.get_npimage(transparent=True)
     return makeClip(br).set_duration(duration)
 
-def flyInAndGrow(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
+def flyInAndGrow(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent):
     def fiag(t):
         surface = gizeh.Surface(clipsize[0],clipsize[1],bg_color=(0, 0, 0, 0))
         fend = 0.5
@@ -116,7 +116,7 @@ def bezier2(c1x, c1y, ax, ay, c2x, c2y):
 def makeBezier(
     c1x, c1y, ax, ay, c2x, c2y,
     duration=defaultdur, 
-    clipsize=clipsize, 
+    clipsize=defaultClipsize, 
     fill=defaultfill, 
     transparent=transparent,
     ):
@@ -137,7 +137,7 @@ def makeBezier(
     return makeClip(bez).set_duration(duration)
         
 
-def zoomFromCenter(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
+def zoomFromCenter(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent):
     def zfc(t):
         surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         zstart = 0
@@ -158,7 +158,7 @@ def zoomFromCenter(duration=defaultdur, clipsize=clipsize, fill=defaultfill, tra
         return surface.get_npimage(transparent=transparent)
     return makeClip(zfc).set_duration(duration)
 
-def circleShrink(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
+def circleShrink(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent):
     def cs(t):
         surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         send = 1
@@ -176,7 +176,7 @@ def circleShrink(duration=defaultdur, clipsize=clipsize, fill=defaultfill, trans
     return makeClip(cs).set_duration(duration)
 
 def boxShrink(duration=defaultdur,
-        clipsize=clipsize,
+        clipsize=defaultClipsize,
         fill=defaultfill,
         transparent=transparent,
         startpos=(0,0),
@@ -224,7 +224,7 @@ def boxShrink(duration=defaultdur,
         return surface.get_npimage(transparent=transparent)
     return makeClip(bs).set_duration(duration)
 
-def drawBoxOutline(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
+def drawBoxOutline(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent):
     def dbo(t):
         surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
 
