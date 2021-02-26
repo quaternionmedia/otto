@@ -60,6 +60,7 @@ async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080
     print('previewing', edl, 'at frame', t)
     try:
         active_clips = [c for c in edl.edl if t >= c.get('start', 0) + c.get('offset', 0)]
+        print('generating active clips', active_clips)
         clips = []
         for c in active_clips:
             if c['type'] == 'video':
@@ -70,7 +71,7 @@ async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080
                 if isinstance(clip, list):
                     clip = concatenate_videoclips(clip)
             elif c['type'] == 'image':
-                clip = CompositeVideoClip([ImageClip(c['name'])], size=clipsize)
+                clip = CompositeVideoClip([ImageClip(c['name'])], size=(width, height))
             if c.get('offset', 0) < 0:
                 clip = clip.subclip(-c['offset'])
             if c.get('offset', 0) > 0:

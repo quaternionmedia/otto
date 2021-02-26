@@ -32,14 +32,14 @@ def makeClip(f):
     return clip
 
 def makeColor(
-        size, #tuple (x,y)
+        clipsize=clipsize, #tuple (x,y)
         color=(1,1,1), #tuple (r,g,b)
         position=(0,0), #tuple (x,y) from top left
         opacity=0.5,
         start=0,
         duration=5,
         **kwargs):
-        return (e.ColorClip(tuple(size),color=tuple(color))
+        return (e.ColorClip(tuple(clipsize),color=tuple(color))
                     .set_position(position)
                     .set_opacity(opacity)
                     .set_start(start)
@@ -49,20 +49,20 @@ def makeColor(
                     .crossfadeout(1)
                     )
 
-def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
-    surface = gizeh.Surface(size[0],size[1],bg_color=defaultbg)
+def growBox(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
+    surface = gizeh.Surface(clipsize[0],clipsize[1],bg_color=defaultbg)
     def gb(t):
-        x = size[0]/2
-        y = size[1]/2
+        x = clipsize[0]/2
+        y = clipsize[1]/2
         gstart = 0
         gend = 1
         staticduration = duration - gend
         w = 0
-        h = size[1]
+        h = clipsize[1]
         if(t > gstart and t < gend):
-            w = t*size[0]//gend
+            w = t*clipsize[0]//gend
         if(t>gend and t<duration):
-            w = size[0]
+            w = clipsize[0]
         # print(w, h)
         rect = gizeh.rectangle(lx=w,ly=h,xy=(400,300),fill=fill)
         rect.draw(surface)
@@ -70,36 +70,36 @@ def growBox(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=tr
         return surface.get_npimage(transparent=transparent)
     return makeClip(gb).set_duration(duration)
 
-def boxReveal(duration=5, size=(800,600), padding=(100,20), fill=(0,0,.5)):
-    w = size[0]+padding[0]*2
+def boxReveal(duration=5, clipsize=(800,600), padding=(100,20), fill=(0,0,.5)):
+    w = clipsize[0]+padding[0]*2
     def br(t):
-        surface = gizeh.Surface(w,size[1]+padding[1]*2,bg_color=(0,0,0,0))
-        x = max(w - t * (size[0] + padding[0]) / duration * 6, padding[0])
-        rect = gizeh.rectangle(lx=x,ly=size[1]+padding[1]*2,xy=(x/2,size[1]/2),fill=fill)
+        surface = gizeh.Surface(w,clipsize[1]+padding[1]*2,bg_color=(0,0,0,0))
+        x = max(w - t * (clipsize[0] + padding[0]) / duration * 6, padding[0])
+        rect = gizeh.rectangle(lx=x,ly=clipsize[1]+padding[1]*2,xy=(x/2,clipsize[1]/2),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=True)
     return makeClip(br).set_duration(duration)
 
-def flyInAndGrow(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
+def flyInAndGrow(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
     def fiag(t):
-        surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
+        surface = gizeh.Surface(clipsize[0],clipsize[1],bg_color=(0, 0, 0, 0))
         fend = 0.5
         gstart = fend
         gend = 1.5
         # staticduration = duration - gend
-        w = size[0]*0.1
-        h = size[1]
-        x = size[0]/2
-        y = -size[1]/2
+        w = clipsize[0]*0.1
+        h = clipsize[1]
+        x = clipsize[0]/2
+        y = -clipsize[1]/2
         if t <= gend:
             if (t <= fend):
                 y = -h/2 + t/fend*h
             else:
-                y = size[1]/2
-                w = w + size[0]*((t-fend)/(gend-gstart))
+                y = clipsize[1]/2
+                w = w + clipsize[0]*((t-fend)/(gend-gstart))
         else:
-            w, h = size[0], size[1]
-            x, y = size[0]/2, size[1]/2
+            w, h = clipsize[0], clipsize[1]
+            x, y = clipsize[0]/2, clipsize[1]/2
         rect = gizeh.rectangle(lx=w,ly=h,xy=(x,y),fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=transparent)
@@ -116,17 +116,17 @@ def bezier2(c1x, c1y, ax, ay, c2x, c2y):
 def makeBezier(
     c1x, c1y, ax, ay, c2x, c2y,
     duration=defaultdur, 
-    size=clipsize, 
+    clipsize=clipsize, 
     fill=defaultfill, 
     transparent=transparent,
     ):
     curve = bezier2(c1x, c1y, ax, ay, c2x, c2y)
     
     def bez(t):
-        surface = gizeh.Surface(size[0],size[1],bg_color=(0, 0, 0, 0))
+        surface = gizeh.Surface(clipsize[0],clipsize[1],bg_color=(0, 0, 0, 0))
 
-        w = size[0]
-        h = size[1]
+        w = clipsize[0]
+        h = clipsize[1]
 
         x = curve.evaluate(float(t))[0][0]*w/2
         y = curve.evaluate(float(t))[1][0]*h/2
@@ -137,37 +137,37 @@ def makeBezier(
     return makeClip(bez).set_duration(duration)
         
 
-def zoomFromCenter(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
+def zoomFromCenter(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
     def zfc(t):
-        surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
+        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         zstart = 0
         zend = 1
         staticduration = duration - (zend-zstart)
         w = 0
         h = 0
-        x = size[0]/2
-        y = size[1]/2
+        x = clipsize[0]/2
+        y = clipsize[1]/2
         if (t < zend):
-            w = t*size[0]/zend
-            h = t*size[1]/zend
+            w = t*clipsize[0]/zend
+            h = t*clipsize[1]/zend
         else:
-            w, h = size[0]/zend, size[1]/zend
+            w, h = clipsize[0]/zend, clipsize[1]/zend
         rect = gizeh.rectangle(lx=w, ly=h, xy=(x,y),fill=fill)
         rect.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
     return makeClip(zfc).set_duration(duration)
 
-def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
+def circleShrink(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
     def cs(t):
-        surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
+        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         send = 1
         r = 10
         x = r
         if(t <= send):
-            r = (send-t)*size[0]/2 + r
-            x = (send-t)*size[0]/2
-        y = size[1]/2
+            r = (send-t)*clipsize[0]/2 + r
+            x = (send-t)*clipsize[0]/2
+        y = clipsize[1]/2
 
         circle = gizeh.circle(r=r, xy=[x,y], fill=fill)
         circle.draw(surface)
@@ -176,7 +176,7 @@ def circleShrink(duration=defaultdur, size=clipsize, fill=defaultfill, transpare
     return makeClip(cs).set_duration(duration)
 
 def boxShrink(duration=defaultdur,
-        size=clipsize,
+        clipsize=clipsize,
         fill=defaultfill,
         transparent=transparent,
         startpos=(0,0),
@@ -194,7 +194,7 @@ def boxShrink(duration=defaultdur,
     ewh = endwh
 
     def bs(t):
-        surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
+        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         w = clipsize[0]
         h = clipsize[1]
 
@@ -224,18 +224,18 @@ def boxShrink(duration=defaultdur,
         return surface.get_npimage(transparent=transparent)
     return makeClip(bs).set_duration(duration)
 
-def drawBoxOutline(duration=defaultdur, size=clipsize, fill=defaultfill, transparent=transparent):
+def drawBoxOutline(duration=defaultdur, clipsize=clipsize, fill=defaultfill, transparent=transparent):
     def dbo(t):
-        surface = gizeh.Surface(size[0], size[1], bg_color=defaultbg)
+        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
 
         dstart = 0
         dend = 1
 
         stroke = 20
-        x = size[0]/2
-        y = size[1]/2
-        w = size[0]
-        h = size[1]
+        x = clipsize[0]/2
+        y = clipsize[1]/2
+        w = clipsize[0]
+        h = clipsize[1]
 
         topline = gizeh.rectangle(lx=0, ly=0, xy=(x,stroke/2),fill=fill)
         bottomline = gizeh.rectangle(lx=0, ly=0, xy=(x,(h-(stroke/2))),fill=fill)
