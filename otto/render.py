@@ -40,7 +40,7 @@ def renderEdl(edl, media, audio=None, filename='render.mp4', moviesize=(1920,108
     video = video.set_duration(duration).crossfadeout(1).audio_fadeout(1)
     video.write_videofile(filename, fps=30, logger=logger, threads=8)
 
-def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,1080), logger='bar'):
+def generateEdl(edl, moviesize=(1920,1080), audio=None, duration=None, inpoint=None, **kwargs):
     clips = []
     for clip in edl:
         print('making clip', clip, type(clip))
@@ -70,14 +70,22 @@ def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,108
         if clip.get('position'):
             c = c.set_position(clip['position'])
         if clip.get('start'):
-            c = c.set_start(clip['start'])
+            c = c.set_start(clip['start'])            
         clips.append(c.crossfadein(1).crossfadeout(1))
     print('made clips', clips)
     video = CompositeVideoClip(clips)
     print('made video', video)
     if audio:
         video = video.set_audio(audio)
+    if inpoint:
+        video = video.subclip(inpoint)
+    if duration:
+        video = video.set_duration(duration)
     video = video.crossfadeout(1).audio_fadeout(1)
+    return video
+
+def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,1080), logger='bar', **kwargs):
+    video = generateEdl(edl, moviesize, **kwargs)
     video.write_videofile(filename, fps=30, logger=logger, threads=8, audio_fps=48000, audio_codec='aac', audio_bitrate='320k')
 
 def renderForm(form, filename='render.mp4', logger='bar'):

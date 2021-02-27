@@ -9,7 +9,7 @@ from starlette.responses import FileResponse
 from uvicorn import run
 from otto.getdata import urlToJson, timestr, download
 from otto.models import VideoForm, Edl
-from otto.render import renderEdl, renderForm
+from otto.render import renderEdl, renderForm, generateEdl
 from otto import Otto, templates, defaults
 from importlib import import_module
 from moviepy.video.compositing.concatenate import concatenate_videoclips
@@ -61,38 +61,8 @@ async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080
     try:
         active_clips = [c for c in edl.edl if t >= c.get('start', 0) + c.get('offset', 0)]
         print('generating active clips', active_clips)
-        clips = []
-        for c in active_clips:
-            if c['type'] == 'video':
-                clip = VideoFileClip(download(c['name']), target_resolution=(height, width))
-            elif c['type'] == 'template':
-                tmp = getattr(templates, c['name'])
-                clip = tmp(**c['data'], clipsize=(width, height), duration=c['duration'])
-                if isinstance(clip, list):
-                    clip = concatenate_videoclips(clip)
-            elif c['type'] == 'image':
-                clip = CompositeVideoClip([ImageClip(c['name'])], size=(width, height))
-            if c.get('offset', 0) < 0:
-                clip = clip.subclip(-c['offset'])
-            if c.get('offset', 0) > 0:
-                clip = clip.set_start(c['offset'])
-            if c.get('inpoint'):
-                clip = clip.subclip(c['inpoint'])
-            if c.get('duration'):
-                clip = clip.set_duration(c['duration'])
-            if c.get('start'):
-                clip = clip.set_start(c['start'])
-            if c.get('position'):
-                clip = clip.set_position(c['position'])
-            if c.get('resize'):
-                clip = clip.resize(c['resize'])
-            if clip:
-                clips.append(clip.crossfadein(1).crossfadeout(1))
-                
-        video = CompositeVideoClip(clips)
+        video = generateEdl(active_clips)
         frame_name = os.path.join('data', timestr() + '.png')
-        for c in clips:
-            print('clip', c)
         video.save_frame(frame_name, t=t, withmask=True)
         return frame_name
     except Exception as e:
