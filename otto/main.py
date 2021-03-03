@@ -1,6 +1,6 @@
 # import render
 import os, json
-from fastapi import FastAPI, Request, HTTPException, Form, BackgroundTasks, Depends
+from fastapi import APIRouter, Request, HTTPException, Form, BackgroundTasks, Depends
 from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
@@ -17,7 +17,7 @@ from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.editor import VideoFileClip, ImageClip
 from typing import List
 
-app = FastAPI()
+app = APIRouter()
 
 env = Environment()
 @app.get('/template/{template}')
