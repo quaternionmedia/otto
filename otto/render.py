@@ -84,10 +84,26 @@ def generateEdl(edl, moviesize=(1920,1080), audio=None, duration=None, inpoint=N
     video = video.crossfadeout(1).audio_fadeout(1)
     return video
 
-def renderMultitrack(edl, audio=None, filename='render.mp4', moviesize=(1920,1080), logger='bar', **kwargs):
+def renderMultitrack(edl, 
+        audio=None,
+        filename='render.mp4',
+        moviesize=(1920,1080),
+        logger='bar',
+        fps=30.0,
+        codec='libx264',
+        bitrate=None,
+        audio_bitrate='320k',
+        ffmpeg_params=None,
+        **kwargs):
     video = generateEdl(edl, moviesize, **kwargs)
-    video.write_videofile(filename, fps=30, logger=logger, threads=8, audio_fps=48000, audio_codec='aac', audio_bitrate='320k')
+    video.write_videofile(filename, 
+        fps=30, 
+        logger=logger, 
+        threads=8,
+        audio_fps=48000, audio_codec='aac', audio_bitrate=audio_bitrate,
+        codec=codec, bitrate=bitrate,
+        ffmpeg_params=ffmpeg_params)
 
 def renderForm(form, filename='render.mp4', logger='bar'):
     v = Otto(form)
-    v.render().write_videofile(filename=filename, fps=30, logger=logger)
+    v.render().write_videofile(filename=filename, fps=fps, logger=logger)
