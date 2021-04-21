@@ -24,5 +24,5 @@ class VideoForm(BaseModel):
 
 
 class Edl(BaseModel):
-    edl: List
+    clips: List
     duration: float = None

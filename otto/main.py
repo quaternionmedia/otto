@@ -59,7 +59,7 @@ async def main(request: Request):
 async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080):
     print('previewing', edl, 'at frame', t)
     try:
-        active_clips = [c for c in edl.edl if t >= c.get('start', 0) + c.get('offset', 0)]
+        active_clips = [c for c in edl.clips if t >= c.get('start', 0) + c.get('offset', 0)]
         print('generating active clips', active_clips)
         video = generateEdl(active_clips, moviesize=(width, height))
         frame_name = os.path.join('data', timestr() + '.png')
