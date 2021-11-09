@@ -48,6 +48,10 @@ async def queueRender(renderer: BackgroundTasks, form: VideoForm = Depends(Video
     renderer.add_task(renderForm, dict(form), filename=os.path.join('videos', ts))
     return True
 
+@app.get('/templates')
+async def getTemplates():
+    return [t for t in dir(templates) if t.islower() and t[0] is not '_']
+
 @app.get('/form')
 async def main(request: Request):
     data = VideoForm(**defaults.sample_forms[0]['form'])
