@@ -8,13 +8,18 @@ from otto.render import generateEdl
 app = APIRouter()
 
 
-
 @app.get('/templates')
 async def getTemplates():
+    """# Get templates
+    Returns a list of template names currently loaded and available."""
     return [t for t in dir(templates) if t.islower() and t[0] is not '_']
 
 @app.post('/preview')
 async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080):
+    """# Preview frame
+    Generates a frame of a given `edl` at time `t`, with `width` and `height`.
+    
+     Returns the name of a file on this server when available, or a relevant error message"""
     print('previewing', edl, 'at frame', t)
     try:
         active_clips = [c for c in edl.clips if t >= c.get('start', 0) + c.get('offset', 0)]
