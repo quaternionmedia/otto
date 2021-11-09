@@ -68,7 +68,7 @@ def generateEdl(edl, moviesize=(1920,1080), audio=None, duration=None, inpoint=N
         if clip.get('duration'):
             c = c.set_duration(clip['duration'])
         if clip.get('position'):
-            c = c.set_position(clip['position'])
+            c = c.set_position(tuple(clip['position']), relative=clip.get('relative', True))
         if clip.get('start'):
             c = c.set_start(clip['start'])            
         clips.append(c.crossfadein(1).crossfadeout(1))
