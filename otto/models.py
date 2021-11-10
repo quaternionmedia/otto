@@ -5,24 +5,24 @@ from otto.as_form import as_form
 @as_form
 class VideoForm(BaseModel):
     project: str = ''
-    NAME: str = ''
-    LOGO: str = '' #AnyUrl
-    ADDRESS: str = ''
-    PHONE: str = ''
-    HOURS: str = ''
-    WEBSITE: str = '' #AnyUrl = 'talahairstudio.com'
-    INITIAL: str = ''
-    BULLETS: str = ''
-    OPTIONAL: str = ''
-    MEDIA: List[str] = ['videos/talavid.mp4', 'audios/talaaudio.mp3']
-    CALL: str = ''
-    CLOSING: str = ''
-    FONTCOLOR: str = '#FFFFFF'
-    THEMECOLOR: str = '#CC5500'
-    FONT: str = 'Segoe_UI_Bold'
-    DURATION: float = 5
+    name: str = ''
+    logo: str = '' #AnyUrl
+    address: str = ''
+    phone: str = ''
+    hours: str = ''
+    website: str = '' #AnyUrl = 'talahairstudio.com'
+    initial: str = ''
+    bullets: str = ''
+    media: str = ''
+    audio: str = ''
+    call: str = ''
+    closing: str = ''
+    fontcolor: str = '#FFFFFF'
+    themecolor: str = '#CC5500'
+    font: str = 'Segoe_UI_Bold'
+    duration: float = 5
 
 
 class Edl(BaseModel):
-    edl: List
-    time: float = None
+    clips: List
+    duration: float = None

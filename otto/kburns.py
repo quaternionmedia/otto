@@ -14,14 +14,14 @@ def kburns(media, duration=5, moviesize=(1920,1080), filename='kbout.mp4'):
         config['config']['output_height'] = moviesize[1]
         slides = []
         for m in media:
-            if m.endswith('.mp4'):
+            if m.endswith('mp4'):
                 slides.append({
-                        'file': media[0],
+                        'file': m,
                         'force_no_audio': True,
                         'start': 0,
-                        'end': duration*2,
+                        'end': duration + 1,
                     })
-            elif m.endswith(('.jpg', '.jpeg', '.png')):
+            else:
                 slides.append({
                     'file': m,
                     'slide_duration': duration + 1,
@@ -64,6 +64,7 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
 
     for k,p in enumerate(kbpaths):
         kbclips.append((VideoFileClip(p)
+                        .resize(moviesize)
                         .set_start(k*duration)
                         .crossfadein(padding)
                         .crossfadeout(padding)
@@ -74,7 +75,7 @@ def kburns2(clips, padding=1, duration=5, moviesize=(800,600)):
 
 if __name__ == '__main__':
     config = loads(open('examples/talavideo.json', 'r').read())
-    photos = [download(p) for p in config['MEDIA'][1:5]]
+    photos = [download(p) for p in config['media'][1:5]]
     print('running kburns with', photos)
     kb = kburns2(photos, duration=10/(len(photos) + 1))
     kb.write_videofile('output/kbtest.mp4', fps=30, threads=8,)

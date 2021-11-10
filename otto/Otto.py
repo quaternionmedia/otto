@@ -20,12 +20,12 @@ class Otto:
             self.data = data
         if (path is not None) and (data is None):
             self.data = openJson(path)
-        self.name = self.data['NAME'].replace(' ', '_')
-        self.media = [download(m, location='data') if m.startswith('http') else m for m in self.data['MEDIA']]
+        self.name = self.data['name'].replace(' ', '_')
+        self.media = [download(m, location='data') if m.startswith('http') else m for m in self.data['media']]
         self.moviesize=(1920,1280)
-        self.duration = float(self.data.get('DURATION')) or 60.0
-        self.slideduration = max(min(self.duration / len(self.data['MEDIA']), 8), 2)
-        self.audio = [ self.audioClip(a) if a.endswith(('.mp3', '.wav', '.flac')) else None for a in self.media ]
+        self.duration = float(self.data.get('duration')) or 60.0
+        self.slideduration = max(min(self.duration / len(self.data['media']), 8), 2)
+        self.audio = [ self.audioClip(download(a)) if a.endswith(('.mp3', '.wav', '.flac')) else None for a in self.data['audio'] ]
         self.clips = []
 
         if(verbose):
@@ -50,7 +50,7 @@ class Otto:
                 .crossfadein(1)
                 .crossfadeout(1)
         )
-        self.clips.append(title(text=self.data['NAME'],
+        self.clips.append(title(text=self.data['name'],
             data=self.data,
             clipsize=self.moviesize,
             textsize=self.scale(2),
@@ -60,7 +60,7 @@ class Otto:
         )
         if self.duration > 15:
             initsize = int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)
-            self.clips.append(initial(text=self.data['INITIAL'],
+            self.clips.append(initial(text=self.data['initial'],
                 data=self.data,
                 clipsize=self.moviesize,
                 textsize=initsize,
@@ -69,7 +69,7 @@ class Otto:
                 duration=min(5, self.duration - 15),
                 fxs=[boxShrink(size=initsize,
                     duration=self.slideduration,
-                    fill=rgbToDec(self.data['THEMECOLOR']),
+                    fill=rgbToDec(self.data['themecolor']),
                     transparent=True,
                     direction=0,
                     startpos=(initsize[0]//2, initsize[1]//2),
@@ -82,7 +82,7 @@ class Otto:
 
         if self.duration > 20:
             bulletsize = (int(self.moviesize[0]), int(self.moviesize[1]))
-            self.clips.extend(bullets(text=self.data['BULLETS'],
+            self.clips.extend(bullets(text=self.data['bullets'],
                 data=self.data,
                 clipsize=self.moviesize,
                 textsize=bulletsize,
@@ -91,7 +91,7 @@ class Otto:
                 fxs=[boxShrink(
                     size=(int(bulletsize[0]), bulletsize[1]),
                     duration=self.slideduration,
-                    fill=rgbToDec(self.data['THEMECOLOR']),
+                    fill=rgbToDec(self.data['themecolor']),
                     transparent=True,
                     direction=0,
                     startpos=(bulletsize[0]//2, bulletsize[1]//2),
@@ -102,7 +102,7 @@ class Otto:
                 )
             )
         if self.duration > 10:
-            self.clips.append(initial(text=self.data['CALL'],
+            self.clips.append(initial(text=self.data['call'],
                 data=self.data,
                 clipsize=self.moviesize,
                 textsize=(int(self.moviesize[0]*0.7), int(self.moviesize[1]*0.5)),
@@ -111,7 +111,7 @@ class Otto:
                 duration=min(5, self.duration - 10),)
             )
         if self.duration > 5:
-            self.clips.append(final(text=self.data['NAME'],
+            self.clips.append(final(text=self.data['name'],
                 data=self.data,
                 duration=min(5, self.duration - 5),
                 clipsize=self.moviesize,
@@ -126,7 +126,7 @@ class Otto:
             t += c.duration
 
         allclips = e.concatenate_videoclips(self.clips)
-        logodl = download(self.data['LOGO'])
+        logodl = download(self.data['logo'])
         logobg = makeColor(self.moviesize,color=(0,0,0),opacity=0)
         logoimg = (e.ImageClip(logodl)
                 .set_duration(self.duration)

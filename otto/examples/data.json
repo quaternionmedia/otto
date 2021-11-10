@@ -1,5 +1,5 @@
 {
-  "NAME": "Steve's Auto Care",
+  "name": "Steve's Auto Care",
   "LOGO": "steves.png",
   "ADDRESS": "11820 San Pablo Avenue\nEl Cerrito, CA",
   "PHONE": "510.237.3906",
@@ -10,7 +10,7 @@
   "OPTIONAL": "We promise to treat our customers' cars as if they were our own. Don't take our word for it, check out our reviews. Our reputation speaks for itself.",
   "MEDIA":["https://stevesautocare.net/wp-content/uploads/2014/12/10DSCN29061.jpg", "https://stevesautocare.net/wp-content/uploads/2016/03/Steve1.jpg", "https://stevesautocare.net/wp-content/uploads/2013/01/HomeLocation.jpg", "https://stevesautocare.net/wp-content/uploads/2013/01/Raul.jpg", "https://stevesautocare.net/wp-content/uploads/2013/01/Community.jpg", "https://stevesautocare.net/wp-content/uploads/2019/06/DSC_3970-800x536.jpg", "https://stevesautocare.net/wp-content/uploads/2014/12/112.jpg", "https://stevesautocare.net/wp-content/uploads/2014/12/5StevesBays1.jpg", "https://stevesautocare.net/wp-content/uploads/2016/06/working-together-in-shop.jpg"],
   "CALL": "Call us today to schedule your next service or repair.",
-  "CLOSING": "NAME PHONE ADDRESS WEBSITE",
+  "CLOSING": "name PHONE ADDRESS WEBSITE",
   "FONTCOLOR": "#FFFFFF",
   "THEMECOLOR": "#1BA057",
   "FONT": "Segoe UI Black"

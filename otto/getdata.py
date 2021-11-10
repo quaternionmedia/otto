@@ -4,31 +4,42 @@ from csv import reader
 from json import loads
 import moviepy.editor as e
 from time import strftime
-
-import urllib.request as request
 import json
+from requests import head
+from hashlib import sha256
+
+content_types = ['image/jpeg', 'video/mp4', 'image/png', 'audio/mpeg']
+extensions = ['jpg', 'mp4', 'png', 'mp3']
+
+def hash(s):
+    return sha256(s.encode()).hexdigest()
 
 def download(url, location='data'):
     if not url.startswith('http'):
         return url
     else:
-        if url.find('.jpg') > 0:
-            basename = run(['basename', url.split('.jpg')[0] + '.jpg'], capture_output=True).stdout.decode().strip()
-        elif url.find('.png') > 0:
-            basename = run(['basename', url.split('.png')[0] + '.png'], capture_output=True).stdout.decode().strip()
-        elif url.find('mp3'):
-            basename = run(['basename', url.split('.mp3')[0] + '.mp3'], capture_output=True).stdout.decode().strip()
-        elif url.find('mp4'):
-            basename = run(['basename', url.split('.mp4')[0] + '.mp4'], capture_output=True).stdout.decode().strip()
-        else:
-            basename = run(['basename', url.split('/')[-1]]).strip()
-        filename = path.join(location, basename) if location else basename
-        if not path.isfile(filename):
-            if location:
-                run(['wget', '--content-disposition', '-O', filename, url])
-            else:
-                run(['wget', '--content-disposition', url])
-        return filename
+        try:
+            h = head(url, allow_redirects=True)
+            content_type = h.headers.get('content-type').lower()
+            if not content_type:
+                raise Exception('no content_type')
+            if 'text' in content_type:
+                raise Exception('text not allowed')
+            if 'html' in content_type:
+                raise Exception('html not allowed')
+            if float(h.headers.get('content-length')) > 1e10:
+                raise Exception('filesize too large', h.headers.get('content-length'))
+            ct = h.headers.get('content-type')
+            if ct not in content_types:
+                raise Exception('type not allowed', h.headers.get('content-type'))
+            ext = extensions[content_types.index(ct)]
+            basename = f'{hash(url)}.{ext}'
+            filename = path.join(location, basename) if location else basename
+            if not path.isfile(filename):
+                run(['wget', '-O', filename, url])
+            return filename
+        except Exception as e:
+            print('error downloading file', url, e)
 
 
 def openCsv(path):
@@ -51,7 +62,7 @@ def timestr(format='%Y%m%d-%H%M%S'):
 
 
 def urlToJson(path):
-
+    import urllib.request as request
     # Open API URL
     with request.urlopen(path) as response:
         if response.getcode() == 200:
