@@ -4,6 +4,7 @@ from fastapi import APIRouter, Request, HTTPException
 from otto.getdata import timestr
 from otto.models import Edl
 from otto.render import generateEdl
+from otto import templates
 
 app = APIRouter()
 
@@ -22,9 +23,9 @@ async def previewFrame(t: float, edl: Edl, width: int = 1920, height: int = 1080
      Returns the name of a file on this server when available, or a relevant error message"""
     print('previewing', edl, 'at frame', t)
     try:
-        active_clips = [c for c in edl.clips if t >= c.get('start', 0) + c.get('offset', 0)]
+        active_clips = [c for c in edl.clips if t >= (c.start or 0) + (c.offset or 0)]
         print('generating active clips', active_clips)
-        video = generateEdl(active_clips, moviesize=(width, height))
+        video = generateEdl(Edl(clips=active_clips), moviesize=(width, height))
         frame_name = os.path.join('data', timestr() + '.png')
         video.save_frame(frame_name, t=t, withmask=True)
         return frame_name
