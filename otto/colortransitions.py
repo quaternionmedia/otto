@@ -2,6 +2,7 @@ import gizeh
 import moviepy.editor as e
 import bezier
 import numpy as np
+from PIL.ImageColor import getcolor
 
 defaultClipsize = (800,600)
 defaultdur = 5
@@ -33,12 +34,13 @@ def makeClip(f):
 
 def makeColor(
         clipsize=defaultClipsize, #tuple (x,y)
-        color=(1,1,1), #tuple (r,g,b)
+        color: str='#0000bb', #rrggbb
         position=(0,0), #tuple (x,y) from top left
         opacity=0.5,
         start=0,
         duration=5,
         **kwargs):
+        color = getcolor(color, 'RGB')
         return (e.ColorClip(tuple(clipsize),color=tuple(color))
                     .set_position(position)
                     .set_opacity(opacity)
