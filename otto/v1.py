@@ -12,6 +12,27 @@ from otto import templates, defaults
 from otto.getdata import timestr
 from otto.models import VideoForm
 from otto.render import renderForm
+from otto.as_form import as_form
+
+@as_form
+class VideoForm(BaseModel):
+    project: str = ''
+    name: str = ''
+    logo: str = '' #AnyUrl
+    address: str = ''
+    phone: str = ''
+    hours: str = ''
+    website: str = '' #AnyUrl = 'talahairstudio.com'
+    initial: str = ''
+    bullets: str = ''
+    media: str = ''
+    audio: str = ''
+    call: str = ''
+    closing: str = ''
+    fontcolor: str = '#FFFFFF'
+    themecolor: str = '#CC5500'
+    font: str = 'Segoe_UI_Bold'
+    duration: float = 5
 
 env = Environment()
 
@@ -64,3 +85,43 @@ async def main(request: Request):
     data = VideoForm(**defaults.sample_forms[0]['form'])
     template = env.from_string(defaults.video_form)
     return HTMLResponse(template.render({"request": request, "video_data": data.dict()}))
+    
+
+def renderEdl(edl: Edl, media, audio=None, filename='render.mp4', moviesize=(1920,1080), logger='bar'):
+    """Render v1 - Depricated in favor of renderMultitrack"""
+    clips = []
+    duration = 0
+    media = [ download(m) for m in media ]
+    for clip in edl.clips:
+        print('making clip', clip, type(clip))
+        duration += clip.duration
+        if clip.type == 'template':
+            tmp = getattr(templates, clip.name)
+            print('making template', tmp )
+            clips.append(
+                tmp(**clip.data, duration=clip.duration, clipsize=moviesize)
+            )
+        elif clip.type == 'video':
+            clips.append(
+                VideoFileClip(clip.name)
+                .subclip(clip.inpoint)
+                .set_duration(clip.duration)
+            )
+    print('made clips', clips)
+    video = concatenate_videoclips(clips).resize(moviesize)
+    print('made video', video, duration)
+    kburns(media[:int(1 + duration//5)], moviesize=moviesize, filename=f'{filename}_kbout.mp4')
+    slides = (VideoFileClip(f'{filename}_kbout.mp4')
+            .set_duration(duration)
+            .crossfadein(1)
+            .crossfadeout(1)
+    )
+    video = CompositeVideoClip([slides, video])
+    if audio:
+        video = video.set_audio(AudioFileClip(audio))
+    video = video.set_duration(duration).crossfadeout(1).audio_fadeout(1)
+    video.write_videofile(filename, fps=30, logger=logger, threads=8)
+
+def renderForm(form, filename='render.mp4', logger='bar'):
+    v = Otto(form)
+    v.render().write_videofile(filename=filename, fps=fps, logger=logger)
