@@ -16,7 +16,8 @@ def generateEdl(edl: Edl, moviesize=(1920,1080), audio=None, **kwargs):
         if clip.type == 'template':
             tmp = getattr(templates, clip.name)
             print('making template', tmp )
-            c = tmp(**clip.data, clipsize=moviesize, duration=clip.duration)
+            c = tmp(**clip.data.dict(), clipsize=getattr(clip, 'clipsize', moviesize), duration=clip.duration)
+            # c = tmp(**clip.data.dict(), clipsize=moviesize, duration=clip.duration)
         elif clip.type == 'video':
             clip.name = download(clip.name)
             c = VideoFileClip(clip.name, target_resolution=(moviesize[1], None))
@@ -35,26 +36,32 @@ def generateEdl(edl: Edl, moviesize=(1920,1080), audio=None, **kwargs):
                 c = c.set_start(clip.offset)
         if clip.inpoint:
             c = c.subclip(clip.inpoint)
+        # if clip.outpoint:
+        #     c = c.set_duration(clip.outpoint - getattr(clip, 'inpoint', 0))
         if clip.duration:
             c = c.set_duration(clip.duration)
         if clip.position:
-            c = c.set_position(tuple(clip.position), relative=clip.relative)
+            c = c.set_position(clip.position, relative=clip.relative)
         if clip.start:
-            c = c.set_start(clip.start)            
-        clips.append(c.crossfadein(1).crossfadeout(1))
+            c = c.set_start(clip.start)
+        if clip.fadeIn:
+            c = c.crossfadein(clip.fadeIn)
+        if clip.fadeOut:
+            c = c.crossfadeout(clip.fadeOut)
+        # if clip.fxs:
+        #     render fx
+        clips.append(c)
     print('made clips', clips)
     video = CompositeVideoClip(clips)
     print('made video', video)
     if audio:
         video = video.set_audio(audio)
-    if inpoint:
-        video = video.subclip(inpoint)
-    if duration or edl.duration:
-        video = video.set_duration(duration or edl.duration)
-    video = video.crossfadeout(1).audio_fadeout(1)
+    if edl.duration:
+        video = video.set_duration(edl.duration)
+    # video = video.crossfadeout(1).audio_fadeout(1)
     return video
 
-def renderMultitrack(edl: Edl, 
+def renderMultitrack(edl: Edl,
         audio=None,
         filename='render.mp4',
         moviesize=(1920,1080),
@@ -65,10 +72,11 @@ def renderMultitrack(edl: Edl,
         audio_bitrate='320k',
         ffmpeg_params=None,
         **kwargs):
+    """Render v2: renders a multitrack Edl as seperate layers"""
     video = generateEdl(edl, moviesize, **kwargs)
     video.write_videofile(filename, 
-        fps=30, 
-        logger=logger, 
+        fps=30.0,
+        logger=logger,
         threads=8,
         audio_fps=48000, audio_codec='aac', audio_bitrate=audio_bitrate,
         codec=codec, bitrate=bitrate,

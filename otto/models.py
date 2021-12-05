@@ -1,20 +1,41 @@
 from pydantic import BaseModel, AnyUrl
-from typing import List, Dict, Optional, Union
+from typing import List, Tuple, Dict, Optional, Union
+
+class FX(BaseModel):
+    name: str
+    data: Optional[dict]
+
+class TemplateData(BaseModel):
+    text: Optional[str]
+    textsize: Optional[tuple]
+    color: Optional[str]
+    themecolor: Optional[str]
+    fontsize: Optional[float]
+    font: Optional[str]
+    method: Optional[str] = 'label'
+    bg: Optional[str]
+    align: Optional[str]
+    position: Optional[Union[Tuple, str]]
+    fxs: Optional[List[FX]]
 
 
 class Clip(BaseModel):
     duration: float = 5
-    type: Optional[str] = None
-    name: Optional[str] = None
-    inpoint: Optional[float] = None
-    outpoint: Optional[float] = None
-    offset: Optional[float] = None
-    start: Optional[float] = None
-    position: Optional[tuple] = None
-    data: Optional[dict] = None
+    type: Optional[str]
+    name: Optional[str]
+    inpoint: Optional[float]
+    outpoint: Optional[float]
+    offset: Optional[float]
+    start: Optional[float]
+    position: Optional[Union[Tuple, str]]
     resize: Optional[Union[float, tuple]]
     relative: Optional[bool] = True
-    fxs: Optional[dict] = None
+    opacity: Optional[float]
+    fadeOut: Optional[float] = 1
+    fadeIn: Optional[float] = 1
+    clipsize: Optional[tuple]
+    data: Optional[TemplateData]
+
 
 
 class Edl(BaseModel):

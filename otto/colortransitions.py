@@ -41,7 +41,7 @@ def makeColor(
         duration=5,
         **kwargs):
         color = getcolor(color, 'RGB')
-        return (e.ColorClip(tuple(clipsize),color=tuple(color))
+        return (e.ColorClip(tuple(clipsize),color=color)
                     .set_position(position)
                     .set_opacity(opacity)
                     .set_start(start)

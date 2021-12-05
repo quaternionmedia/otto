@@ -28,9 +28,8 @@ def title(text,
             bg=None,
             **kwargs):
     try:
-        data = data or defaults
-        color = color or data['fontcolor']
-        themecolor = themecolor or data['themecolor']
+        color = color or defaults['fontcolor']
+        themecolor = themecolor or defaults['themecolor']
         textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
         t = (TextClip(text.strip(),
             color=color,
@@ -306,9 +305,8 @@ def textBox(text,
             **kwargs
             ):
     try:
-        data = data or defaults
-        color = color or data['fontcolor']
-        themecolor = themecolor or data['themecolor']
+        color = color or defaults['fontcolor']
+        themecolor = themecolor or defaults['themecolor']
         textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
         text = text.strip()
         tc = CompositeVideoClip([TextClip(text,
@@ -321,14 +319,15 @@ def textBox(text,
                     align=align,
                 ).set_start(start)
                 .set_duration(duration)
-                .set_position(position)
                 # .resize(textsize)
                 .crossfadein(1)
                 .crossfadeout(1)
                 ], size=clipsize)
+        if position:
+            tc = tc.set_position(position)
         if fxs:
             for fx in fxs:
-                effect = getattr(colortransitions, fx.get('name'))
+                effect = getattr(colortransitions, fx['name'])
                 tc = tc.set_position(lambda t: (effect(**fx['data']).evaluate(t).tolist()[0][0] if t < 1 else 0, 0), relative=True)
         bkgs = []
         if bg:
