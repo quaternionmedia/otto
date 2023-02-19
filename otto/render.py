@@ -15,8 +15,12 @@ def generateEdl(edl: Edl, moviesize=(1920,1080), audio=None, **kwargs):
         print('making clip', clip, type(clip))
         if clip.type == 'template':
             tmp = getattr(templates, clip.name)
-            print('making template', tmp )
-            c = tmp(**clip.data.dict(), clipsize=getattr(clip, 'clipsize', moviesize), duration=clip.duration)
+            print('making template', tmp)
+            c = tmp(
+                **clip.data.dict(),
+                clipsize=clip.clipsize or moviesize,
+                duration=clip.duration
+            )
             # c = tmp(**clip.data.dict(), clipsize=moviesize, duration=clip.duration)
         elif clip.type == 'video':
             clip.name = download(clip.name)
