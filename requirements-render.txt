@@ -1,0 +1,2 @@
+bezier --no-binary=bezier
+numpy

@@ -1,7 +1,5 @@
 import gizeh
 import moviepy.editor as e
-import bezier
-import numpy as np
 from PIL.ImageColor import getcolor
 
 defaultClipsize = (800,600)
@@ -108,11 +106,11 @@ def flyInAndGrow(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill
     return makeClip(fiag).set_duration(duration)
 
 def bezier2(c1x, c1y, ax, ay, c2x, c2y, **kwargs):
+    import bezier
+    import numpy as np
+
     # return 2nd order bezier of parameters
-    nodes = np.asfortranarray([
-        [c1x, ax, c2x],
-        [c1y, ay, c2y]
-    ])
+    nodes = np.asfortranarray([[c1x, ax, c2x], [c1y, ay, c2y]])
     return bezier.Curve(nodes, degree=2)
 
 def makeBezier(
