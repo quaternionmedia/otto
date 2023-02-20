@@ -2,11 +2,9 @@ from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip, AudioFileClip, ImageClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.audio.AudioClip import CompositeAudioClip
-from otto import Otto, templates
-from otto.getdata import timestr, download
-from otto.kburns import kburns
+from otto import templates
+from otto.getdata import download
 from otto.models import Edl
-from typing import List
 
 def generateEdl(edl: Edl, moviesize=(1920,1080), audio=None, **kwargs):
     """Generates a moviepy CompositeVideoClip from an Edl"""

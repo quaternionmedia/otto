@@ -1,16 +1,12 @@
 from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
-from PIL.ImageColor import getcolor
 from otto.getdata import scale
 from otto.colortransitions import *
 from otto import colortransitions
 from otto.defaults import defaults
+from otto.utils import rgbToDec
 
-def rgbToDec(rgb):
-    color = getcolor(rgb, 'RGB')
-    color = [c / 255 for c in color]
-    return color
 
 def title(text,
             data=None,
