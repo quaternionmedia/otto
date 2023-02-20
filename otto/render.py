@@ -21,7 +21,6 @@ def generateEdl(edl: Edl, moviesize=(1920,1080), audio=None, **kwargs):
                 clipsize=clip.clipsize or moviesize,
                 duration=clip.duration
             )
-            # c = tmp(**clip.data.dict(), clipsize=moviesize, duration=clip.duration)
         elif clip.type == 'video':
             clip.name = download(clip.name)
             c = VideoFileClip(clip.name, target_resolution=(moviesize[1], None))
@@ -52,6 +51,8 @@ def generateEdl(edl: Edl, moviesize=(1920,1080), audio=None, **kwargs):
             c = c.crossfadein(clip.fadeIn)
         if clip.fadeOut:
             c = c.crossfadeout(clip.fadeOut)
+        if clip.opacity:
+            c = c.set_opacity(clip.opacity)
         # if clip.fxs:
         #     render fx
         clips.append(c)

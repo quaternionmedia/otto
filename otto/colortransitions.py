@@ -31,23 +31,25 @@ def makeClip(f):
     return clip
 
 def makeColor(
-        clipsize=defaultClipsize, #tuple (x,y)
-        color: str='#0000bb', #rrggbb
-        position=(0,0), #tuple (x,y) from top left
-        opacity=0.5,
-        start=0,
-        duration=5,
-        **kwargs):
-        color = getcolor(color, 'RGB')
-        return (e.ColorClip(tuple(clipsize),color=color)
-                    .set_position(position)
-                    .set_opacity(opacity)
-                    .set_start(start)
-                    .set_duration(duration)
-                    .set_fps(30)
-                    .crossfadein(1)
-                    .crossfadeout(1)
-                    )
+    clipsize: tuple = defaultClipsize,  # tuple (x,y)
+    color: str = '#0000bb',  # rrggbb
+    position=(0, 0),  # tuple (x,y) from top left
+    start=0,
+    duration=5,
+    **kwargs
+):
+    position = position or (0, 0)
+    color = getcolor(color, 'RGB')
+    clip = e.ColorClip(clipsize, color=color)
+    composite = (
+        clip.set_position(position)
+        .set_start(start)
+        .set_duration(duration)
+        .set_fps(30)
+        .crossfadein(1)
+        .crossfadeout(1)
+    )
+    return composite
 
 def growBox(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent, **kwargs):
     surface = gizeh.Surface(clipsize[0],clipsize[1],bg_color=defaultbg)
