@@ -315,12 +315,12 @@ def textBox(text,
                     align=align,
                 ).set_start(start)
                 .set_duration(duration)
+                .set_position(position)
                 # .resize(textsize)
+                .set_fps(fps)
                 .crossfadein(1)
                 .crossfadeout(1)
                 ], size=clipsize)
-        if position:
-            tc = tc.set_position(position)
         if fxs:
             for fx in fxs:
                 effect = getattr(colortransitions, fx['name'])
