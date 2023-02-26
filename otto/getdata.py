@@ -7,6 +7,7 @@ from time import strftime
 import json
 from requests import head
 from hashlib import sha256
+from otto.utils import download_url
 
 content_types = ['image/jpeg', 'video/mp4', 'image/png', 'audio/mpeg']
 extensions = ['jpg', 'mp4', 'png', 'mp3']
@@ -36,7 +37,8 @@ def download(url, location='data'):
             basename = f'{hash(url)}.{ext}'
             filename = path.join(location, basename) if location else basename
             if not path.isfile(filename):
-                run(['wget', '-O', filename, url])
+                download_url(url, filename)
+
             return filename
         except Exception as e:
             print('error downloading file', url, e)
