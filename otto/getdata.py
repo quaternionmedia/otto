@@ -1,10 +1,7 @@
-from subprocess import run
 from os import path
 from csv import reader
 from json import loads
-import moviepy.editor as e
 from time import strftime
-import json
 from requests import head
 from hashlib import sha256
 from otto.utils import download_url
@@ -69,7 +66,7 @@ def urlToJson(path):
     with request.urlopen(path) as response:
         if response.getcode() == 200:
             source = response.read()
-            data = json.loads(source)
+            data = loads(source)
         else:
             print('An error occurred while attempting to retrieve data from the API.')
     return data
