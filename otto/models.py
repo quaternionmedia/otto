@@ -1,9 +1,11 @@
 from pydantic import BaseModel, AnyUrl
 from typing import List, Tuple, Dict, Optional, Union
 
+
 class FX(BaseModel):
     name: str
     data: Optional[dict]
+
 
 class TemplateData(BaseModel):
     text: Optional[str]
@@ -37,7 +39,13 @@ class Clip(BaseModel):
     data: Optional[TemplateData]
 
 
-
 class Edl(BaseModel):
     clips: List[Clip]
     duration: float = None
+
+
+class Render(BaseModel):
+    edl: Edl
+    width: Optional[int] = 1920
+    height: Optional[int] = 1080
+    fps: Optional[float] = 30.0
