@@ -17,7 +17,7 @@ def hello() -> dict:
 async def getTemplates() -> list:
     """# Get templates
     Returns a list of template names currently loaded and available."""
-    return [t for t in dir(templates) if t.islower() and t[0] is not '_']
+    return [t for t in dir(templates) if t.islower() and t[0] != '_']
 
 
 if __name__ == '__main__':
