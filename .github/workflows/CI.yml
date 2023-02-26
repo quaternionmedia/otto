@@ -5,18 +5,18 @@ on: [push, pull_request]
 jobs:
   api_tests:
     name: 🐢 API tests
-    uses: quaternionmedia/alfred/.github/workflows/pytest.yml@main
+    uses: quaternionmedia/alfred/.github/workflows/pytest.yml@pytest
     with:
       args: coverage
 
   lint:
     name: 👖 Linter
-    uses: quaternionmedia/alfred/.github/workflows/pytest.yml@main
+    uses: quaternionmedia/alfred/.github/workflows/pytest.yml@pytest
     with:
       args: lint
 
   format:
     name: ⬛ Black Formatter
-    uses: quaternionmedia/alfred/.github/workflows/pytest.yml@main
+    uses: quaternionmedia/alfred/.github/workflows/pytest.yml@pytest
     with:
       args: blacken
