@@ -1,6 +1,4 @@
-import gizeh
 import moviepy.editor as e
-from PIL.ImageColor import getcolor
 
 defaultClipsize = (800,600)
 defaultdur = 5
@@ -38,6 +36,8 @@ def makeColor(
     duration=5,
     **kwargs
 ):
+    from PIL.ImageColor import getcolor
+
     position = position or (0, 0)
     color = getcolor(color, 'RGB')
     clip = e.ColorClip(clipsize, color=color)
@@ -123,6 +123,7 @@ def makeBezier(
     transparent=transparent,
     **kwargs
     ):
+    import gizeh
     curve = bezier2(c1x, c1y, ax, ay, c2x, c2y)
     
     def bez(t):
@@ -141,6 +142,8 @@ def makeBezier(
         
 
 def zoomFromCenter(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent, **kwargs):
+    import gizeh
+
     def zfc(t):
         surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         zstart = 0
@@ -162,6 +165,8 @@ def zoomFromCenter(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfi
     return makeClip(zfc).set_duration(duration)
 
 def circleShrink(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent, **kwargs):
+    import gizeh
+
     def cs(t):
         surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         send = 1
@@ -189,6 +194,7 @@ def boxShrink(duration=defaultdur,
         shirnkdur=1,
         direction=-1, #0-360, -1 is defaults
         **kwargs):
+    import gizeh
 
     #need to declare here b/c the returned function can only t passed in
     spos = startpos
@@ -228,6 +234,8 @@ def boxShrink(duration=defaultdur,
     return makeClip(bs).set_duration(duration)
 
 def drawBoxOutline(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent, **kwargs):
+    import gizeh
+
     def dbo(t):
         surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
 

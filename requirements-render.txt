@@ -1,2 +1,2 @@
 bezier --no-binary=bezier
-numpy
+gizeh
