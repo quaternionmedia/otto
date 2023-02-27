@@ -32,7 +32,9 @@ def test_without_t():
 
 
 def test_empty_edl():
-    """POST an Edl with no clips. Should validate sucessfully, but raise a rendering exception"""
+    """POST an Edl with no clips.
+
+    Should validate sucessfully, but raise a rendering exception"""
     with raises(EmptyClipsException):
         payload = {'edl': Edl(clips=[]).dict()}
         client.post('/preview?t=0', json=payload)
@@ -43,7 +45,22 @@ def test_color_clip():
     clip = Clip(
         type='template', name='makeColor', data=TemplateData(color='#000000').dict()
     ).dict()
-    payload = {'edl': Edl(clips=[clip], duration=0).dict()}
+    payload = {'edl': Edl(clips=[clip], duration=1).dict()}
     response = client.post('/preview?t=0', json=payload)
     assert response.status_code == 200, 'Black video did not render sucessfully'
+    assert response.json().startswith('data/'), 'Returned path is not in data/'
+
+
+def test_text_clip():
+    """Test an Edl with one Text clip"""
+    clip = Clip(
+        type='template',
+        name='textBox',
+        duration=1,
+        start=0,
+        data=TemplateData(text='test'),
+    ).dict()
+    payload = {'edl': Edl(clips=[clip]).dict()}
+    response = client.post('/preview?t=0', json=payload)
+    assert response.status_code == 200, 'Text did not render sucessfully'
     assert response.json().startswith('data/'), 'Returned path is not in data/'

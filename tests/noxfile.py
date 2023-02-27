@@ -18,6 +18,7 @@ def coverage(session):
     session.install("-r", "../requirements.txt")
     session.install("-r", "requirements-tests.txt")
     session.install("-e", "..")
+    session.run("mkdir", "-p", "data")
     session.run(
         "pytest",
         "-vv",
