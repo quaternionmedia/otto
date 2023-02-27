@@ -43,7 +43,7 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
             c = c.subclip(clip.inpoint)
         # if clip.outpoint:
         #     c = c.set_duration(clip.outpoint - getattr(clip, 'inpoint', 0))
-        if clip.duration:
+        if clip.duration != None:
             c = c.set_duration(clip.duration)
         if clip.position:
             c = c.set_position(clip.position, relative=clip.relative)

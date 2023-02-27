@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from otto.main import app
-from otto.models import Edl
+from otto.models import Edl, Clip, TemplateData
 from otto.exceptions import EmptyClipsException
 from pytest import raises
 
@@ -36,3 +36,14 @@ def test_empty_edl():
     with raises(EmptyClipsException):
         payload = {'edl': Edl(clips=[]).dict()}
         client.post('/preview?t=0', json=payload)
+
+
+def test_color_clip():
+    """Test an Edl with one Black video clip"""
+    clip = Clip(
+        type='template', name='makeColor', data=TemplateData(color='#000000').dict()
+    ).dict()
+    payload = {'edl': Edl(clips=[clip], duration=0).dict()}
+    response = client.post('/preview?t=0', json=payload)
+    assert response.status_code == 200, 'Black video did not render sucessfully'
+    assert response.json().startswith('data/'), 'Returned path is not in data/'
