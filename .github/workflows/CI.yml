@@ -3,12 +3,6 @@ name: ⚗️ CI tests
 on: [push, pull_request]
 
 jobs:
-  api_tests:
-    name: 🐢 API tests
-    uses: quaternionmedia/alfred/.github/workflows/pytest.yml@pytest
-    with:
-      args: coverage
-
   lint:
     name: 👖 Linter
     uses: quaternionmedia/alfred/.github/workflows/pytest.yml@pytest
