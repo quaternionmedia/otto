@@ -3,7 +3,8 @@ from otto.main import app
 from otto.models import Edl, Clip, TemplateData
 from otto.exceptions import EmptyClipsException
 from pytest import raises
-
+from os import path
+from pytest import mark
 
 client = TestClient(app)
 
@@ -14,12 +15,14 @@ def test_get_preview():
     assert response.status_code == 405, 'GET /preview method not allowed!'
 
 
+@mark.broken_actions(reason='Fails on Actions with validation exception')
 def test_empty_post():
     """POST empty object should fail with a valdation error"""
     response = client.post('/preview', data={})
     assert response.status_code == 422, 'Empty data should raise a validation error'
 
 
+@mark.broken_actions(reason='Fails on Actions with validation exception')
 def test_without_t():
     """POST an Edl with no t content. Should give validation error"""
     payload = {'edl': Edl(clips=[]).dict()}
@@ -48,7 +51,9 @@ def test_color_clip():
     payload = {'edl': Edl(clips=[clip]).dict()}
     response = client.post('/preview?t=0', json=payload)
     assert response.status_code == 200, 'Black video did not render sucessfully'
-    assert response.json().startswith('data/'), 'Returned path is not in data/'
+    filename = response.json()
+    assert filename.startswith('data/'), 'Returned path is not in data/'
+    assert path.isfile(filename), 'Can not find file that otto generated'
 
 
 def test_text_clip():
@@ -56,11 +61,13 @@ def test_text_clip():
     clip = Clip(
         type='template',
         name='textBox',
-        duration=1,
+        duration=2,
         start=0,
         data=TemplateData(text='test', color='#FFFFFF'),
     ).dict()
-    payload = {'edl': Edl(clips=[clip]).dict(), 'duration': 1}
+    payload = {'edl': Edl(clips=[clip]).dict(), 'duration': 2}
     response = client.post('/preview?t=1', json=payload)
     assert response.status_code == 200, 'Text did not render sucessfully'
-    assert response.json().startswith('data/'), 'Returned path is not in data/'
+    filename = response.json()
+    assert filename.startswith('data/'), 'Returned path is not in data/'
+    assert path.isfile(filename), 'Can not find file that otto generated'

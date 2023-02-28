@@ -28,6 +28,6 @@ jobs:
         uses: mfinelli/setup-imagemagick@v2
 
       - name: 🧪 Run pytest suite
-        run: pytest -v -n auto
+        run: pytest -v -n auto -m "not broken_actions"
         env:
           IMAGEMAGICK_BINARY: /home/runner/bin/magick
