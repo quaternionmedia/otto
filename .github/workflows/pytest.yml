@@ -29,4 +29,4 @@ jobs:
       - name: 🧪 Run pytest suite
         run: pytest
         env:
-          IMAGEMAGICK_BINARY: $HOME/bin/magick
+          IMAGEMAGICK_BINARY: /home/runner/bin/magick
