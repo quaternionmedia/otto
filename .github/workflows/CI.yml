@@ -20,3 +20,7 @@ jobs:
     uses: quaternionmedia/alfred/.github/workflows/pytest.yml@pytest
     with:
       args: blacken
+
+  pytest:
+    name: 🐍 Pytest
+    uses: ./.github/workflows/pytest.yml
