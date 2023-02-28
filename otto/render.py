@@ -5,7 +5,7 @@ from moviepy.audio.AudioClip import CompositeAudioClip
 from otto import templates
 from otto.getdata import download
 from otto.models import Edl
-from otto.exceptions import EmptyClipsException
+from otto.exceptions import EmptyClipsException, EdlException
 
 
 def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
@@ -14,12 +14,13 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
         raise EmptyClipsException('There were no clips in the Edl')
     clips = []
     for clip in edl.clips:
+        # Generate clip
         print('making clip', clip, type(clip))
         if clip.type == 'template':
             tmp = getattr(templates, clip.name)
             print('making template', tmp)
             c = tmp(
-                **clip.data.dict(),
+                **clip.data.dict(exclude_none=True),
                 clipsize=clip.clipsize or moviesize,
                 duration=clip.duration
             )
@@ -31,9 +32,13 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
             audio = c.audio_fadein(1).audio_fadeout(1)
         elif clip.type == 'image':
             c = CompositeVideoClip([ImageClip(clip.name)])
+
+        # Apply Effects
+        if not c:
+            raise EdlException('A clip did not get made properly', clip)
+
         if clip.resize:
             c = c.resize(clip.resize)
-
         if clip.offset:
             if clip.offset < 0:
                 c = c.subclip(-clip.offset)
