@@ -1,9 +1,9 @@
-from fastapi import APIRouter
+from fastapi import FastAPI
 from otto.preview import previewAPI
 from otto import templates
 from otto import __version__
 
-app = APIRouter()
+app = FastAPI()
 
 app.include_router(previewAPI, prefix='/preview', tags=['preview'])
 

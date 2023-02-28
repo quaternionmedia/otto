@@ -15,14 +15,12 @@ def test_get_preview():
     assert response.status_code == 405, 'GET /preview method not allowed!'
 
 
-@mark.broken_actions(reason='Fails on Actions with validation exception')
 def test_empty_post():
     """POST empty object should fail with a valdation error"""
     response = client.post('/preview', data={})
     assert response.status_code == 422, 'Empty data should raise a validation error'
 
 
-@mark.broken_actions(reason='Fails on Actions with validation exception')
 def test_without_t():
     """POST an Edl with no t content. Should give validation error"""
     payload = {'edl': Edl(clips=[]).dict()}
