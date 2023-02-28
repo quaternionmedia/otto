@@ -18,7 +18,9 @@ jobs:
           python-version: 3.11
 
       - name: 🏗️ Setup testing environment
-        run: pip3 install -r requirements.txt -r tests/requirements-tests.txt
+        run: |
+          pip3 install -r requirements.txt -r tests/requirements-tests.txt
+          pip3 install .
 
       - name: 🖼️ Install Imagemagick
         uses: mfinelli/setup-imagemagick@v2
