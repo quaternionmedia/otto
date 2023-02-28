@@ -41,6 +41,7 @@ def test_empty_edl():
         client.post('/preview?t=0', json=payload)
 
 
+@mark.render
 def test_color_clip():
     """Test an Edl with one Black video clip"""
     clip = Clip(
@@ -54,6 +55,7 @@ def test_color_clip():
     assert path.isfile(filename), 'Can not find file that otto generated'
 
 
+@mark.render
 def test_text_clip():
     """Test an Edl with one Text clip"""
     clip = Clip(
