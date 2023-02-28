@@ -22,6 +22,7 @@ jobs:
           pip3 install -r requirements.txt -r tests/requirements-tests.txt
           pip3 install .
           mkdir data
+          apt install libfuse2
 
       - name: 🖼️ Install Imagemagick
         uses: mfinelli/setup-imagemagick@v2
