@@ -6,6 +6,8 @@ from pytest import raises
 from os import path
 from pytest import mark
 
+TEST_DIR = path.dirname(path.realpath(__file__))
+
 client = TestClient(app)
 
 
@@ -23,8 +25,8 @@ def test_empty_post():
 
 def test_without_t():
     """POST an Edl with no t content. Should give validation error"""
-    payload = {'edl': Edl(clips=[]).dict()}
-    response = client.post('/preview', json=payload)
+    edl = {'edl': Edl(clips=[]).dict()}
+    response = client.post('/preview', json=edl)
     assert response.status_code == 422, 'Route requires t parameter'
     error = response.json()
     assert len(error['detail']) == 1, 'There should only be one error here'
@@ -37,8 +39,16 @@ def test_empty_edl():
 
     Should validate sucessfully, but raise a rendering exception"""
     with raises(EmptyClipsException):
-        payload = {'edl': Edl(clips=[]).dict()}
-        client.post('/preview?t=0', json=payload)
+        edl = {'edl': Edl(clips=[]).dict()}
+        client.post('/preview?t=0', json=edl)
+
+
+def check_rendered_image(edl: Edl):
+    response = client.post('/preview?t=1', json=edl)
+    assert response.status_code == 200, 'Text did not render sucessfully'
+    filename = response.json()
+    assert filename.startswith('data/'), 'Returned path is not in data/'
+    assert path.isfile(filename), 'Can not find file that otto generated'
 
 
 @mark.render
@@ -47,12 +57,8 @@ def test_color_clip():
     clip = Clip(
         type='template', name='makeColor', data=TemplateData(color='#000000').dict()
     ).dict()
-    payload = {'edl': Edl(clips=[clip]).dict()}
-    response = client.post('/preview?t=0', json=payload)
-    assert response.status_code == 200, 'Black video did not render sucessfully'
-    filename = response.json()
-    assert filename.startswith('data/'), 'Returned path is not in data/'
-    assert path.isfile(filename), 'Can not find file that otto generated'
+    edl = {'edl': Edl(clips=[clip]).dict()}
+    check_rendered_image(edl)
 
 
 @mark.render
@@ -65,9 +71,34 @@ def test_text_clip():
         start=0,
         data=TemplateData(text='test', color='#FFFFFF'),
     ).dict()
-    payload = {'edl': Edl(clips=[clip]).dict(), 'duration': 2}
-    response = client.post('/preview?t=1', json=payload)
-    assert response.status_code == 200, 'Text did not render sucessfully'
-    filename = response.json()
-    assert filename.startswith('data/'), 'Returned path is not in data/'
-    assert path.isfile(filename), 'Can not find file that otto generated'
+    edl = {'edl': Edl(clips=[clip]).dict(), 'duration': 2}
+    check_rendered_image(edl)
+
+
+@mark.render
+def test_image_clip():
+    """Test an Edl with an image clip"""
+    clip = Clip(
+        type='image',
+        name=path.join(TEST_DIR, 'black.png'),
+        duration=1,
+    ).dict()
+    edl = {'edl': Edl(clips=[clip]).dict(), 'duration': 1}
+    check_rendered_image(edl)
+
+
+@mark.render
+def test_video_clip():
+    """Test an Edl with a video clip"""
+    clip = Clip(
+        type='video',
+        name=path.join(TEST_DIR, 'black.mp4'),
+        duration=1,
+    ).dict()
+    edl = {'edl': Edl(clips=[clip]).dict(), 'duration': 1}
+    check_rendered_image(edl)
+
+
+# @mark.render
+# def test_audio_clip():
+#     """Test an Edl with an audio clip"""
