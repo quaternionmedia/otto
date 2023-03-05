@@ -10,15 +10,15 @@ def blacken(session):
 @nox.session
 def lint(session):
     session.install("flake8")
-    session.run("flake8", "-v", ".")
+    session.run("flake8", "-v", "tests")
 
 
 @nox.session(tags=["test"])
 def coverage(session):
-    session.install("-r", "../requirements.txt")
+    session.install("-r", "requirements.txt")
     session.install("-r", "requirements-tests.txt")
-    session.install("-e", "..")
-    session.run("mkdir", "-p", "data")
+    session.install("-e", ".")
+    session.run("mkdir", "-p", "data", external=True)
     session.run(
         "pytest",
         "-vv",
