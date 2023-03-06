@@ -4,7 +4,10 @@ import nox
 @nox.session
 def blacken(session):
     session.install("black")
-    session.run("black", "-S", "-v", ".")
+    if session.posargs and session.posargs[0] == 'check':
+        session.run("black", "-S", "-v", ".", "--check")
+    else:
+        session.run("black", "-S", "-v", ".")
 
 
 @nox.session

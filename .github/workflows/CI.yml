@@ -5,15 +5,15 @@ on: [push, pull_request]
 jobs:
   lint:
     name: 👖 Linter
-    uses: quaternionmedia/alfred/.github/workflows/nox.yml@pytest
+    uses: .github/workflows/nox.yml
     with:
       args: lint
 
   format:
     name: ⬛ Black Formatter
-    uses: quaternionmedia/alfred/.github/workflows/nox.yml@pytest
+    uses: .github/workflows/nox.yml
     with:
-      args: blacken
+      args: blacken -- check
 
   pytest:
     name: 🐍 Pytest
