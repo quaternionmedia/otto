@@ -5,13 +5,13 @@ on: [push, pull_request]
 jobs:
   lint:
     name: 👖 Linter
-    uses: .github/workflows/nox.yml
+    uses: ./.github/workflows/nox.yml
     with:
       args: lint
 
   format:
     name: ⬛ Black Formatter
-    uses: .github/workflows/nox.yml
+    uses: ./.github/workflows/nox.yml
     with:
       args: blacken -- check
 
