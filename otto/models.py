@@ -1,5 +1,5 @@
-from pydantic import BaseModel, AnyUrl
-from typing import List, Tuple, Dict, Optional, Union
+from pydantic import BaseModel
+from typing import List, Tuple, Optional, Union
 
 
 class FX(BaseModel):

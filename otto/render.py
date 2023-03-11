@@ -1,4 +1,3 @@
-from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.editor import VideoFileClip, AudioFileClip, ImageClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.audio.AudioClip import CompositeAudioClip
@@ -48,7 +47,7 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
             c = c.subclip(clip.inpoint)
         # if clip.outpoint:
         #     c = c.set_duration(clip.outpoint - getattr(clip, 'inpoint', 0))
-        if clip.duration != None:
+        if clip.duration is not None:
             c = c.set_duration(clip.duration)
         if clip.position:
             c = c.set_position(clip.position, relative=clip.relative)
