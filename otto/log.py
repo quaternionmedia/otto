@@ -1,5 +1,5 @@
 import logging
-import sys, os
+from otto.config import LOG_DIR
 import sys
 import os
 from time import strftime
