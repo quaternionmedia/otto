@@ -71,7 +71,7 @@ def test_text_clip():
         start=0,
         data=TemplateData(text='test', color='#FFFFFF'),
     ).dict()
-    edl = {'edl': Edl(clips=[clip]).dict(), 'duration': 2}
+    edl = {'edl': Edl(clips=[clip], duration=2).dict()}
     check_rendered_image(edl)
 
 
@@ -83,7 +83,7 @@ def test_image_clip():
         name=path.join(TEST_DIR, 'black.png'),
         duration=1,
     ).dict()
-    edl = {'edl': Edl(clips=[clip]).dict(), 'duration': 1}
+    edl = {'edl': Edl(clips=[clip], duration=1).dict()}
     check_rendered_image(edl)
 
 
@@ -95,7 +95,7 @@ def test_video_clip():
         name=path.join(TEST_DIR, 'black.mp4'),
         duration=1,
     ).dict()
-    edl = {'edl': Edl(clips=[clip]).dict(), 'duration': 1}
+    edl = {'edl': Edl(clips=[clip], duration=1).dict()}
     check_rendered_image(edl)
 
 

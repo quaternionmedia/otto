@@ -25,7 +25,6 @@ def maprange(a, b, s):
 
 
 def makeClip(f):
-    video = e.VideoClip(f)
     mask = e.VideoClip(lambda t: f(t)[:, :, 3] / 255.0, ismask=True)
     clip = e.VideoClip(lambda t: f(t)[:, :, :3]).set_mask(mask).set_position('center')
     return clip
@@ -62,14 +61,13 @@ def growBox(
     transparent=transparent,
     **kwargs
 ):
-    surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
+    from gizeh import Surface, rectangle
+
+    surface = Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
 
     def gb(t):
-        x = clipsize[0] / 2
-        y = clipsize[1] / 2
         gstart = 0
         gend = 1
-        staticduration = duration - gend
         w = 0
         h = clipsize[1]
         if t > gstart and t < gend:
@@ -77,7 +75,7 @@ def growBox(
         if t > gend and t < duration:
             w = clipsize[0]
         # print(w, h)
-        rect = gizeh.rectangle(lx=w, ly=h, xy=(400, 300), fill=fill)
+        rect = rectangle(lx=w, ly=h, xy=(400, 300), fill=fill)
         rect.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
@@ -88,12 +86,14 @@ def growBox(
 def boxReveal(
     duration=5, clipsize=defaultClipsize, padding=(100, 20), fill=(0, 0, 0.5), **kwargs
 ):
+    from gizeh import Surface, rectangle
+
     w = clipsize[0] + padding[0] * 2
 
     def br(t):
-        surface = gizeh.Surface(w, clipsize[1] + padding[1] * 2, bg_color=(0, 0, 0, 0))
+        surface = Surface(w, clipsize[1] + padding[1] * 2, bg_color=(0, 0, 0, 0))
         x = max(w - t * (clipsize[0] + padding[0]) / duration * 6, padding[0])
-        rect = gizeh.rectangle(
+        rect = rectangle(
             lx=x,
             ly=clipsize[1] + padding[1] * 2,
             xy=(x / 2, clipsize[1] / 2),
@@ -112,8 +112,10 @@ def flyInAndGrow(
     transparent=transparent,
     **kwargs
 ):
+    from gizeh import Surface, rectangle
+
     def fiag(t):
-        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=(0, 0, 0, 0))
+        surface = Surface(clipsize[0], clipsize[1], bg_color=(0, 0, 0, 0))
         fend = 0.5
         gstart = fend
         gend = 1.5
@@ -131,7 +133,7 @@ def flyInAndGrow(
         else:
             w, h = clipsize[0], clipsize[1]
             x, y = clipsize[0] / 2, clipsize[1] / 2
-        rect = gizeh.rectangle(lx=w, ly=h, xy=(x, y), fill=fill)
+        rect = rectangle(lx=w, ly=h, xy=(x, y), fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=transparent)
 
@@ -160,12 +162,12 @@ def makeBezier(
     transparent=transparent,
     **kwargs
 ):
-    import gizeh
+    from gizeh import Surface, rectangle
 
     curve = bezier2(c1x, c1y, ax, ay, c2x, c2y)
 
     def bez(t):
-        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=(0, 0, 0, 0))
+        surface = Surface(clipsize[0], clipsize[1], bg_color=(0, 0, 0, 0))
 
         w = clipsize[0]
         h = clipsize[1]
@@ -173,7 +175,7 @@ def makeBezier(
         x = curve.evaluate(float(t))[0][0] * w / 2
         y = curve.evaluate(float(t))[1][0] * h / 2
 
-        rect = gizeh.rectangle(lx=w, ly=h, xy=(x, y), fill=fill)
+        rect = rectangle(lx=w, ly=h, xy=(x, y), fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=transparent)
 
@@ -187,13 +189,11 @@ def zoomFromCenter(
     transparent=transparent,
     **kwargs
 ):
-    import gizeh
+    from gizeh import Surface, rectangle
 
     def zfc(t):
-        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
-        zstart = 0
+        surface = Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         zend = 1
-        staticduration = duration - (zend - zstart)
         w = 0
         h = 0
         x = clipsize[0] / 2
@@ -203,7 +203,7 @@ def zoomFromCenter(
             h = t * clipsize[1] / zend
         else:
             w, h = clipsize[0] / zend, clipsize[1] / zend
-        rect = gizeh.rectangle(lx=w, ly=h, xy=(x, y), fill=fill)
+        rect = rectangle(lx=w, ly=h, xy=(x, y), fill=fill)
         rect.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
@@ -218,10 +218,10 @@ def circleShrink(
     transparent=transparent,
     **kwargs
 ):
-    import gizeh
+    from gizeh import Surface, circle
 
     def cs(t):
-        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
+        surface = Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         send = 1
         r = 10
         x = r
@@ -230,8 +230,8 @@ def circleShrink(
             x = (send - t) * clipsize[0] / 2
         y = clipsize[1] / 2
 
-        circle = gizeh.circle(r=r, xy=[x, y], fill=fill)
-        circle.draw(surface)
+        cir = circle(r=r, xy=[x, y], fill=fill)
+        cir.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
 
@@ -251,7 +251,7 @@ def boxShrink(
     direction=-1,  # 0-360, -1 is defaults
     **kwargs
 ):
-    import gizeh
+    from gizeh import Surface, rectangle
 
     # need to declare here b/c the returned function can only t passed in
     spos = startpos
@@ -260,15 +260,9 @@ def boxShrink(
     ewh = endwh
 
     def bs(t):
-        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
+        surface = Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         w = clipsize[0]
         h = clipsize[1]
-
-        if direction == -1:
-            startpos = (w // 2, h // 2)
-            startwh = (w, h)
-            endpos = (w // 10, h // 2)
-            endwh = (int(w * 0.2), int(h * 0.7))
 
         x = spos[0]
         y = spos[1]
@@ -284,7 +278,7 @@ def boxShrink(
             w = ewh[0]
             h = ewh[1]
 
-        circle = gizeh.rectangle(lx=w, ly=h, xy=(x, y), fill=fill)
+        circle = rectangle(lx=w, ly=h, xy=(x, y), fill=fill)
         circle.draw(surface)
 
         return surface.get_npimage(transparent=transparent)
@@ -299,13 +293,10 @@ def drawBoxOutline(
     transparent=transparent,
     **kwargs
 ):
-    import gizeh
+    from gizeh import Surface, rectangle
 
     def dbo(t):
-        surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
-
-        dstart = 0
-        dend = 1
+        surface = Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
 
         stroke = 20
         x = clipsize[0] / 2
@@ -313,10 +304,10 @@ def drawBoxOutline(
         w = clipsize[0]
         h = clipsize[1]
 
-        topline = gizeh.rectangle(lx=0, ly=0, xy=(x, stroke / 2), fill=fill)
-        bottomline = gizeh.rectangle(lx=0, ly=0, xy=(x, (h - (stroke / 2))), fill=fill)
-        rightline = gizeh.rectangle(lx=0, ly=0, xy=(w - (stroke / 2), y), fill=fill)
-        leftline = gizeh.rectangle(lx=0, ly=0, xy=(stroke / 2, y), fill=fill)
+        topline = rectangle(lx=0, ly=0, xy=(x, stroke / 2), fill=fill)
+        bottomline = rectangle(lx=0, ly=0, xy=(x, (h - (stroke / 2))), fill=fill)
+        rightline = rectangle(lx=0, ly=0, xy=(w - (stroke / 2), y), fill=fill)
+        leftline = rectangle(lx=0, ly=0, xy=(stroke / 2, y), fill=fill)
 
         t1 = 0.25
         t2 = 0.5
@@ -324,37 +315,33 @@ def drawBoxOutline(
         t4 = 1.5
 
         if t < t1:
-            topline = gizeh.rectangle(
+            topline = rectangle(
                 lx=w * (t / t1), ly=stroke, xy=(x * (t / t1), stroke / 2), fill=fill
             )
         elif t >= t1 and t < t2:
-            topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x, stroke / 2), fill=fill)
-            rightline = gizeh.rectangle(
+            topline = rectangle(lx=w, ly=stroke, xy=(x, stroke / 2), fill=fill)
+            rightline = rectangle(
                 lx=stroke,
                 ly=h * ((t - t1) / (t2 - t1)),
                 xy=((w - (stroke / 2)), y * ((t - t1) / (t2 - t1))),
                 fill=fill,
             )
         elif t >= t2 and t < t3:
-            topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x, stroke / 2), fill=fill)
-            rightline = gizeh.rectangle(
-                lx=stroke, ly=h, xy=(w - (stroke / 2), y), fill=fill
-            )
-            bottomline = gizeh.rectangle(
+            topline = rectangle(lx=w, ly=stroke, xy=(x, stroke / 2), fill=fill)
+            rightline = rectangle(lx=stroke, ly=h, xy=(w - (stroke / 2), y), fill=fill)
+            bottomline = rectangle(
                 lx=w * ((t - t2) / (t3 - t2)),
                 ly=stroke,
                 xy=(w - (x * ((t - t2) / (t3 - t2))), (h - (stroke / 2))),
                 fill=fill,
             )
         elif t >= t3 and t < t4:
-            topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x, stroke / 2), fill=fill)
-            bottomline = gizeh.rectangle(
+            topline = rectangle(lx=w, ly=stroke, xy=(x, stroke / 2), fill=fill)
+            bottomline = rectangle(
                 lx=w, ly=stroke, xy=(x, (h - (stroke / 2))), fill=fill
             )
-            rightline = gizeh.rectangle(
-                lx=stroke, ly=h, xy=(w - (stroke / 2), y), fill=fill
-            )
-            leftline = gizeh.rectangle(
+            rightline = rectangle(lx=stroke, ly=h, xy=(w - (stroke / 2), y), fill=fill)
+            leftline = rectangle(
                 lx=stroke,
                 ly=(h * ((t - t3) / (t4 - t3))),
                 xy=(stroke / 2, h - (y * ((t - t3) / (t4 - t3)))),
@@ -362,16 +349,14 @@ def drawBoxOutline(
             )
 
         else:
-            topline = gizeh.rectangle(lx=w, ly=stroke, xy=(x, stroke / 2), fill=fill)
-            bottomline = gizeh.rectangle(
+            topline = rectangle(lx=w, ly=stroke, xy=(x, stroke / 2), fill=fill)
+            bottomline = rectangle(
                 lx=w, ly=stroke, xy=(x, (h - (stroke / 2))), fill=fill
             )
-            rightline = gizeh.rectangle(
-                lx=stroke, ly=h, xy=(w - (stroke / 2), y), fill=fill
-            )
-            leftline = gizeh.rectangle(lx=stroke, ly=h, xy=(stroke / 2, y), fill=fill)
+            rightline = rectangle(lx=stroke, ly=h, xy=(w - (stroke / 2), y), fill=fill)
+            leftline = rectangle(lx=stroke, ly=h, xy=(stroke / 2, y), fill=fill)
 
-        bkg = gizeh.rectangle(lx=w * 2, ly=h * 2, fill=(0.1, 0.1, 0.1, 0.5))
+        bkg = rectangle(lx=w * 2, ly=h * 2, fill=(0.1, 0.1, 0.1, 0.5))
         bkg.draw(surface)
         topline.draw(surface)
         bottomline.draw(surface)

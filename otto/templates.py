@@ -1,6 +1,7 @@
 from moviepy.editor import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
+from otto.colortransitions import makeColor, boxReveal, boxShrink, drawBoxOutline
 from otto import colortransitions as ct
 from otto.config import defaults
 from otto.utils import rgbToDec
@@ -36,10 +37,10 @@ def title(
             method=method,
             stroke_color=None,
         ).set_position(position)
-        boxclip = ct.boxReveal(
+        boxclip = boxReveal(
             duration=duration, size=textsize, fill=rgbToDec(themecolor)
         ).set_position(position)
-        bgvid = ct.makeColor(
+        bgvid = makeColor(
             textsize, color=rgbToDec(bg) if bg else (0, 0, 0), opacity=0.5 if bg else 0
         ).set_position(position)
         return (
@@ -184,7 +185,7 @@ def bullets(
             if len(fxs) == 0:
                 fxs.append(
                     (
-                        ct.boxShrink(
+                        boxShrink(
                             duration=clip.duration,
                             size=textsize,
                             fill=rgbToDec(themecolor),
@@ -290,7 +291,7 @@ def final(
         #         fill=rgbToDec(themecolor),
         #         transparent=True)
 
-        dbo = ct.drawBoxOutline(
+        dbo = drawBoxOutline(
             size=(int(clipsize[0] * 0.85), int(clipsize[1] * 0.85)),
             duration=duration,
             fill=rgbToDec(themecolor),

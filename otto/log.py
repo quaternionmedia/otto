@@ -1,5 +1,7 @@
 import logging
 import sys, os
+import sys
+import os
 from time import strftime
 
 timestr = strftime('%Y%m%d-%H%M%S')
