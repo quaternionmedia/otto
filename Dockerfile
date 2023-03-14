@@ -30,11 +30,12 @@ RUN pip3 install -r /requirements.txt
 RUN apt-get install -y \
   libmagick++-dev
 
-COPY ./deps/ImageMagick-7.0.10-14.tar.gz /
-RUN tar xvzf ImageMagick-7.0.10-14.tar.gz
-RUN cd ImageMagick-7.0.10-14 && make install
+ENV MAGICK_VERSION=7.1.0-14
+COPY ./deps/ImageMagick-$MAGICK_VERSION.tar.gz /
+RUN tar xvzf ImageMagick-$MAGICK_VERSION.tar.gz
+RUN cd ImageMagick-$MAGICK_VERSION && make install
 RUN ldconfig /usr/local/lib
-ENV MAGICK_HOME="/ImageMagick-7.0.10-14"
+ENV MAGICK_HOME="/ImageMagick-$MAGICK_VERSION"
 ENV PATH="$MAGICK_HOME/bin:$PATH"
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$MAGICK_HOME/lib"
 

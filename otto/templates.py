@@ -1,16 +1,12 @@
 from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
-from PIL.ImageColor import getcolor
 from otto.getdata import scale
 from otto.colortransitions import *
 from otto import colortransitions
 from otto.defaults import defaults
+from otto.utils import rgbToDec
 
-def rgbToDec(rgb):
-    color = getcolor(rgb, 'RGB')
-    color = [c / 255 for c in color]
-    return color
 
 def title(text,
             data=None,
@@ -28,9 +24,8 @@ def title(text,
             bg=None,
             **kwargs):
     try:
-        data = data or defaults
-        color = color or data['fontcolor']
-        themecolor = themecolor or data['themecolor']
+        color = color or defaults['fontcolor']
+        themecolor = themecolor or defaults['themecolor']
         textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
         t = (TextClip(text.strip(),
             color=color,
@@ -306,9 +301,8 @@ def textBox(text,
             **kwargs
             ):
     try:
-        data = data or defaults
-        color = color or data['fontcolor']
-        themecolor = themecolor or data['themecolor']
+        color = color or defaults['fontcolor']
+        themecolor = themecolor or defaults['themecolor']
         textsize = textsize or (clipsize[0]//2, clipsize[1]//2)
         text = text.strip()
         tc = CompositeVideoClip([TextClip(text,
@@ -323,12 +317,13 @@ def textBox(text,
                 .set_duration(duration)
                 .set_position(position)
                 # .resize(textsize)
+                .set_fps(fps)
                 .crossfadein(1)
                 .crossfadeout(1)
                 ], size=clipsize)
         if fxs:
             for fx in fxs:
-                effect = getattr(colortransitions, fx.get('name'))
+                effect = getattr(colortransitions, fx['name'])
                 tc = tc.set_position(lambda t: (effect(**fx['data']).evaluate(t).tolist()[0][0] if t < 1 else 0, 0), relative=True)
         bkgs = []
         if bg:

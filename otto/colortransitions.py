@@ -1,7 +1,4 @@
-import gizeh
 import moviepy.editor as e
-import bezier
-import numpy as np
 
 defaultClipsize = (800,600)
 defaultdur = 5
@@ -32,22 +29,27 @@ def makeClip(f):
     return clip
 
 def makeColor(
-        clipsize=defaultClipsize, #tuple (x,y)
-        color=(1,1,1), #tuple (r,g,b)
-        position=(0,0), #tuple (x,y) from top left
-        opacity=0.5,
-        start=0,
-        duration=5,
-        **kwargs):
-        return (e.ColorClip(tuple(clipsize),color=tuple(color))
-                    .set_position(position)
-                    .set_opacity(opacity)
-                    .set_start(start)
-                    .set_duration(duration)
-                    .set_fps(30)
-                    .crossfadein(1)
-                    .crossfadeout(1)
-                    )
+    clipsize: tuple = defaultClipsize,  # tuple (x,y)
+    color: str = '#0000bb',  # rrggbb
+    position=(0, 0),  # tuple (x,y) from top left
+    start=0,
+    duration=5,
+    **kwargs
+):
+    from PIL.ImageColor import getcolor
+
+    position = position or (0, 0)
+    color = getcolor(color, 'RGB')
+    clip = e.ColorClip(clipsize, color=color)
+    composite = (
+        clip.set_position(position)
+        .set_start(start)
+        .set_duration(duration)
+        .set_fps(30)
+        .crossfadein(1)
+        .crossfadeout(1)
+    )
+    return composite
 
 def growBox(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent, **kwargs):
     surface = gizeh.Surface(clipsize[0],clipsize[1],bg_color=defaultbg)
@@ -106,11 +108,11 @@ def flyInAndGrow(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill
     return makeClip(fiag).set_duration(duration)
 
 def bezier2(c1x, c1y, ax, ay, c2x, c2y, **kwargs):
+    import bezier
+    import numpy as np
+
     # return 2nd order bezier of parameters
-    nodes = np.asfortranarray([
-        [c1x, ax, c2x],
-        [c1y, ay, c2y]
-    ])
+    nodes = np.asfortranarray([[c1x, ax, c2x], [c1y, ay, c2y]])
     return bezier.Curve(nodes, degree=2)
 
 def makeBezier(
@@ -121,6 +123,7 @@ def makeBezier(
     transparent=transparent,
     **kwargs
     ):
+    import gizeh
     curve = bezier2(c1x, c1y, ax, ay, c2x, c2y)
     
     def bez(t):
@@ -139,6 +142,8 @@ def makeBezier(
         
 
 def zoomFromCenter(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent, **kwargs):
+    import gizeh
+
     def zfc(t):
         surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         zstart = 0
@@ -160,6 +165,8 @@ def zoomFromCenter(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfi
     return makeClip(zfc).set_duration(duration)
 
 def circleShrink(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent, **kwargs):
+    import gizeh
+
     def cs(t):
         surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
         send = 1
@@ -187,6 +194,7 @@ def boxShrink(duration=defaultdur,
         shirnkdur=1,
         direction=-1, #0-360, -1 is defaults
         **kwargs):
+    import gizeh
 
     #need to declare here b/c the returned function can only t passed in
     spos = startpos
@@ -226,6 +234,8 @@ def boxShrink(duration=defaultdur,
     return makeClip(bs).set_duration(duration)
 
 def drawBoxOutline(duration=defaultdur, clipsize=defaultClipsize, fill=defaultfill, transparent=transparent, **kwargs):
+    import gizeh
+
     def dbo(t):
         surface = gizeh.Surface(clipsize[0], clipsize[1], bg_color=defaultbg)
 

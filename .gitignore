@@ -1,52 +1,18 @@
 # project based
-data/*
-otto/data/*
+temp
 otto/output/*
-otto/videos/*
-otto/audios/*
-/_trash
+otto/examples/*
+
+# media
 *.mp4
 *.mp3
-/deps/*
-
-node_modules
-*/dist/*
-/dist/*
-.cache
-package-lock.json
-yarn.lock
-media/
-/website/cypress/screenshots/
-/website/cypress/videos/
-__*__
-/videos
-otto/examples/*
-database/
 *.jpg
-# compiled output
-/tmp
-/out-tsc
-*.env
 
-# dependencies
+# fonts
+*.ttf
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-
-# misc
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
-
-# System Files
-.DS_Store
-Thumbs.db
+# logs
+*.log
 
 # pip files
 otto.egg*

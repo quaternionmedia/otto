@@ -1,28 +1,43 @@
 from pydantic import BaseModel, AnyUrl
-from typing import List, Dict
-from otto.as_form import as_form
+from typing import List, Tuple, Dict, Optional, Union
 
-@as_form
-class VideoForm(BaseModel):
-    project: str = ''
-    name: str = ''
-    logo: str = '' #AnyUrl
-    address: str = ''
-    phone: str = ''
-    hours: str = ''
-    website: str = '' #AnyUrl = 'talahairstudio.com'
-    initial: str = ''
-    bullets: str = ''
-    media: str = ''
-    audio: str = ''
-    call: str = ''
-    closing: str = ''
-    fontcolor: str = '#FFFFFF'
-    themecolor: str = '#CC5500'
-    font: str = 'Segoe_UI_Bold'
+class FX(BaseModel):
+    name: str
+    data: Optional[dict]
+
+class TemplateData(BaseModel):
+    text: Optional[str]
+    textsize: Optional[tuple]
+    color: Optional[str]
+    themecolor: Optional[str]
+    fontsize: Optional[float]
+    font: Optional[str]
+    method: Optional[str] = 'label'
+    bg: Optional[str]
+    align: Optional[str]
+    position: Optional[Union[Tuple, str]]
+    fxs: Optional[List[FX]]
+
+
+class Clip(BaseModel):
     duration: float = 5
+    type: Optional[str]
+    name: Optional[str]
+    inpoint: Optional[float]
+    outpoint: Optional[float]
+    offset: Optional[float]
+    start: Optional[float]
+    position: Optional[Union[Tuple, str]]
+    resize: Optional[Union[float, tuple]]
+    relative: Optional[bool] = True
+    opacity: Optional[float]
+    fadeOut: Optional[float] = 1
+    fadeIn: Optional[float] = 1
+    clipsize: Optional[tuple]
+    data: Optional[TemplateData]
+
 
 
 class Edl(BaseModel):
-    clips: List
+    clips: List[Clip]
     duration: float = None
