@@ -17,6 +17,8 @@ jobs:
     name: 🐍 pytest
     runs-on: ubuntu-latest
     environment: codecov
+    env:
+      BEZIER_NO_EXTENSION: true
 
     steps:
       - name: 📰 Checkout
