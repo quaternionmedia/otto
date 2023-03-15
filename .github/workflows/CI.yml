@@ -1,0 +1,20 @@
+name: ⚗️ CI tests
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: 👖 Linter
+    uses: quaternionmedia/alfred/.github/workflows/nox.yml@pytest
+    with:
+      args: lint
+
+  format:
+    name: ⬛ Black Formatter
+    uses: quaternionmedia/alfred/.github/workflows/nox.yml@pytest
+    with:
+      args: blacken
+
+  pytest:
+    name: 🐍 Pytest
+    uses: ./.github/workflows/pytest.yml
