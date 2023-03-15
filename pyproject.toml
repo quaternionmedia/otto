@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "otto"
+version = "0.2.0"
+description = "The ottomatic video engine"
+authors = ["Quaternion Media <qm@quaternion.media>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+fastapi = "^0.94.0"
+moviepy = "^1.0.3"
+pydantic = "^1.10.5"
+
+
+[tool.poetry.group.dev.dependencies]
+uvicorn = "^0.21.0"
+
+
+[tool.poetry.group.render.dependencies]
+gizeh = "^0.1.11"
+bezier = "^2021.2.12"
+tqdm = "^4.64.1"
+
+
+[tool.poetry.group.test.dependencies]
+nox = "^2022.11.21"
+pytest = "^7.2.1"
+black = "^23.1.0"
+flake8 = "^6.0.0"
+httpx = "^0.23.3"
+
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.4.2"
+mkdocs-material = "^9.1.2"
+mkdocs-git-revision-date-localized-plugin = "^1.2.0"
+mkdocstrings = {extras = ["python"], version = "^0.20.0"}
+mike = "^1.1.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
