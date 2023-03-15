@@ -1,10 +1,9 @@
-from moviepy.editor import TextClip, ColorClip, ImageClip, VideoClip
+from moviepy.editor import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
-from otto.getdata import scale
-from otto.colortransitions import *
-from otto import colortransitions
-from otto.defaults import defaults
+from otto.colortransitions import makeColor, boxReveal, boxShrink, drawBoxOutline
+from otto import colortransitions as ct
+from otto.config import defaults
 from otto.utils import rgbToDec
 
 
@@ -125,22 +124,6 @@ def initial(
                     .crossfadeout(1)
                 )
             st += d
-        if len(fxs) == 0:
-            t = textsize
-
-            fx = [
-                boxShrink(
-                    size=(t[0], t[1]),
-                    duration=duration or d,
-                    fill=rgbToDec(themecolor),
-                    transparent=True,
-                    direction=0,
-                    startpos=(t[0] // 2, t[1] // 2),
-                    endpos=(t[0] // 2, 9 * t[1] // 10),
-                    startwh=(t[0], t[1]),
-                    endwh=(int(t[0] * 0.8), int(t[1] * 0.1)),
-                ).crossfadeout(1)
-            ]
         print('initial', bkgs, texts)
         return (
             CompositeVideoClip([*bkgs, *texts, *fxs], size=clipsize)
@@ -376,7 +359,7 @@ def textBox(
         )
         if fxs:
             for fx in fxs:
-                effect = getattr(colortransitions, fx['name'])
+                effect = getattr(ct, fx['name'])
                 tc = tc.set_position(
                     lambda t: (
                         effect(**fx['data']).evaluate(t).tolist()[0][0] if t < 1 else 0,
