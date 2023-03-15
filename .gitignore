@@ -16,3 +16,6 @@ otto/examples/*
 
 # pip files
 otto.egg*
+
+# test
+.nox

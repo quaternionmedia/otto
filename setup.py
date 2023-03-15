@@ -10,7 +10,7 @@ INSTALL_REQUIRES = [
     'gizeh',
 ]
 setuptools.setup(
-    name="otto", # Replace with your own username
+    name="otto",
     version=__version__,
     author="Quaternion Media",
     author_email="info@quaternion.media",

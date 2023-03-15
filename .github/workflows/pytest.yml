@@ -19,7 +19,7 @@ jobs:
 
       - name: 🏗️ Setup testing environment
         run: |
-          pip3 install -r requirements.txt -r tests/requirements-tests.txt
+          pip3 install -r requirements.txt -r requirements-tests.txt
           pip3 install .
           mkdir data
           sudo apt install -y libfuse2 fonts-open-sans
