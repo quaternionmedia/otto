@@ -45,7 +45,9 @@ jobs:
         run: poetry install --no-interaction --no-root
 
       - name: 🏗️ Install dependencies
-        run: poetry install --no-interaction
+        run: |
+          poetry install --no-interaction
+          mkdir -p data
 
       - name: 🖼️ Install Imagemagick
         uses: mfinelli/setup-imagemagick@v2
