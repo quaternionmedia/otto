@@ -1,15 +1,33 @@
+"""Otto.main
+
+The primary app.
+
+This initializes the main FastAPI `app` and attaches all routes to it.
+"""
 from fastapi import FastAPI
 from otto.preview import previewAPI
 from otto import templates
 from otto import __version__
 
 app = FastAPI()
-
+"""# The main app"""
 app.include_router(previewAPI, prefix='/preview', tags=['preview'])
 
 
 @app.get('/')
-def hello() -> dict:
+def version() -> dict:
+    """# Version
+
+    Return version information
+    Args:
+
+    Returns: JSON with version number
+        otto (str): version number
+
+            {
+                'otto': 'SEMANTIC.VERSION.NUMBER'
+            }
+    """
     return {'otto': __version__}
 
 
