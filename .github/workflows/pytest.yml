@@ -54,7 +54,7 @@ jobs:
         run: |
           sudo apt install -y libfuse2 fonts-open-sans
           mkdir -p data
-          sudo rm /etc/ImageMagick/policy.xml
+          ls -al /etc/
 
       - name: 🧪 Run pytest suite
         run: poetry run pytest -v --cov --cov-report lcov ${{ inputs.pytest_args }}
