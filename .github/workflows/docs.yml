@@ -39,10 +39,10 @@ jobs:
         run: poetry install --no-interaction --only docs
 
       - name: 🧵 Set version string
-        run: echo VERSION_TITLE=$(mike list | grep latest) >> $GITHUB_ENV
+        run: echo VERSION_TITLE=$(poetry run mike list | grep latest) >> $GITHUB_ENV
 
       - name: 🏗️ Deploy
         env:
           GIT_COMMITTER_NAME: qm-bot
           GIT_COMMITTER_EMAIL: qm-bot@quaternion.media
-        run: mike deploy --push --update-aliases ${VERSION_TITLE%\[latest\]} latest
+        run: poetry run mike deploy --push --update-aliases ${VERSION_TITLE%\[latest\]} latest
