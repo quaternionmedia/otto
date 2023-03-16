@@ -20,7 +20,20 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.x
-          cache: 'poetry'
+
+      - name: 📓 Setup poetry
+        run: pipx install poetry
+
+      - name: 💸 Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: 🏋 Download dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
 
       - name: 🚧 Install dependencies
         run: poetry install --only docs
