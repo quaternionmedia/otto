@@ -33,10 +33,10 @@ jobs:
 
       - name: 🏋 Download dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+        run: poetry install --no-interaction --no-root --only docs
 
       - name: 🚧 Install dependencies
-        run: poetry install --only docs
+        run: poetry install --no-interaction --only docs
 
       - name: 🧵 Set version string
         run: echo VERSION_TITLE=$(mike list | grep latest) >> $GITHUB_ENV
