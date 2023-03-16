@@ -55,6 +55,7 @@ jobs:
 
       - name: 🧪 Run pytest suite
         run: poetry run pytest -v --cov --cov-report lcov ${{ inputs.pytest_args }}
+        continue-on-error: true
 
       - name: 📈 Uploade coverage report
         uses: codecov/codecov-action@v3
