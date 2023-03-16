@@ -1,0 +1,35 @@
+name: 📚 Docs
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - docs
+
+jobs:
+  deploy:
+    name: 📑 Build and deploy docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📰 Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+          cache: 'poetry'
+
+      - name: 🚧 Install dependencies
+        run: poetry install --only docs
+
+      - name: 🧵 Set version string
+        run: echo VERSION_TITLE=$(mike list | grep latest) >> $GITHUB_ENV
+
+      - name: 🏗️ Deploy
+        env:
+          GIT_COMMITTER_NAME: qm-bot
+          GIT_COMMITTER_EMAIL: qm-bot@quaternion.media
+        run: mike deploy --push --update-aliases ${VERSION_TITLE%\[latest\]} latest
