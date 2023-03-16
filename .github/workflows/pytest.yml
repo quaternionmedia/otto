@@ -51,6 +51,7 @@ jobs:
         run: |
           sudo apt install -y libfuse2 fonts-open-sans
           mkdir -p data
+          sudo rm /etc/ImageMagick/policy.xml
 
       - name: 🖼️ Install Imagemagick
         uses: mfinelli/setup-imagemagick@v2
