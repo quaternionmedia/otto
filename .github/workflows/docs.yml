@@ -41,8 +41,10 @@ jobs:
       - name: 🧵 Set version string
         run: echo VERSION_TITLE=$(poetry run mike list | grep latest) >> $GITHUB_ENV
 
-      - name: 🏗️ Deploy
-        env:
-          GIT_COMMITTER_NAME: qm-bot
-          GIT_COMMITTER_EMAIL: qm-bot@quaternion.media
+      - name: 🖋️ Configure git user
+        run: |
+          git config user.name qm-bot
+          git config user.email qm-bot@quaternion.media
+
+      - name: 🏗️ Deploy docs
         run: poetry run mike deploy --push --update-aliases ${VERSION_TITLE%\[latest\]} latest
