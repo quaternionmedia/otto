@@ -14,14 +14,18 @@ pydantic = "^1.10.5"
 
 
 [tool.poetry.group.dev.dependencies]
-uvicorn = "^0.21.0"
+uvicorn = "^0.21.1"
 
+[tool.poetry.group.render]
+optional = true
 
 [tool.poetry.group.render.dependencies]
 gizeh = "^0.1.11"
 bezier = "^2021.2.12"
 tqdm = "^4.64.1"
 
+[tool.poetry.group.test]
+optional = true
 
 [tool.poetry.group.test.dependencies]
 nox = "^2022.11.21"
@@ -31,6 +35,8 @@ flake8 = "^6.0.0"
 httpx = "^0.23.3"
 pytest-cov = "^4.0.0"
 
+[tool.poetry.group.docs]
+optional = true
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.4.2"
