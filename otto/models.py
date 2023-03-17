@@ -68,7 +68,7 @@ class Clip(BaseModel):
 
     opacity: Optional[float]
     """The opacity of the clip.
-    
+
     Values:
         0: transparent
         1.0: opaque"""
