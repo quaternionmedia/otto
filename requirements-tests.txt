@@ -1,9 +1,0 @@
-nox
-pytest
-black
-flake8
-httpx
-
-# pytest plugins
-pytest-timeout
-pytest-xdist

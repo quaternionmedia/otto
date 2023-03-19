@@ -1,3 +1,0 @@
-bezier --no-binary=bezier
-gizeh
-tqdm
