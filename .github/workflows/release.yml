@@ -1,0 +1,13 @@
+name: 📦 Release
+
+on:
+  milestone:
+    types: [closed]
+
+jobs:
+  release:
+    name: 📝 Draft Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Create draft release from milestone
+        uses: quaternionmedia/.github/.github/workflows/draft_release.yml@main

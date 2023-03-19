@@ -42,10 +42,10 @@ jobs:
 
       - name: 🏋 Download dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+        run: poetry install --no-interaction --no-root --with render,test
 
       - name: 🏗️ Install dependencies
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --with render,test
 
       - name: 🖼️ Install Imagemagick
         uses: mfinelli/setup-imagemagick@v2
