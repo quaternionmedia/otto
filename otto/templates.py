@@ -1,3 +1,8 @@
+"""Templates
+
+Prebuilt Template blocks, designed to be rendered to Clips
+"""
+
 from moviepy.editor import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
@@ -24,6 +29,7 @@ def title(
     bg=None,
     **kwargs
 ):
+    """Render a large Title block of text"""
     try:
         color = color or defaults['fontcolor']
         themecolor = themecolor or defaults['themecolor']
@@ -76,6 +82,8 @@ def initial(
     fxs=[],
     **kwargs
 ):
+    """**DEPRICATED** Initial screen for video. Use textBox instead"""
+
     try:
         data = data or defaults
         color = color or data['fontcolor']
@@ -153,6 +161,8 @@ def bullets(
     fxs=[],
     **kwargs
 ):
+    """**DEPRICATED** Render bullet points to a video. Use textBox instead."""
+
     try:
         data = data or defaults
         color = color or data['fontcolor']
@@ -238,6 +248,7 @@ def final(
     fps=30,
     **kwargs
 ):
+    """**DEPRICATED** Render an "End Credits" style information block"""
     try:
         data = data or defaults
         color = color or data['fontcolor']
@@ -330,6 +341,8 @@ def textBox(
     fxs=None,
     **kwargs
 ):
+    """Render a block of text in a bounding box"""
+
     try:
         color = color or defaults['fontcolor']
         themecolor = themecolor or defaults['themecolor']

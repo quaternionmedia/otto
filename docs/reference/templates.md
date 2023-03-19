@@ -1,0 +1,3 @@
+# Templates
+
+::: otto.templates
