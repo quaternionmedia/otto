@@ -2,11 +2,23 @@ name: 🐍 Otto pytest
 
 on:
   workflow_call:
+    inputs:
+      python_version:
+        description: The version of python to setup
+        default: 3.11
+        type: string
+
+      pytest_args:
+        description: Additional args to pass to pytest.
+        type: string
 
 jobs:
   run_pytest:
     name: 🐍 pytest
     runs-on: ubuntu-latest
+    environment: codecov
+    env:
+      BEZIER_NO_EXTENSION: true
 
     steps:
       - name: 📰 Checkout
@@ -14,20 +26,43 @@ jobs:
 
       - name: 🐍 Setup Python
         uses: actions/setup-python@v4
+        id: setup-python
         with:
-          python-version: 3.11
+          python-version: ${{ inputs.python_version }}
 
-      - name: 🏗️ Setup testing environment
-        run: |
-          pip3 install -r requirements.txt -r requirements-tests.txt
-          pip3 install .
-          mkdir data
-          sudo apt install -y libfuse2 fonts-open-sans
+      - name: 📓 Setup poetry
+        run: pipx install poetry
+
+      - name: 💸 Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: 🏋 Download dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root --with render,test
+
+      - name: 🏗️ Install dependencies
+        run: poetry install --no-interaction --with render,test
 
       - name: 🖼️ Install Imagemagick
         uses: mfinelli/setup-imagemagick@v2
 
+      - name: 🛸 Configure extra test dependencies
+        run: |
+          sudo apt install -y libfuse2 fonts-open-sans
+          mkdir -p data
+          sudo rm /etc/ImageMagick-6/policy.xml
+
       - name: 🧪 Run pytest suite
-        run: pytest -v -n auto
-        env:
-          IMAGEMAGICK_BINARY: /home/runner/bin/magick
+        run: poetry run pytest -v --cov --cov-report lcov ${{ inputs.pytest_args }}
+
+      - name: 📈 Uploade coverage report
+        # always run this step, even if the tests fail
+        # putting always() would cause the function to run even if the build is canceled
+        if: success() || failure()
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
