@@ -27,7 +27,7 @@ def title(
     opacity=0.4,
     fps=30,
     bg=None,
-    **kwargs
+    **kwargs,
 ):
     """Render a large Title block of text"""
     try:
@@ -80,7 +80,7 @@ def initial(
     fps=30,
     bg=None,
     fxs=[],
-    **kwargs
+    **kwargs,
 ):
     """**DEPRICATED** Initial screen for video. Use textBox instead"""
 
@@ -159,7 +159,7 @@ def bullets(
     opacity=0.4,
     fps=30,
     fxs=[],
-    **kwargs
+    **kwargs,
 ):
     """**DEPRICATED** Render bullet points to a video. Use textBox instead."""
 
@@ -246,7 +246,7 @@ def final(
     position='center',
     opacity=0.4,
     fps=30,
-    **kwargs
+    **kwargs,
 ):
     """**DEPRICATED** Render an "End Credits" style information block"""
     try:
@@ -339,7 +339,7 @@ def textBox(
     bg=None,
     align='center',
     fxs=None,
-    **kwargs
+    **kwargs,
 ):
     """Render a block of text in a bounding box"""
 

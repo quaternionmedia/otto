@@ -5,8 +5,13 @@ on:
     inputs:
       python_version:
         description: The version of python to setup
-        default: 3.11
         type: string
+        default: 3.11
+
+      pip_extras:
+        description: A list of pip extras to install
+        type: string
+        default: [test]
 
       pytest_args:
         description: Additional args to pass to pytest.
@@ -25,27 +30,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@main
         id: setup-python
         with:
           python-version: ${{ inputs.python_version }}
 
-      - name: 📓 Setup poetry
-        run: pipx install poetry
-
-      - name: 💸 Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: 🏋 Download dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root --with render,test
-
       - name: 🏗️ Install dependencies
-        run: poetry install --no-interaction --with render,test
+        run: pip install .${{ inputs.pip_extras }}
 
       - name: 🖼️ Install Imagemagick
         uses: mfinelli/setup-imagemagick@v2
@@ -57,7 +48,7 @@ jobs:
           sudo rm /etc/ImageMagick-6/policy.xml
 
       - name: 🧪 Run pytest suite
-        run: poetry run pytest -v --cov --cov-report lcov ${{ inputs.pytest_args }}
+        run: pytest -v --cov --cov-report lcov ${{ inputs.pytest_args }}
 
       - name: 📈 Uploade coverage report
         # always run this step, even if the tests fail
