@@ -11,7 +11,7 @@ on:
       pip_extras:
         description: A list of pip extras to install
         type: string
-        default: [test]
+        default: '[test]'
 
       pytest_args:
         description: Additional args to pass to pytest.
