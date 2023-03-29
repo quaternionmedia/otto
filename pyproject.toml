@@ -4,11 +4,11 @@ build-backend = "pdm.pep517.api"
 
 
 [project]
-name = "otto"
+name = "al-otto"
 version = "0.2.0"
 description = "The ottomatic video engine"
 authors = [
-    {name = "Quaternion Media, LLC", email = "qm@quaternion.media"}
+    {name = "Quaternion Media", email = "qm@quaternion.media"}
 ]
 dependencies = ["fastapi<1.0.0,>=0.94.0", "moviepy<2.0.0,>=1.0.3", "pydantic<2.0.0,>=1.10.5"]
 requires-python = ">=3.8.1,<4.0"
