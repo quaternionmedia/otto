@@ -19,3 +19,12 @@ otto.egg*
 
 # test
 .nox
+
+# docs
+site/
+
+__pypackages__
+dist
+
+# pdm
+.pdm.toml

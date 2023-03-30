@@ -1,11 +1,11 @@
 [build-system]
-requires = ["pdm-pep517>=1.0.0"]
-build-backend = "pdm.pep517.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 
 [project]
 name = "al-otto"
-version = "0.2.0"
+dynamic = ["version"]
 description = "The ottomatic video engine"
 authors = [
     {name = "Quaternion Media", email = "qm@quaternion.media"}
@@ -45,3 +45,10 @@ dev = [
     "flake8 >= 6.0.0"
 ]
 nox = ["nox >= 2022.11.21"]
+
+
+[tool.pdm]
+version = { source = "file", path = "otto/_version.py" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
