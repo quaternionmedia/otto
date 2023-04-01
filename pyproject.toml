@@ -35,7 +35,8 @@ docs = [
     "mkdocs >= 1.4.2",
     "mkdocs-material >= 9.1.2",
     "mkdocs-git-revision-date-localized-plugin >= 1.2.0",
-    "mike >= 1.1.2"
+    "mike >= 1.1.2",
+    "setuptools"
 ]
 
 [tool.pdm.dev-dependencies]
