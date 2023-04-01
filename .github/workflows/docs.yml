@@ -1,5 +1,7 @@
 name: 📚 Docs
+
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -8,43 +10,5 @@ on:
 
 jobs:
   deploy:
-    name: 📑 Build and deploy docs
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📰 Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.x
-
-      - name: 📓 Setup poetry
-        run: pipx install poetry
-
-      - name: 💸 Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: 🏋 Download dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root --only docs
-
-      - name: 🚧 Install dependencies
-        run: poetry install --no-interaction --only docs
-
-      - name: 🧵 Set version string
-        run: echo VERSION_TITLE=$(poetry run mike list | grep latest) >> $GITHUB_ENV
-
-      - name: 🖋️ Configure git user
-        run: |
-          git config user.name qm-bot
-          git config user.email qm-bot@quaternion.media
-
-      - name: 🏗️ Deploy docs
-        run: poetry run mike deploy --push --update-aliases ${VERSION_TITLE%\[latest\]} latest
+    name: 🖋 Build and deploy docs
+    uses: quaternionmedia/.github/.github/workflows/docs.yml@pdm
