@@ -12,3 +12,5 @@ jobs:
   deploy:
     name: 🖋 Build and deploy docs
     uses: quaternionmedia/.github/.github/workflows/docs.yml@pdm
+    with:
+      pdm_args: -G docs --no-self --prod
