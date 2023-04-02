@@ -35,9 +35,8 @@ docs = [
     "mkdocs >= 1.4.2",
     "mkdocs-material >= 9.1.2",
     "mkdocs-git-revision-date-localized-plugin >= 1.2.0",
-    "mike >= 1.1.2",
+    "mike @ git+https://github.com/jimporter/mike.git@063c93e9cce7c82939c7d47e6d33f99b24bba372",
     "mkdocstrings[python] >= 0.20.0",
-    "setuptools"
 ]
 
 [tool.pdm.dev-dependencies]
