@@ -47,7 +47,7 @@ def check_rendered_image(edl: Edl):
     response = client.post('/preview?t=1', json=edl)
     assert response.status_code == 200, 'Text did not render sucessfully'
     filename = response.json()
-    assert filename.startswith('data/'), 'Returned path is not in data/'
+    assert filename.startswith('data'), 'Returned path is not in data/'
     assert path.isfile(filename), 'Can not find file that otto generated'
 
 

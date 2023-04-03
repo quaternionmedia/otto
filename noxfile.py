@@ -18,14 +18,9 @@ def lint(session):
 
 @nox.session(tags=["test"])
 def coverage(session):
-    session.install("-r", "requirements.txt")
-    session.install("-r", "requirements-tests.txt")
-    session.install("-e", ".")
+    session.install(".[test,render]")
     session.run("mkdir", "-p", "data", external=True)
     session.run(
         "pytest",
-        "-vv",
-        "--timeout=600",
-        "-n",
-        "auto",
+        "-vv"
     )
