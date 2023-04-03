@@ -21,7 +21,7 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
             c = tmp(
                 **clip.data.dict(exclude_none=True),
                 clipsize=clip.clipsize or moviesize,
-                duration=clip.duration
+                duration=clip.duration,
             )
         elif clip.type == 'video':
             clip.name = download(clip.name)
@@ -84,7 +84,7 @@ def renderMultitrack(
     bitrate=None,
     audio_bitrate='320k',
     ffmpeg_params=None,
-    **kwargs
+    **kwargs,
 ):
     """Render v2: renders a multitrack Edl as seperate layers"""
     video = generateEdl(edl, moviesize, **kwargs)

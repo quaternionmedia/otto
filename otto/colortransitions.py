@@ -36,7 +36,7 @@ def makeColor(
     position=(0, 0),  # tuple (x,y) from top left
     start=0,
     duration=5,
-    **kwargs
+    **kwargs,
 ):
     from PIL.ImageColor import getcolor
 
@@ -59,7 +59,7 @@ def growBox(
     clipsize=defaultClipsize,
     fill=defaultfill,
     transparent=transparent,
-    **kwargs
+    **kwargs,
 ):
     from gizeh import Surface, rectangle
 
@@ -110,7 +110,7 @@ def flyInAndGrow(
     clipsize=defaultClipsize,
     fill=defaultfill,
     transparent=transparent,
-    **kwargs
+    **kwargs,
 ):
     from gizeh import Surface, rectangle
 
@@ -160,7 +160,7 @@ def makeBezier(
     clipsize=defaultClipsize,
     fill=defaultfill,
     transparent=transparent,
-    **kwargs
+    **kwargs,
 ):
     from gizeh import Surface, rectangle
 
@@ -187,7 +187,7 @@ def zoomFromCenter(
     clipsize=defaultClipsize,
     fill=defaultfill,
     transparent=transparent,
-    **kwargs
+    **kwargs,
 ):
     from gizeh import Surface, rectangle
 
@@ -216,7 +216,7 @@ def circleShrink(
     clipsize=defaultClipsize,
     fill=defaultfill,
     transparent=transparent,
-    **kwargs
+    **kwargs,
 ):
     from gizeh import Surface, circle
 
@@ -249,7 +249,7 @@ def boxShrink(
     endwh=(0, 0),
     shirnkdur=1,
     direction=-1,  # 0-360, -1 is defaults
-    **kwargs
+    **kwargs,
 ):
     from gizeh import Surface, rectangle
 
@@ -291,7 +291,7 @@ def drawBoxOutline(
     clipsize=defaultClipsize,
     fill=defaultfill,
     transparent=transparent,
-    **kwargs
+    **kwargs,
 ):
     from gizeh import Surface, rectangle
 

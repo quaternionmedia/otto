@@ -1,0 +1,11 @@
+name: 📦 Publish release to PyPi
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    name: 🗞 Publish package to PyPi
+    uses: quaternionmedia/.github/.github/workflows/publish.yml@main

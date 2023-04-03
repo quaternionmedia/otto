@@ -6,6 +6,8 @@ jobs:
   tests:
     name: ⚗️ Application Tests
     uses: ./.github/workflows/pytest.yml
+    with:
+      pip_extras: '[test,render]'
 
   lint:
     name: 👕 Lint
