@@ -1,11 +1,33 @@
-name: 📦 Publish release to PyPi
+name: 📖 Publish to PyPi
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - '*'
 
 jobs:
   publish:
-    name: 🗞 Publish package to PyPi
-    uses: quaternionmedia/.github/.github/workflows/publish.yml@main
+    name: 🗞 Build and publish package to PyPi
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - name: 📰 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@main
+        with:
+          python-version: 3.x
+          cache: pip
+
+      - name: 📲 Install dependencies
+        run: pip install pdm
+
+      - name: 🏗️ Build package
+        run: pdm build
+
+      - name: 🗞 Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
