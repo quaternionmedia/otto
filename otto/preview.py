@@ -12,7 +12,7 @@ async def previewFrame(t: float, render: Render):
     """# Preview frame
     Generates a frame of a given `edl` at time `t`, with `width` and `height`.
 
-     Returns the name of a file on this server when available, or a relevant error message
+    Returns the name of a file on this server when available, or a relevant error
     """
     print('previewing', render.edl, 'at frame', t)
     active_clips = [

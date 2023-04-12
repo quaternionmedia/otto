@@ -28,4 +28,4 @@ dist/
 build/
 
 # pdm
-.pdm.toml
+.pdm-python
