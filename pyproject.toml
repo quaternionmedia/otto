@@ -10,7 +10,11 @@ description = "The ottomatic video engine"
 authors = [
     {name = "Quaternion Media", email = "qm@quaternion.media"}
 ]
-dependencies = ["fastapi<1.0.0,>=0.94.0", "moviepy<2.0.0,>=1.0.3", "pydantic<2.0.0,>=1.10.5"]
+dependencies = [
+    "fastapi~=0.95",
+    "moviepy~=1.0",
+    "pydantic~=1.10",
+]
 requires-python = ">=3.8.1,<4.0"
 readme = "README.md"
 license = {text = "MIT"}
@@ -22,32 +26,34 @@ repository = "https://github.com/quaternionmedia/otto"
 
 [project.optional-dependencies]
 render = [
-    "gizeh >= 0.1.11",
-    "bezier >= 2021.2.12",
-    "tqdm >= 4.64.1"
+    "gizeh~=0.1",
+    "bezier~=2021.2",
+    "tqdm~=4.65",
 ]
 test = [
-    "pytest >= 7.2.1",
-    "httpx >= 0.23.3",
-    "pytest-cov >= 4.0.0",
-    "pytest-xdist>=3.2.1",
+    "pytest~=7.3",
+    "httpx~=0.24",
+    "pytest-cov~=4.0",
+    "pytest-xdist~=3.2",
 ]
 docs = [
-    "mkdocs >= 1.4.2",
-    "mkdocs-material >= 9.1.2",
-    "mkdocs-git-revision-date-localized-plugin >= 1.2.0",
-    "mike >= 1.1.2",
-    "mkdocstrings[python] >= 0.20.0",
-    "setuptools"
+    "mkdocs~=1.4",
+    "mkdocs-material~=9.1",
+    "mkdocs-git-revision-date-localized-plugin~=1.2",
+    "mike~=1.1",
+    "mkdocstrings[python]~=0.21",
+    "setuptools~=67.6",
 ]
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "uvicorn >= 0.21.1",
-    "black >= 23.1.0",
-    "ruff >= 0.0.261"
+    "uvicorn~=0.21",
+    "black~=23.3",
+    "ruff~=0.0",
 ]
-nox = ["nox >= 2022.11.21"]
+nox = [
+    "nox~=2022.11",
+]
 
 
 [tool.pdm]
