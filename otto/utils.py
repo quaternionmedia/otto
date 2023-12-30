@@ -1,5 +1,7 @@
-from PIL.ImageColor import getcolor
 import urllib.request
+
+from alfred.config import PRODUCTION
+from PIL.ImageColor import getcolor
 from tqdm import tqdm
 
 
@@ -11,6 +13,9 @@ class DownloadProgressBar(tqdm):
 
 
 def download_url(url, output_path):
+    if PRODUCTION:
+        urllib.request.urlretrieve(url, filename=output_path)
+        return
     with DownloadProgressBar(
         unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]
     ) as t:
