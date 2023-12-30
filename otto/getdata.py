@@ -1,4 +1,3 @@
-from csv import reader
 from hashlib import sha256
 from json import loads
 from os import path
@@ -6,6 +5,8 @@ from time import strftime
 
 from requests import head
 
+from otto.config import DATA_DIR
+from otto.log import log
 from otto.utils import download_url
 
 content_types = ['image/jpeg', 'video/mp4', 'image/png', 'audio/mpeg']
@@ -16,7 +17,7 @@ def sha(s):
     return sha256(s.encode()).hexdigest()
 
 
-def download(url, location='data'):
+def download(url, location=DATA_DIR):
     if not url.startswith('http'):
         return url
     h = head(url, allow_redirects=True)
@@ -45,6 +46,8 @@ def download(url, location='data'):
 
 
 def openCsv(path):
+    from csv import reader
+
     csvreader = reader(open(path, 'r'))
     d = {}
     for row in csvreader:
@@ -75,5 +78,7 @@ def urlToJson(path):
             source = response.read()
             data = loads(source)
         else:
-            print('An error occurred while attempting to retrieve data from the API.')
+            log.error(
+                'An error occurred while attempting to retrieve data from the API.'
+            )
     return data

@@ -3,6 +3,7 @@ from otto.models import Edl, Render
 from otto.render import generateEdl
 from otto.getdata import timestr
 from os.path import join
+from otto.config import DATA_DIR
 
 previewAPI = APIRouter()
 
@@ -22,7 +23,7 @@ async def previewFrame(t: float, render: Render):
     video = generateEdl(
         Edl(clips=active_clips), moviesize=(render.width, render.height)
     )
-    frame_name = join('data', timestr() + '.jpg')
+    frame_name = join(DATA_DIR, timestr() + '.jpg')
     print(f'saving frame {t} as: {frame_name}', video)
     video.save_frame(frame_name, t=t, withmask=False)
     return frame_name
