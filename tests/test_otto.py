@@ -20,5 +20,5 @@ def test_get_templates():
         'application/json' in response.headers['content-type']
     ), 'Content-Type is not JSON'
     templates = response.json()
-    assert type(templates) is list, 'Type of response is not List'
+    assert isinstance(templates, list), 'Type of response is not List'
     assert len(templates) > 0, 'Templates list is empty!'
