@@ -38,11 +38,9 @@ def download(url, location=DATA_DIR):
     filename = path.join(location, basename) if location else basename
     if path.isfile(filename):
         return filename
-    try:
-        download_url(url, filename)
-        return filename
-    except Exception as e:
-        print('error downloading file', url, e)
+    print('downloading', url, 'to', filename)
+    download_url(url, filename)
+    return filename
 
 
 def openCsv(path):
