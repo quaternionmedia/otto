@@ -3,11 +3,12 @@
 Prebuilt Template blocks, designed to be rendered to Clips
 """
 
-from moviepy.editor import TextClip, ColorClip
+from moviepy.editor import ColorClip, TextClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
-from otto.colortransitions import makeColor, boxReveal, boxShrink, drawBoxOutline
+
 from otto import colortransitions as ct
+from otto.colortransitions import boxReveal, boxShrink, drawBoxOutline, makeColor
 from otto.config import defaults
 from otto.utils import rgbToDec
 

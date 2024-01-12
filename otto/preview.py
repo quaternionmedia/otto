@@ -1,9 +1,11 @@
+from os.path import join
+
 from fastapi import APIRouter
+
+from otto.config import DATA_DIR
+from otto.getdata import timestr
 from otto.models import Edl, Render
 from otto.render import generateEdl
-from otto.getdata import timestr
-from os.path import join
-from otto.config import DATA_DIR
 
 previewAPI = APIRouter()
 

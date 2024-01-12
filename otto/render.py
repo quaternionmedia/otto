@@ -1,10 +1,11 @@
-from moviepy.editor import VideoFileClip, AudioFileClip, ImageClip
-from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.audio.AudioClip import CompositeAudioClip
+from moviepy.editor import AudioFileClip, ImageClip, VideoFileClip
+from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+
 from otto import templates
+from otto.exceptions import EdlException, EmptyClipsException
 from otto.getdata import download
 from otto.models import Edl
-from otto.exceptions import EmptyClipsException, EdlException
 
 
 def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):

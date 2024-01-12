@@ -1,8 +1,9 @@
 import logging
-from otto.config import LOG_DIR
-import sys
 import os
+import sys
 from time import strftime
+
+from otto.config import LOG_DIR
 
 
 def ts():
