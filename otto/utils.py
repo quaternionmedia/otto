@@ -1,8 +1,9 @@
 import urllib.request
 
-from alfred.config import PRODUCTION
 from PIL.ImageColor import getcolor
 from tqdm import tqdm
+
+from otto.config import PRODUCTION
 
 
 class DownloadProgressBar(tqdm):

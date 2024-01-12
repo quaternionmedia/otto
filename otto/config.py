@@ -1,5 +1,7 @@
 from os import environ
 
+PRODUCTION = environ.get('PRODUCTION', False)
+
 LOG_DIR = environ.get('LOG_DIR', 'logs')
 DATA_DIR = environ.get('DATA_DIR', 'data')
 
