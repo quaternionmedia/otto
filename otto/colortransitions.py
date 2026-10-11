@@ -30,18 +30,45 @@ def makeClip(f):
     return clip
 
 
+def toRgb(color):
+    """Normalise the three colour spellings used across this package.
+
+    `makeColor` previously accepted only a '#rrggbb' string, and passed it
+    straight to PIL's getcolor, which calls .lower() on it. Its callers do not
+    all pass strings:
+
+    - `templates.title` passes the tuple (0, 0, 0) when no background colour is
+      given, and `rgbToDec(bg)` -- a list of 0-1 floats -- when one is. Both
+      raise "'tuple'/'list' object has no attribute 'lower'", so `title`
+      returned None on every call, for every argument, and had done for as long
+      as the traceback was being swallowed by its own `except`.
+
+    Accepting all three here fixes every caller at once rather than patching
+    the one that was noticed.
+    """
+    from PIL.ImageColor import getcolor
+
+    if isinstance(color, str):
+        return getcolor(color, 'RGB')
+    channels = tuple(color)
+    # rgbToDec returns 0-1 floats; ColorClip wants 0-255 ints. A tuple of ints
+    # is already in the right space -- (0, 0, 0) is black either way, which is
+    # harmless, and any non-zero int makes the distinction unambiguous.
+    if channels and all(isinstance(c, float) and 0.0 <= c <= 1.0 for c in channels):
+        return tuple(int(round(c * 255)) for c in channels)
+    return tuple(int(c) for c in channels)
+
+
 def makeColor(
     clipsize: tuple = defaultClipsize,  # tuple (x,y)
-    color: str = '#0000bb',  # rrggbb
+    color='#0000bb',  # '#rrggbb', an (r,g,b) tuple, or 0-1 floats
     position=(0, 0),  # tuple (x,y) from top left
     start=0,
     duration=5,
     **kwargs,
 ):
-    from PIL.ImageColor import getcolor
-
     position = position or (0, 0)
-    color = getcolor(color, 'RGB')
+    color = toRgb(color)
     clip = e.ColorClip(clipsize, color=color)
     composite = (
         clip.set_position(position)
