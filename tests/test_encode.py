@@ -126,3 +126,23 @@ def test_a_video_held_past_the_end_of_its_sound_encodes(media, tmp_path):
 def test_a_silent_edl_encodes(tmp_path):
     infos = encode(Edl(clips=[color_clip(duration=1)]), tmp_path / 'out.mp4')
     assert not infos['audio_found']
+
+
+def test_the_sound_is_written_beside_the_output(recorded_encode):
+    renderMultitrack(Edl(clips=[color_clip()]), filename='/renders/a.mp4')
+    assert recorded_encode[0]['temp_audiofile'] == '/renders/a.audio.m4a'
+
+
+@pytest.mark.render
+def test_an_encode_leaves_the_working_directory_alone(media, tmp_path, monkeypatch):
+    """moviepy wrote its temporary sound file there, named after the output."""
+    cwd = tmp_path / 'cwd'
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    out = tmp_path / 'out' / 'render.mp4'
+    out.parent.mkdir()
+
+    encode(Edl(clips=[color_clip(duration=1), sound(media['tone'], duration=1)]), out)
+
+    assert list(cwd.iterdir()) == []
+    assert [p.name for p in out.parent.iterdir()] == ['render.mp4']

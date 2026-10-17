@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 from typing import NamedTuple
@@ -406,6 +407,11 @@ def renderMultitrack(
         audio_fps=AUDIO_FPS,
         audio_codec='aac',
         audio_bitrate=audio_bitrate,
+        # Beside the output. moviepy otherwise writes the sound to the working
+        # directory, named after the output's basename alone, so two renders
+        # to the same name in different directories wrote the same file, and
+        # a render from a read-only working directory failed.
+        temp_audiofile=os.path.splitext(filename)[0] + '.audio.m4a',
         codec=codec,
         bitrate=bitrate,
         ffmpeg_params=ffmpeg_params,
