@@ -1,10 +1,10 @@
 from typing import NamedTuple
 
 import numpy as np
-from moviepy.editor import VideoFileClip, AudioFileClip, ImageClip
+from moviepy.editor import VideoFileClip, AudioFileClip, ColorClip, ImageClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
-from moviepy.audio.AudioClip import CompositeAudioClip
+from moviepy.audio.AudioClip import AudioClip, CompositeAudioClip
 from PIL import Image
 from otto.templates import TEMPLATES
 from otto.getdata import download
@@ -13,6 +13,16 @@ from otto.exceptions import DownloadException, EmptyClipsException, EdlException
 
 CLIP_TYPES = ('template', 'video', 'image', 'audio')
 """The values a clip's `type` may take."""
+
+AUDIO_FPS = 48000
+"""The sample rate sound is decoded at, mixed at and encoded at.
+
+Decoding every source at the rate the output is written at means ffmpeg does
+any resampling, rather than the mix picking the nearest sample.
+"""
+
+DEFAULT_FPS = 30.0
+"""The frame rate of a render that asks for none and has no clip that has one."""
 
 
 def _describe(index, clip):
@@ -51,7 +61,7 @@ def _open_video(path, box):
         # has the displayed proportions rather than the stored ones.
         width, height = height, width
     fitted = _fit((width, height), box)
-    source = VideoFileClip(path, target_resolution=fitted[::-1])
+    source = VideoFileClip(path, target_resolution=fitted[::-1], audio_fps=AUDIO_FPS)
     # Past its end a video holds its last frame. Left to itself the reader
     # returns whichever frame it read last: the last one when a render reads
     # in order, but the first one when a preview seeks straight past the end.
@@ -126,6 +136,39 @@ def _fade(clip, field, where):
     return seconds
 
 
+def _place_sound(source, timing, fade_in, fade_out, where):
+    """An audio clip's sound, cut to its timing and faded, ready to mix."""
+    if timing.inpoint >= source.duration:
+        raise EdlException(
+            f'{where}: inpoint {timing.inpoint} is not in its source, '
+            f'which is {source.duration:g} seconds long'
+        )
+    # Past the end of its source a sound is silence; moviepy raises when asked
+    # to read there, so stop at the end instead.
+    sound = source.subclip(timing.inpoint, min(timing.outpoint, source.duration))
+    sound = sound.set_start(timing.start)
+    if fade_in > 0:
+        sound = sound.audio_fadein(fade_in)
+    if fade_out > 0:
+        sound = sound.audio_fadeout(fade_out)
+    return sound
+
+
+def _soundtrack(audio):
+    """generateEdl's `audio`: None, an AudioClip, or a path or URL to a file."""
+    if audio is None or isinstance(audio, AudioClip):
+        return audio
+    if isinstance(audio, str):
+        try:
+            return AudioFileClip(download(audio), fps=AUDIO_FPS)
+        except Exception as exc:
+            raise EdlException(f'soundtrack {audio!r}: {exc}') from exc
+    raise EdlException(
+        'audio must be an AudioClip or a path or URL to an audio file, '
+        f'not {type(audio).__name__}'
+    )
+
+
 def _make_template(clip, where, moviesize, duration):
     """Build a template clip from the registry, or say why it cannot be built."""
     template = TEMPLATES.get(clip.name)
@@ -190,6 +233,13 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     A video that ends before its clip does holds its last frame. A template is
     built with enough duration to cover `outpoint`.
 
+    **Sound.** Audio clips are mixed, never drawn: their timing works as
+    above, and their fades fade the volume. The sound of video clips is mixed
+    with them, as is `audio` -- a soundtrack, given as an AudioClip or a path
+    or URL to an audio file -- from the start of the output. Sound that ends
+    before its clip does is followed by silence. An Edl of audio clips alone
+    renders over black.
+
     **Geometry.** The result is `moviesize` (width, height), whatever size its
     clips are. Video and image clips are scaled to fit inside the frame -- or
     inside their `clipsize`, when they have one -- keeping their proportions,
@@ -209,6 +259,8 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     if edl.duration is not None and edl.duration <= 0:
         raise EdlException(f'Edl duration must be positive, not {edl.duration}')
     clips = []
+    sounds = []
+    ends = []
     for index, clip in enumerate(edl.clips):
         where = _describe(index, clip)
         if clip.type not in CLIP_TYPES:
@@ -230,10 +282,7 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
             elif clip.type == 'video':
                 c = _open_video(_media_path(clip, where), box)
             elif clip.type == 'audio':
-                c = CompositeAudioClip(
-                    [AudioFileClip(_media_path(clip, where), fps=48000)]
-                )
-                audio = c.audio_fadein(1).audio_fadeout(1)
+                c = AudioFileClip(_media_path(clip, where), fps=AUDIO_FPS)
             elif clip.type == 'image':
                 c = _open_image(_media_path(clip, where), box)
         except EdlException:
@@ -242,6 +291,17 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
             raise EdlException(
                 f'{where}: could not be opened: {type(exc).__name__}: {exc}'
             ) from exc
+
+        ends.append(timing.start + timing.length)
+        if clip.type == 'audio':
+            sounds.append(_place_sound(c, timing, fade_in, fade_out, where))
+            continue
+
+        # A video's sound can end before its picture does. Drop sound that has
+        # ended before the clip begins, and below, stop it where it ends.
+        if c.audio is not None and c.audio.duration <= timing.inpoint:
+            c = c.without_audio()
+        sound_end = c.audio.duration if c.audio is not None else None
 
         # Which part of the source plays, and for how long. An image is the
         # same picture throughout, so only its length matters.
@@ -254,6 +314,8 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
             raise EdlException(
                 f'{where}: inpoint {timing.inpoint} is not in its source: {exc}'
             ) from exc
+        if sound_end is not None and sound_end - timing.inpoint < timing.length:
+            c = c.set_audio(c.audio.set_duration(sound_end - timing.inpoint))
 
         if clip.resize:
             c = c.resize(clip.resize)
@@ -269,13 +331,21 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
         if clip.opacity is not None:
             c = c.set_opacity(clip.opacity)
         clips.append(c)
+
+    if not clips:
+        # Nothing to see: the sound plays over black.
+        clips.append(ColorClip(moviesize, color=(0, 0, 0)).set_duration(max(ends)))
     # Sized explicitly: without `size`, a composite takes its first clip's.
     video = CompositeVideoClip(clips, size=moviesize)
-    if audio:
-        video = video.set_audio(audio)
-    if edl.duration is not None:
-        video = video.set_duration(edl.duration)
-    return video
+
+    tracks = [video.audio] if video.audio is not None else []
+    tracks += sounds
+    soundtrack = _soundtrack(audio)
+    if soundtrack is not None:
+        tracks.append(soundtrack)
+    if tracks:
+        video = video.set_audio(CompositeAudioClip(tracks))
+    return video.set_duration(edl.duration if edl.duration is not None else max(ends))
 
 
 def renderMultitrack(
@@ -291,14 +361,23 @@ def renderMultitrack(
     ffmpeg_params=None,
     **kwargs,
 ):
-    """Render v2: renders a multitrack Edl as seperate layers"""
-    video = generateEdl(edl, moviesize, **kwargs)
+    """Render v2: renders a multitrack Edl as seperate layers
+
+    Writes `filename` at `moviesize` and `fps` frames per second. `audio` is a
+    soundtrack mixed under the Edl's own sound; see `generateEdl`. An `fps` of
+    None takes the fastest clip's frame rate, or DEFAULT_FPS.
+    """
+    if fps is not None and not fps > 0:
+        raise EdlException(f'fps must be positive, not {fps}')
+    video = generateEdl(edl, moviesize, audio=audio, **kwargs)
+    if fps is None:
+        fps = video.fps or DEFAULT_FPS
     video.write_videofile(
         filename,
-        fps=30.0,
+        fps=fps,
         logger=logger,
         threads=8,
-        audio_fps=48000,
+        audio_fps=AUDIO_FPS,
         audio_codec='aac',
         audio_bitrate=audio_bitrate,
         codec=codec,
