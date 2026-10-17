@@ -6,13 +6,44 @@ Prebuilt Template blocks, designed to be rendered to Clips.
 be built from what it was given; it never returns None.
 """
 
+import numpy as np
 from moviepy.editor import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
-from otto.colortransitions import makeColor, boxReveal, boxShrink, drawBoxOutline
+from otto.colortransitions import (
+    makeColor,
+    boxReveal,
+    boxShrink,
+    drawBoxOutline,
+    toRgb,
+)
 from otto import colortransitions as ct
 from otto.config import defaults
 from otto.utils import rgbToDec
+
+
+def _straight(clip):
+    """`clip` with its colours no longer scaled by its own opacity.
+
+    A transparent CompositeVideoClip blends its layers over black, so where it
+    is partly transparent its colours are already multiplied by its opacity --
+    and the composite it is placed in multiplies them by it again. A box drawn
+    at 40% inside a template showed at 16%, and the antialiased edges of text
+    went dark over a bright picture. Dividing by the mask here leaves the
+    outer composite as the only thing that applies it.
+    """
+    if clip.mask is None:
+        return clip
+    # Read here and again by the composite this clip is placed in.
+    mask = clip.mask.set_memoize(True)
+
+    def straighten(get_frame, t):
+        rgb = get_frame(t)
+        alpha = mask.get_frame(t)[..., None]
+        out = np.divide(rgb, alpha, out=np.zeros(rgb.shape), where=alpha > 0)
+        return np.minimum(out, 255)
+
+    return clip.fl(straighten).set_mask(mask)
 
 
 def _transition(clip, index, count, seconds=1):
@@ -62,11 +93,18 @@ def title(
     boxclip = boxReveal(
         duration=duration, size=textsize, fill=rgbToDec(themecolor)
     ).set_position(position)
-    bgvid = makeColor(
-        textsize, color=rgbToDec(bg) if bg else (0, 0, 0), opacity=0.5 if bg else 0
-    ).set_position(position)
-    return (
-        CompositeVideoClip([bgvid, t, boxclip] if bg else [t, boxclip], size=clipsize)
+    layers = [t, boxclip]
+    if bg:
+        # makeColor takes no opacity: passing one did nothing, so the box
+        # meant to sit half-transparent behind the title was opaque.
+        layers.insert(
+            0,
+            makeColor(textsize, color=bg, duration=duration)
+            .set_position(position)
+            .set_opacity(opacity),
+        )
+    return _straight(
+        CompositeVideoClip(layers, size=clipsize)
         .set_position(position)
         .set_fps(fps)
         .set_duration(duration)
@@ -131,7 +169,7 @@ def initial(
         if bg:
             bkgs.append(
                 _transition(
-                    ColorClip((tc.w, tc.h), color=rgbToDec(bg))
+                    ColorClip((tc.w, tc.h), color=toRgb(bg))
                     .set_duration(tc.duration)
                     .set_start(tc.start)
                     .set_position(tc.pos)
@@ -142,7 +180,7 @@ def initial(
             )
         st += d
     print('initial', bkgs, texts)
-    return (
+    return _straight(
         CompositeVideoClip([*bkgs, *texts, *fxs], size=clipsize)
         .set_position(position)
         .set_duration(duration or d)
@@ -194,7 +232,7 @@ def bullets(
             stroke_color=None,
         ).set_position(position)
         bkg = (
-            ColorClip((clip.w, clip.h), color=rgbToDec(themecolor))
+            ColorClip((clip.w, clip.h), color=toRgb(themecolor))
             .set_position(clip.pos)
             .set_opacity(opacity)
         )
@@ -224,7 +262,7 @@ def bullets(
     final = concatenate_videoclips(clips)
     if duration:
         final = final.set_duration(duration)
-    return final
+    return _straight(final)
 
 
 def final(
@@ -306,7 +344,7 @@ def final(
         transparent=True,
     )
 
-    return (
+    return _straight(
         CompositeVideoClip([dbo, *texts], size=clipsize)
         .set_fps(fps)
         .set_duration(duration)
@@ -334,32 +372,44 @@ def textBox(
     fxs=None,
     **kwargs,
 ):
-    """Render a block of text in a bounding box"""
+    """Render a block of text in a bounding box
+
+    With `bg`, the box is filled with that colour at `opacity`, behind the
+    text.
+    """
 
     color = color or defaults['fontcolor']
     themecolor = themecolor or defaults['themecolor']
     textsize = textsize or (clipsize[0] // 2, clipsize[1] // 2)
     text = text.strip()
-    tc = CompositeVideoClip(
-        [
-            TextClip(
-                text,
-                color=color,
-                fontsize=fontsize,
-                size=textsize,
-                font=font,
-                method=method,
-                stroke_color=None,
-                align=align,
-            )
+    words = (
+        TextClip(
+            text,
+            color=color,
+            fontsize=fontsize,
+            size=textsize,
+            font=font,
+            method=method,
+            stroke_color=None,
+            align=align,
+        )
+        .set_start(start)
+        .set_duration(duration)
+        .set_position(position)
+        .set_fps(fps)
+    )
+    layers = [words]
+    if bg:
+        # This box used to be built and then dropped, so `bg` did nothing.
+        layers.insert(
+            0,
+            ColorClip(words.size, color=toRgb(bg))
             .set_start(start)
             .set_duration(duration)
             .set_position(position)
-            # .resize(textsize)
-            .set_fps(fps)
-        ],
-        size=clipsize,
-    )
+            .set_opacity(opacity),
+        )
+    tc = CompositeVideoClip(layers, size=clipsize)
     if fxs:
         for fx in fxs:
             effect = getattr(ct, fx['name'])
@@ -370,18 +420,7 @@ def textBox(
                 ),
                 relative=True,
             )
-    bkgs = []
-    if bg:
-        bkgs.append(
-            ColorClip((tc.w, tc.h), color=rgbToDec(bg))
-            .set_duration(tc.duration)
-            .set_start(tc.start)
-            .set_position(tc.pos)
-            .set_opacity(opacity)
-        )
-
-    print('textBox', bkgs, fxs)
-    return tc
+    return _straight(tc)
 
 
 TEMPLATES = {
