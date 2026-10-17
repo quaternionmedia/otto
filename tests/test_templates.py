@@ -122,3 +122,110 @@ def test_the_reveal_box_starts_covering_all_of_itself():
     assert tuple(box.size) == (60, 30)
     # The bottom padding rows were left uncovered.
     assert coverage[1:-1, 1:-1].min() == pytest.approx(1)
+
+
+# --- effects ----------------------------------------------------------------
+
+SEEDED_FLY_IN = {'c1x': 1, 'c1y': 0, 'ax': 0, 'ay': 0, 'c2x': 0, 'c2y': 1}
+"""The bezier2 data alfred's seeded projects give textBox."""
+
+
+def fx(**data):
+    return {'name': 'bezier2', 'data': data}
+
+
+def still_curve(x, y=0.0):
+    """A curve that stays at (x, y)."""
+    return fx(c1x=x, c1y=y, ax=x, ay=y, c2x=x, c2y=y)
+
+
+def test_an_effect_flies_in_horizontally_and_rests():
+    position = templates._motion([fx(**SEEDED_FLY_IN)])
+
+    assert position(0) == pytest.approx((1, 0))
+    assert position(0.5) == pytest.approx((0.25, 0))  # (1 - t)^2
+    assert position(1) == (0, 0)
+    assert position(4) == (0, 0)
+
+
+def test_an_effect_can_move_vertically_when_it_says_so():
+    position = templates._motion([fx(**SEEDED_FLY_IN, axes='xy')])
+    assert position(0.5) == pytest.approx((0.25, 0.25))  # (t^2 for y)
+
+
+def test_every_effect_applies_not_just_the_last():
+    position = templates._motion([still_curve(0.25), still_curve(0.5, 0.1)])
+    assert position(0.5) == pytest.approx((0.75, 0))
+
+
+def test_an_fx_model_is_accepted_as_well_as_a_dict():
+    from otto.models import FX
+
+    position = templates._motion([FX(name='bezier2', data=SEEDED_FLY_IN)])
+    assert position(0.5) == pytest.approx((0.25, 0))
+
+
+@pytest.mark.parametrize(
+    'effect, problem',
+    [
+        ({'name': 'bezier2'}, 'needs data'),
+        ({'name': 'bezier2', 'data': {'c1x': 1}}, 'needs data'),
+        ({'name': 'makeColor', 'data': SEEDED_FLY_IN}, 'no fx is named'),
+        ({'name': 'bezier2', 'data': {**SEEDED_FLY_IN, 'axes': 'z'}}, 'axes'),
+    ],
+)
+def test_a_bad_effect_is_refused_before_any_frame_is_drawn(effect, problem):
+    with pytest.raises(ValueError, match=problem):
+        templates._motion([effect])
+
+
+@pytest.mark.render
+def test_a_bad_effect_fails_the_clip_by_name():
+    from otto.exceptions import EdlException
+
+    clip = template('textBox', fxs=[{'name': 'bezier2'}])
+    with pytest.raises(EdlException, match=r"clip 0 \('textBox'\): .*needs data"):
+        render(clip)
+
+
+@pytest.mark.render
+@pytest.mark.parametrize('name', ['textBox', 'initial', 'bullets'])
+def test_text_templates_move_along_their_effects(name):
+    made = render(template(name, fxs=[still_curve(0.25)]))
+
+    assert made.clips[0].pos(0.5) == pytest.approx((0.25, 0))
+    assert made.clips[0].pos(1.5) == (0, 0)
+
+
+@pytest.mark.parametrize('name', ['initial', 'bullets'])
+def test_no_template_shares_a_mutable_default(name):
+    import inspect
+
+    assert (
+        inspect.signature(templates.TEMPLATES[name]).parameters['fxs'].default is None
+    )
+
+
+@pytest.mark.render
+def test_bullets_build_their_own_overlay_on_every_call():
+    templates.bullets(text='x', clipsize=FRAME, duration=3)
+    second = templates.bullets(text='x', clipsize=(128, 72), duration=3)
+
+    assert tuple(second.clips[0].clips[-1].size) == (64, 36)
+
+
+@pytest.mark.render
+def test_bullets_that_end_early_are_held_to_the_duration():
+    """Frames after the last bullet raised IndexError in the middle of a render."""
+    made = render(template('bullets', duration=10))
+
+    assert made.duration == 10
+    made.get_frame(9.5)
+
+
+@pytest.mark.render
+def test_bullets_without_text_are_refused():
+    from otto.exceptions import EdlException
+
+    with pytest.raises(EdlException, match='bullets needs text'):
+        render(template('bullets', text=' • '))

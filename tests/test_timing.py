@@ -224,7 +224,7 @@ def test_sequence_templates_fade_only_between_their_items(name, recorded_fades):
     clip = Clip(
         type='template',
         name=name,
-        duration=30,
+        duration=9,  # three items of 3 seconds each: no padding after them
         fadeIn=0,
         fadeOut=0,
         data=TemplateData(text=text[name]),

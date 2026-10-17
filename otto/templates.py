@@ -60,6 +60,64 @@ def _transition(clip, index, count, seconds=1):
     return clip
 
 
+FX_CURVES = {'bezier2': ct.bezier2}
+"""The effects a template's `fxs` may name: curves the template moves along."""
+
+FX_SECONDS = 1
+"""How long an effect's movement lasts, from the start of the clip."""
+
+
+def _motion(fxs):
+    """A position function that moves a clip along the curves `fxs` describe.
+
+    Each fx is `{'name': <a key of FX_CURVES>, 'data': <its control points>}`,
+    or an FX model. For its first FX_SECONDS the clip is offset by the point
+    each curve has reached, the curve's parameter running from 0 to 1 over
+    that time, summed over the fxs, in fractions of the frame; after that it
+    rests at (0, 0). A curve moves the clip horizontally -- the fly-in alfred's
+    seeded projects are written for, whose curves end a frame below where they
+    start -- unless its data says `axes: 'xy'`, or `'y'`.
+
+    Raises ValueError, here rather than when a frame is drawn, for an fx that
+    names no curve or lacks the data its curve needs.
+    """
+    curves = []
+    for fx in fxs:
+        if isinstance(fx, dict):
+            name, data = fx.get('name'), fx.get('data')
+        else:
+            name, data = getattr(fx, 'name', None), getattr(fx, 'data', None)
+        make_curve = FX_CURVES.get(name)
+        if make_curve is None:
+            raise ValueError(
+                f'no fx is named {name!r}; the fxs are {", ".join(FX_CURVES)}'
+            )
+        data = dict(data or {})
+        axes = data.pop('axes', 'x')
+        if axes not in ('x', 'y', 'xy'):
+            raise ValueError(f'fx {name!r}: axes must be x, y or xy, not {axes!r}')
+        try:
+            curves.append((make_curve(**data), axes))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f'fx {name!r} needs data c1x, c1y, ax, ay, c2x and c2y: {exc}'
+            ) from exc
+
+    def position(t):
+        if t >= FX_SECONDS:
+            return (0, 0)
+        x = y = 0.0
+        for curve, axes in curves:
+            point = curve.evaluate(t / FX_SECONDS)
+            if 'x' in axes:
+                x += float(point[0][0])
+            if 'y' in axes:
+                y += float(point[1][0])
+        return (x, y)
+
+    return position
+
+
 def title(
     text,
     data=None,
@@ -127,7 +185,7 @@ def initial(
     opacity=0.4,
     fps=30,
     bg=None,
-    fxs=[],
+    fxs=None,
     **kwargs,
 ):
     """**DEPRICATED** Initial screen for video. Use textBox instead"""
@@ -179,13 +237,15 @@ def initial(
                 )
             )
         st += d
-    print('initial', bkgs, texts)
-    return _straight(
-        CompositeVideoClip([*bkgs, *texts, *fxs], size=clipsize)
+    made = (
+        CompositeVideoClip([*bkgs, *texts], size=clipsize)
         .set_position(position)
         .set_duration(duration or d)
         .set_fps(30)
     )
+    if fxs:
+        made = made.set_position(_motion(fxs), relative=True)
+    return _straight(made)
 
 
 def bullets(
@@ -203,7 +263,7 @@ def bullets(
     position=('center', 'center'),
     opacity=0.4,
     fps=30,
-    fxs=[],
+    fxs=None,
     **kwargs,
 ):
     """**DEPRICATED** Render bullet points to a video. Use textBox instead."""
@@ -214,14 +274,20 @@ def bullets(
     textsize = textsize or (clipsize[0] // 2, clipsize[1] // 2)
     text = text.split('\u2022')
     text = [t.strip() for t in text if t.strip()]
-    print(
-        'bullet texts',
-        text,
+    if not text:
+        raise ValueError('bullets needs text: bullet points separated by \u2022')
+    # Built for each call. It was appended to the mutable default `fxs=[]`, so
+    # the first call's overlay was reused by every later one; and an fx passed
+    # in through `fxs` -- a dict -- was handed to CompositeVideoClip as a clip.
+    overlay = boxShrink(clipsize=textsize, fill=rgbToDec(themecolor)).set_position(
+        ('left', 'bottom')
     )
     items = []
     st = 0
     for t in text:
         d = 2 + pow(len(t.split(' ')), 0.6)
+        if duration and st + d > duration:
+            break
         clip = TextClip(
             t,
             color=color,
@@ -236,32 +302,25 @@ def bullets(
             .set_position(clip.pos)
             .set_opacity(opacity)
         )
-        if len(fxs) == 0:
-            fxs.append(
-                (
-                    boxShrink(
-                        duration=clip.duration,
-                        clipsize=textsize,
-                        fill=rgbToDec(themecolor),
-                    ).set_position(('left', 'bottom'))
-                )
-            )
-        if not duration or st + d <= duration:
-            items.append(
-                CompositeVideoClip([bkg, clip, *fxs], size=clipsize).set_duration(d)
-            )
-        if duration and st + d > duration:
-            items.append(
-                CompositeVideoClip(
-                    [ColorClip(clipsize, color=(0, 0, 0, 0))]
-                ).set_duration(duration - st)
-            )
-            break
+        items.append(
+            CompositeVideoClip([bkg, clip, overlay], size=clipsize).set_duration(d)
+        )
         st += d
+    if duration and st < duration:
+        # Nothing for the rest of the duration: a bullet that does not fit is
+        # left out, and frames past the last bullet raised IndexError inside
+        # concatenate_videoclips, failing any render whose bullets fell short.
+        items.append(
+            CompositeVideoClip([ColorClip(clipsize, color=(0, 0, 0, 0))]).set_duration(
+                duration - st
+            )
+        )
     clips = [_transition(item, i, len(items)) for i, item in enumerate(items)]
     final = concatenate_videoclips(clips)
     if duration:
         final = final.set_duration(duration)
+    if fxs:
+        final = final.set_position(_motion(fxs), relative=True)
     return _straight(final)
 
 
@@ -411,15 +470,7 @@ def textBox(
         )
     tc = CompositeVideoClip(layers, size=clipsize)
     if fxs:
-        for fx in fxs:
-            effect = getattr(ct, fx['name'])
-            tc = tc.set_position(
-                lambda t: (
-                    effect(**fx['data']).evaluate(t).tolist()[0][0] if t < 1 else 0,
-                    0,
-                ),
-                relative=True,
-            )
+        tc = tc.set_position(_motion(fxs), relative=True)
     return _straight(tc)
 
 
