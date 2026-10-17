@@ -4,6 +4,7 @@ The primary app.
 
 This initializes the main FastAPI `app` and attaches all routes to it.
 """
+
 from fastapi import FastAPI
 from otto.preview import previewAPI
 from otto import templates
@@ -34,8 +35,12 @@ def version() -> dict:
 @app.get('/templates')
 async def getTemplates() -> list:
     """# Get templates
-    Returns a list of template names currently loaded and available."""
-    return [t for t in dir(templates) if t.islower() and t[0] != '_']
+    Returns the names of the templates an Edl may use: `templates.TEMPLATES`.
+
+    This listed the lowercase names in the module's namespace, which offered
+    imports (concatenate_videoclips, ct, defaults) as templates and left out
+    the two current ones, textBox and makeColor, for having capitals."""
+    return list(templates.TEMPLATES)
 
 
 if __name__ == '__main__':
