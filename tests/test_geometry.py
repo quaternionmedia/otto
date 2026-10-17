@@ -89,9 +89,21 @@ def test_a_video_fits_its_clipsize_when_it_has_one(media):
     assert tuple(made.clips[0].size) == (32, 18)
 
 
+def rotated_copy(source, target):
+    """`source`, marked as turned a quarter, the way this ffmpeg marks it.
+
+    ffmpeg 6 and later write a display matrix (`-display_rotation`); earlier
+    ones write a `rotate` tag, and know no `-display_rotation`.
+    """
+    try:
+        ffmpeg('-display_rotation', '90', '-i', source, '-c', 'copy', target)
+    except subprocess.CalledProcessError:
+        ffmpeg('-i', source, '-c', 'copy', '-metadata:s:v:0', 'rotate=90', target)
+
+
 def test_a_rotated_video_is_fitted_upright(media, tmp_path):
     rotated = str(tmp_path / 'rotated.mp4')
-    ffmpeg('-i', media['wide'], '-c', 'copy', '-metadata:s:v:0', 'rotate=90', rotated)
+    rotated_copy(media['wide'], rotated)
 
     made = render(video(rotated))
 

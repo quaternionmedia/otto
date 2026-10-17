@@ -1,6 +1,9 @@
+import re
+import subprocess
 from typing import NamedTuple
 
 import numpy as np
+from moviepy.config import get_setting
 from moviepy.editor import VideoFileClip, AudioFileClip, ColorClip, ImageClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
@@ -50,13 +53,36 @@ def _fit(size, box):
     return max(1, round(width * scale)), max(1, round(height * scale))
 
 
+_DISPLAY_MATRIX = re.compile(r'displaymatrix: rotation of (-?\d+(?:\.\d+)?) degrees')
+
+
+def _rotation(path, infos):
+    """How far the file says its picture is turned, in degrees.
+
+    moviepy reads the `rotate` tag that ffmpeg 4 prints. ffmpeg 5 and later
+    print only a display matrix -- imageio-ffmpeg 0.6 bundles ffmpeg 7 -- so
+    without asking ffmpeg again, a portrait phone video looked unrotated.
+    """
+    if infos.get('video_rotation'):
+        return infos['video_rotation']
+    probe = subprocess.run(
+        [get_setting('FFMPEG_BINARY'), '-hide_banner', '-i', path],
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
+        errors='replace',
+    )
+    match = _DISPLAY_MATRIX.search(probe.stderr)
+    return float(match.group(1)) if match else 0
+
+
 def _open_video(path, box):
     """A video file, scaled by ffmpeg as it decodes to fit inside `box`."""
     infos = ffmpeg_parse_infos(path)
     if not infos.get('video_found'):
         raise ValueError('it has no video stream')
     width, height = infos['video_size']
-    if infos.get('video_rotation') in (90, 270):
+    if round(_rotation(path, infos)) % 180 == 90:
         # ffmpeg turns the frames upright as it decodes them, so the picture
         # has the displayed proportions rather than the stored ones.
         width, height = height, width
