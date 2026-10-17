@@ -4,10 +4,14 @@ from json import loads
 from time import strftime
 from requests import head
 from hashlib import sha256
+from otto.exceptions import DownloadException
 from otto.utils import download_url
 
 content_types = ['image/jpeg', 'video/mp4', 'image/png', 'audio/mpeg']
 extensions = ['jpg', 'mp4', 'png', 'mp3']
+
+MAX_DOWNLOAD_BYTES = 1e10
+"""The largest remote file `download` will fetch, by its content-length."""
 
 
 def hash(s):
@@ -15,32 +19,57 @@ def hash(s):
 
 
 def download(url, location='data'):
+    """A local path for `url`, fetching it into `location` first if it is remote.
+
+    Anything not starting with `http` is taken to be local already and is
+    returned unchanged. A remote file is fetched once, named by a hash of its
+    URL, and only when its HEAD response describes one of `content_types` no
+    larger than MAX_DOWNLOAD_BYTES.
+
+    Raises DownloadException, naming the URL and the reason, when the file is
+    refused or cannot be fetched.
+    """
     if not url.startswith('http'):
         return url
-    else:
-        try:
-            h = head(url, allow_redirects=True)
-            content_type = h.headers.get('content-type').lower()
-            if not content_type:
-                raise Exception('no content_type')
-            if 'text' in content_type:
-                raise Exception('text not allowed')
-            if 'html' in content_type:
-                raise Exception('html not allowed')
-            if float(h.headers.get('content-length')) > 1e10:
-                raise Exception('filesize too large', h.headers.get('content-length'))
-            ct = h.headers.get('content-type')
-            if ct not in content_types:
-                raise Exception('type not allowed', h.headers.get('content-type'))
-            ext = extensions[content_types.index(ct)]
-            basename = f'{hash(url)}.{ext}'
-            filename = path.join(location, basename) if location else basename
-            if not path.isfile(filename):
-                download_url(url, filename)
+    try:
+        response = head(url, allow_redirects=True)
+    except Exception as exc:
+        raise DownloadException(f'{url}: could not be reached: {exc}') from exc
 
-            return filename
-        except Exception as e:
-            print('error downloading file', url, e)
+    content_type = response.headers.get('content-type')
+    if not content_type:
+        raise DownloadException(f'{url}: no content_type in the response')
+    media_type = content_type.split(';')[0].strip().lower()
+    if 'text' in media_type or 'html' in media_type:
+        raise DownloadException(f'{url}: {content_type!r} not allowed: text')
+    if media_type not in content_types:
+        raise DownloadException(
+            f'{url}: {content_type!r} type not allowed; '
+            f'allowed: {", ".join(content_types)}'
+        )
+
+    length = response.headers.get('content-length')
+    try:
+        size = float(length)
+    except (TypeError, ValueError):
+        raise DownloadException(
+            f'{url}: content-length {length!r} not allowed: the size must be known'
+        ) from None
+    if size > MAX_DOWNLOAD_BYTES:
+        raise DownloadException(
+            f'{url}: filesize too large: {length} bytes, '
+            f'the limit is {MAX_DOWNLOAD_BYTES:.0f}'
+        )
+
+    ext = extensions[content_types.index(media_type)]
+    basename = f'{hash(url)}.{ext}'
+    filename = path.join(location, basename) if location else basename
+    if not path.isfile(filename):
+        try:
+            download_url(url, filename)
+        except Exception as exc:
+            raise DownloadException(f'{url}: download failed: {exc}') from exc
+    return filename
 
 
 def openCsv(path):
