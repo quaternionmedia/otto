@@ -71,12 +71,7 @@ def makeColor(
     color = toRgb(color)
     clip = e.ColorClip(clipsize, color=color)
     composite = (
-        clip.set_position(position)
-        .set_start(start)
-        .set_duration(duration)
-        .set_fps(30)
-        .crossfadein(1)
-        .crossfadeout(1)
+        clip.set_position(position).set_start(start).set_duration(duration).set_fps(30)
     )
     return composite
 

@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 import numpy as np
 from moviepy.editor import VideoFileClip, AudioFileClip, ImageClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
@@ -49,7 +51,12 @@ def _open_video(path, box):
         # has the displayed proportions rather than the stored ones.
         width, height = height, width
     fitted = _fit((width, height), box)
-    return VideoFileClip(path, target_resolution=fitted[::-1])
+    source = VideoFileClip(path, target_resolution=fitted[::-1])
+    # Past its end a video holds its last frame. Left to itself the reader
+    # returns whichever frame it read last: the last one when a render reads
+    # in order, but the first one when a preview seeks straight past the end.
+    last = max(0, source.duration - 1 / source.fps)
+    return source.fl(lambda get_frame, t: get_frame(min(t, last)), apply_to=[])
 
 
 def _open_image(path, box):
@@ -63,7 +70,63 @@ def _open_image(path, box):
     return ImageClip(np.array(picture))
 
 
-def _make_template(clip, where, moviesize):
+class Timing(NamedTuple):
+    """Where a clip sits on the output timeline, and what of its source plays."""
+
+    start: float
+    """Seconds into the output at which the clip begins."""
+
+    inpoint: float
+    """Seconds into the source at which playback begins."""
+
+    length: float
+    """Seconds the clip plays for."""
+
+    @property
+    def outpoint(self):
+        """Seconds into the source at which playback ends."""
+        return self.inpoint + self.length
+
+
+def clipTiming(clip, where='clip'):
+    """The Timing of `clip`, per the rules in `generateEdl`.
+
+    Raises EdlException, prefixed with `where`, for timing that describes no
+    clip: a negative start or inpoint, an outpoint not after the inpoint, a
+    duration that is not positive.
+    """
+    for field in ('start', 'inpoint'):
+        value = getattr(clip, field)
+        if value is not None and value < 0:
+            raise EdlException(f'{where}: {field} must not be negative, not {value}')
+    offset = clip.offset or 0
+    start = (clip.start or 0) + max(offset, 0)
+    inpoint = (clip.inpoint or 0) + max(-offset, 0)
+    if clip.outpoint is not None:
+        if clip.outpoint <= inpoint:
+            raise EdlException(
+                f'{where}: outpoint ({clip.outpoint}) must be after '
+                f'the inpoint ({inpoint})'
+            )
+        length = clip.outpoint - inpoint
+    elif clip.duration is None or clip.duration <= 0:
+        raise EdlException(f'{where}: duration must be positive, not {clip.duration}')
+    else:
+        length = clip.duration
+    return Timing(start, inpoint, length)
+
+
+def _fade(clip, field, where):
+    """Seconds of fade asked for: 0 (no fade) when the field is 0 or null."""
+    seconds = getattr(clip, field)
+    if seconds is None:
+        return 0
+    if seconds < 0:
+        raise EdlException(f'{where}: {field} must not be negative, not {seconds}')
+    return seconds
+
+
+def _make_template(clip, where, moviesize, duration):
     """Build a template clip from the registry, or say why it cannot be built."""
     template = TEMPLATES.get(clip.name)
     if template is None:
@@ -77,7 +140,7 @@ def _make_template(clip, where, moviesize):
         made = template(
             **clip.data.dict(exclude_none=True),
             clipsize=clip.clipsize or moviesize,
-            duration=clip.duration,
+            duration=duration,
         )
     except Exception as exc:
         raise EdlException(
@@ -105,20 +168,46 @@ def _media_path(clip, where):
 def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     """Generates a moviepy CompositeVideoClip from an Edl
 
-    The result is `moviesize` (width, height), whatever size its clips are.
-    Video and image clips are scaled to fit inside the frame -- or inside
-    their `clipsize`, when they have one -- keeping their proportions, and
-    `resize` then scales them further. A video or image clip with no
+    **Timing.** Clips are layered, not sequenced: each is placed by its own
+    timing, and clips that overlap in time are stacked in list order, later
+    clips on top.
+
+    - `start` is where the clip begins in the output, in seconds. A clip with
+      no start begins at 0, exactly as one with `start: 0` does.
+    - `inpoint` is where playback begins in the clip's source (default 0).
+    - `outpoint`, when given, is where playback ends in the source, and the
+      clip plays for `outpoint - inpoint` seconds; `duration` is then not
+      consulted. Without an outpoint the clip plays for `duration` seconds.
+      alfred sends both, with `duration == outpoint - inpoint`.
+    - `offset` is deprecated: a positive offset is added to `start`, a
+      negative one to `inpoint`.
+    - `fadeIn` and `fadeOut` are seconds of fade; 0 or null is no fade. They
+      are the only fades a clip gets: templates do not add their own.
+    - `opacity`, when given, scales the clip's opacity: 0 is invisible.
+    - `Edl.duration`, when given, is the length of the output; otherwise the
+      output ends with its last clip.
+
+    A video that ends before its clip does holds its last frame. A template is
+    built with enough duration to cover `outpoint`.
+
+    **Geometry.** The result is `moviesize` (width, height), whatever size its
+    clips are. Video and image clips are scaled to fit inside the frame -- or
+    inside their `clipsize`, when they have one -- keeping their proportions,
+    and `resize` then scales them further. A video or image clip with no
     `position` is centred in the frame.
 
-    Raises EdlException naming the clip -- `clip 2 ('title'): ...` -- for a
-    clip that cannot be rendered: a missing or unknown `type`, a template name
-    that is not in `otto.templates.TEMPLATES`, a template clip without `data`,
-    a template that fails, media that cannot be fetched or opened.
+    **Errors.** Raises EdlException naming the clip -- `clip 2 ('title'):
+    ...` -- for a clip that cannot be rendered: a missing or unknown `type`, a
+    template name that is not in `otto.templates.TEMPLATES`, a template clip
+    without `data`, a template that fails, media that cannot be fetched or
+    opened, timing that describes no clip, a negative fade, an opacity outside
+    0..1.
     """
     if len(edl.clips) == 0:
         raise EmptyClipsException('There were no clips in the Edl')
     moviesize = _frame_size(moviesize)
+    if edl.duration is not None and edl.duration <= 0:
+        raise EdlException(f'Edl duration must be positive, not {edl.duration}')
     clips = []
     for index, clip in enumerate(edl.clips):
         where = _describe(index, clip)
@@ -127,10 +216,17 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
                 f'{where}: unknown clip type {clip.type!r}; '
                 f'a clip is one of {", ".join(CLIP_TYPES)}'
             )
+        timing = clipTiming(clip, where)
+        fade_in = _fade(clip, 'fadeIn', where)
+        fade_out = _fade(clip, 'fadeOut', where)
+        if clip.opacity is not None and not 0 <= clip.opacity <= 1:
+            raise EdlException(
+                f'{where}: opacity must be between 0 and 1, not {clip.opacity}'
+            )
         box = clip.clipsize or moviesize
         try:
             if clip.type == 'template':
-                c = _make_template(clip, where, moviesize)
+                c = _make_template(clip, where, moviesize, timing.outpoint)
             elif clip.type == 'video':
                 c = _open_video(_media_path(clip, where), box)
             elif clip.type == 'audio':
@@ -147,42 +243,38 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
                 f'{where}: could not be opened: {type(exc).__name__}: {exc}'
             ) from exc
 
-        # Apply Effects
+        # Which part of the source plays, and for how long. An image is the
+        # same picture throughout, so only its length matters.
+        try:
+            if timing.inpoint and clip.type != 'image':
+                c = c.subclip(timing.inpoint, timing.outpoint)
+            else:
+                c = c.set_duration(timing.length)
+        except Exception as exc:
+            raise EdlException(
+                f'{where}: inpoint {timing.inpoint} is not in its source: {exc}'
+            ) from exc
+
         if clip.resize:
             c = c.resize(clip.resize)
-        if clip.offset:
-            if clip.offset < 0:
-                c = c.subclip(-clip.offset)
-            else:
-                c = c.set_start(clip.offset)
-        if clip.inpoint:
-            c = c.subclip(clip.inpoint)
-        # if clip.outpoint:
-        #     c = c.set_duration(clip.outpoint - getattr(clip, 'inpoint', 0))
-        if clip.duration is not None:
-            c = c.set_duration(clip.duration)
         if clip.position:
             c = c.set_position(clip.position, relative=clip.relative)
         elif clip.type in ('video', 'image'):
             c = c.set_position('center')
-        if clip.start:
-            c = c.set_start(clip.start)
-        if clip.fadeIn:
-            c = c.crossfadein(clip.fadeIn)
-        if clip.fadeOut:
-            c = c.crossfadeout(clip.fadeOut)
-        if clip.opacity:
+        c = c.set_start(timing.start)
+        if fade_in > 0:
+            c = c.crossfadein(fade_in)
+        if fade_out > 0:
+            c = c.crossfadeout(fade_out)
+        if clip.opacity is not None:
             c = c.set_opacity(clip.opacity)
-        # if clip.fxs:
-        #     render fx
         clips.append(c)
     # Sized explicitly: without `size`, a composite takes its first clip's.
     video = CompositeVideoClip(clips, size=moviesize)
     if audio:
         video = video.set_audio(audio)
-    if edl.duration:
+    if edl.duration is not None:
         video = video.set_duration(edl.duration)
-    # video = video.crossfadeout(1).audio_fadeout(1)
     return video
 
 

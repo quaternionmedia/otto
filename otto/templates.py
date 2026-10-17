@@ -15,6 +15,20 @@ from otto.config import defaults
 from otto.utils import rgbToDec
 
 
+def _transition(clip, index, count, seconds=1):
+    """Fade one item of a sequence in from the item before it and out to the next.
+
+    The first item does not fade in and the last does not fade out: those are
+    the edges of the whole template clip, and the fades there are the clip's
+    own `fadeIn` and `fadeOut`, which the engine applies.
+    """
+    if index > 0:
+        clip = clip.crossfadein(seconds)
+    if index < count - 1:
+        clip = clip.crossfadeout(seconds)
+    return clip
+
+
 def title(
     text,
     data=None,
@@ -56,8 +70,6 @@ def title(
         .set_position(position)
         .set_fps(fps)
         .set_duration(duration)
-        .crossfadein(1)
-        .crossfadeout(1)
     )
 
 
@@ -114,19 +126,19 @@ def initial(
             .set_duration(d)
             .set_position(position)
             .resize(textsize)
-            .crossfadein(1)
-            .crossfadeout(1)
         )
-        texts.append(tc)
+        texts.append(_transition(tc, i, len(text)))
         if bg:
             bkgs.append(
-                ColorClip((tc.w, tc.h), color=rgbToDec(bg))
-                .set_duration(tc.duration)
-                .set_start(tc.start)
-                .set_position(tc.pos)
-                .set_opacity(opacity)
-                .crossfadein(1)
-                .crossfadeout(1)
+                _transition(
+                    ColorClip((tc.w, tc.h), color=rgbToDec(bg))
+                    .set_duration(tc.duration)
+                    .set_start(tc.start)
+                    .set_position(tc.pos)
+                    .set_opacity(opacity),
+                    i,
+                    len(text),
+                )
             )
         st += d
     print('initial', bkgs, texts)
@@ -168,7 +180,7 @@ def bullets(
         'bullet texts',
         text,
     )
-    clips = []
+    items = []
     st = 0
     for t in text:
         d = 2 + pow(len(t.split(' ')), 0.6)
@@ -197,24 +209,18 @@ def bullets(
                 )
             )
         if not duration or st + d <= duration:
-            clips.append(
-                CompositeVideoClip([bkg, clip, *fxs], size=clipsize)
-                # .set_start(st)
-                .set_duration(d)
-                .crossfadein(1)
-                .crossfadeout(1)
+            items.append(
+                CompositeVideoClip([bkg, clip, *fxs], size=clipsize).set_duration(d)
             )
-            print('added clip', t, clip, st, d)
         if duration and st + d > duration:
-            # clips.append(CompositeVideoClip([''], duration=duration - st))
-            print('adding blank clip', st, duration - st)
-            clips.append(
+            items.append(
                 CompositeVideoClip(
                     [ColorClip(clipsize, color=(0, 0, 0, 0))]
                 ).set_duration(duration - st)
             )
             break
         st += d
+    clips = [_transition(item, i, len(items)) for i, item in enumerate(items)]
     final = concatenate_videoclips(clips)
     if duration:
         final = final.set_duration(duration)
@@ -305,8 +311,6 @@ def final(
         .set_fps(fps)
         .set_duration(duration)
         .set_position((0, 0))
-        .crossfadein(1)
-        .crossfadeout(1)
     )
 
 
@@ -353,8 +357,6 @@ def textBox(
             .set_position(position)
             # .resize(textsize)
             .set_fps(fps)
-            .crossfadein(1)
-            .crossfadeout(1)
         ],
         size=clipsize,
     )
@@ -376,8 +378,6 @@ def textBox(
             .set_start(tc.start)
             .set_position(tc.pos)
             .set_opacity(opacity)
-            .crossfadein(1)
-            .crossfadeout(1)
         )
 
     print('textBox', bkgs, fxs)
