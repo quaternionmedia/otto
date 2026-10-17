@@ -155,11 +155,19 @@ def test_timing_is_available_to_callers():
         ({'fadeOut': -0.5}, 'fadeOut must not be negative'),
         ({'opacity': 4.2}, 'opacity must be between 0 and 1'),
         ({'opacity': -0.1}, 'opacity must be between 0 and 1'),
+        ({'resize': 0}, 'resize must be a positive factor'),
+        ({'resize': -2}, 'resize must be a positive factor'),
+        ({'resize': (0, 10)}, 'resize must be a positive factor'),
     ],
 )
 def test_timing_that_describes_no_clip_is_refused(attrs, problem):
     with pytest.raises(EdlException, match=rf"clip 1 \('makeColor'\): {problem}"):
         render(still(), still(**attrs))
+
+
+def test_a_positive_resize_is_accepted():
+    assert tuple(render(still(resize=0.5)).clips[0].size) == (16, 9)
+    assert tuple(render(still(resize=(8, 4))).clips[0].size) == (8, 4)
 
 
 def test_an_edl_duration_must_be_positive():

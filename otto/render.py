@@ -154,6 +154,25 @@ def clipTiming(clip, where='clip'):
     return Timing(start, inpoint, length)
 
 
+def _check_resize(clip, where):
+    """Refuse a `resize` that leaves nothing to draw.
+
+    A factor of 0, or a negative or zero width or height, reached Pillow as an
+    empty image and failed there, naming neither the clip nor the field.
+    """
+    if clip.resize is None:
+        return
+    factors = clip.resize if isinstance(clip.resize, (tuple, list)) else [clip.resize]
+    if not factors or not all(
+        isinstance(f, (int, float)) and not isinstance(f, bool) and f > 0
+        for f in factors
+    ):
+        raise EdlException(
+            f'{where}: resize must be a positive factor or (width, height), '
+            f'not {clip.resize!r}'
+        )
+
+
 def _fade(clip, field, where):
     """Seconds of fade asked for: 0 (no fade) when the field is 0 or null."""
     seconds = getattr(clip, field)
@@ -279,7 +298,7 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     template name that is not in `otto.templates.TEMPLATES`, a template clip
     without `data`, a template that fails, media that cannot be fetched or
     opened, timing that describes no clip, a negative fade, an opacity outside
-    0..1.
+    0..1, a resize that is not positive.
     """
     if len(edl.clips) == 0:
         raise EmptyClipsException('There were no clips in the Edl')
@@ -303,6 +322,7 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
             raise EdlException(
                 f'{where}: opacity must be between 0 and 1, not {clip.opacity}'
             )
+        _check_resize(clip, where)
         box = clip.clipsize or moviesize
         try:
             if clip.type == 'template':
