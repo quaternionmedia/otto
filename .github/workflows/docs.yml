@@ -12,3 +12,7 @@ jobs:
   deploy:
     name: 🖋 Build and deploy docs
     uses: quaternionmedia/.github/.github/workflows/docs.yml@pdm
+    with:
+      # The reusable workflow defaults to the newest Python, which is outside
+      # otto's requires-python, so pdm would refuse to install.
+      python_version: '3.11'

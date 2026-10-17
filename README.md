@@ -90,11 +90,27 @@ pytest
 
 Can also be run with VSCode Python test extension, or VSCode debugger.
 
+Tests marked `render` draw text and shapes, so they need what the `render`
+extra needs from the system (below). The Dockerfile's `test` target has all of
+it:
+
+```bash
+docker build --target test -t otto-test . && docker run --rm otto-test
+```
+
 ### `render`
 
 Includes the python dependencies needed for rendering and effects.
 
 **NOTE** Requires a working installation of [imagemagick](https://imagemagick.org/)
+whose security policy allows reading text from a file (moviepy passes text as
+`@file`; Debian and Ubuntu forbid it), fonts, and cairo. Building `bezier`
+needs `BEZIER_NO_EXTENSION=true` and, with a current pip, the build
+constraints in `build-constraints.txt`:
+
+```bash
+BEZIER_NO_EXTENSION=true PIP_BUILD_CONSTRAINT=build-constraints.txt pip install .[render]
+```
 
 #### `docs`
 

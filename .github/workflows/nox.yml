@@ -21,8 +21,10 @@ jobs:
         with:
           python-version: 3.11
 
+      # nox installs each session's own dependencies; it only needs itself.
+      # This read a requirements-tests.txt the repository does not have.
       - name: 🏗️ Setup testing environment
-        run: pip3 install -r requirements-tests.txt
+        run: pip3 install nox
 
       - name: 🧪 Run nox test suite
         run: nox -s ${{ inputs.args }}

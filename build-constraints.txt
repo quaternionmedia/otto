@@ -1,0 +1,7 @@
+# What pip may install to *build* a dependency from source.
+#
+# bezier 2021.2.12 (the `render` extra) has no wheel for current Pythons, and
+# its setup.py imports pkg_resources, which setuptools 81 removed. pip 25.3 and
+# later read this file as PIP_BUILD_CONSTRAINT; older pip applied
+# PIP_CONSTRAINT to builds instead, so both are pointed here.
+setuptools<81

@@ -24,6 +24,9 @@ jobs:
     environment: codecov
     env:
       BEZIER_NO_EXTENSION: true
+      # bezier cannot be built with setuptools 81+; see build-constraints.txt.
+      PIP_BUILD_CONSTRAINT: build-constraints.txt
+      PIP_CONSTRAINT: build-constraints.txt
 
     steps:
       - name: 📰 Checkout
@@ -39,14 +42,24 @@ jobs:
       - name: 🏗️ Install dependencies
         run: pip install .${{ inputs.pip_extras }}
 
-      - name: 🖼️ Install Imagemagick
-        uses: mfinelli/setup-imagemagick@v2
+      # ImageMagick from apt, not the AppImage this used: that needed libfuse2,
+      # which ubuntu-24.04 renamed libfuse2t64, and was installed without an
+      # apt-get update. The policy file it then deleted was ImageMagick 6's,
+      # which the runner image no longer ships, so `rm` failed the job.
+      #
+      # moviepy hands text to ImageMagick as `@file`, which the distribution
+      # policy forbids; that one rule is removed rather than the whole policy.
+      - name: 🖼️ Install ImageMagick, fonts and cairo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            imagemagick libcairo2 fonts-open-sans fonts-urw-base35
+          for policy in /etc/ImageMagick-6/policy.xml /etc/ImageMagick-7/policy.xml; do
+            if [ -f "$policy" ]; then sudo sed -i '/pattern="@\*"/d' "$policy"; fi
+          done
 
       - name: 🛸 Configure extra test dependencies
-        run: |
-          sudo apt install -y libfuse2 fonts-open-sans
-          mkdir -p data
-          sudo rm /etc/ImageMagick-6/policy.xml
+        run: mkdir -p data
 
       - name: 🧪 Run pytest suite
         run: pytest -v --cov --cov-report lcov ${{ inputs.pytest_args }}
