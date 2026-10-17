@@ -199,7 +199,7 @@ def test_the_default_fades_are_one_second(recorded_fades):
 
 
 # Templates that need ImageMagick (and, for title, cairo) to build.
-TEXT_TEMPLATES = ['title', 'textBox', 'initial', 'bullets']
+TEXT_TEMPLATES = ['title', 'textBox', 'initial', 'bullets', 'final']
 
 
 @pytest.mark.render

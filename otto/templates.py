@@ -343,52 +343,35 @@ def final(
     fps=30,
     **kwargs,
 ):
-    """**DEPRICATED** Render an "End Credits" style information block"""
-    data = data or defaults
+    """**DEPRICATED** Render an "End Credits" style information block
+
+    Four lines: `text`, then `address`, `website` and `phone`, each taken
+    from `data` -- and then from `otto.config.defaults` -- when not given. A
+    line with nothing to say is left out: there is no default phone number.
+    """
+    data = {**defaults, **(data or {})}
     color = color or data['fontcolor']
     themecolor = themecolor or data['themecolor']
     fontsize = fontsize or pow(clipsize[1], 0.9) / 6 - 10
+    lines = [
+        # (words, size, method, y offset); the first is required
+        (text, fontsize * 1.5, method, -clipsize[1] // 4),
+        (address or data.get('address'), fontsize * 0.75, method, -clipsize[1] // 24),
+        (website or data.get('website'), fontsize, method, clipsize[1] // 8),
+        (phone or data.get('phone'), fontsize, 'label', clipsize[1] // 4),
+    ]
     texts = [
         TextClip(
-            text,
+            words,
             color=color,
-            fontsize=fontsize * 1.5,
+            fontsize=size,
             size=clipsize,
             font=font,
-            method=method,
+            method=how,
             stroke_color=None,
-            # align='north').set_position(('center', 'top')),
-        ).set_position((0, -clipsize[1] // 4)),
-        TextClip(
-            address or data['address'],
-            color=color,
-            fontsize=fontsize * 0.75,
-            size=clipsize,
-            font=font,
-            method=method,
-            stroke_color=None,
-            # align='west').set_position(('left', 'center')),
-        ).set_position((0, -clipsize[1] // 24)),
-        TextClip(
-            website or data['website'],
-            color=color,
-            fontsize=fontsize,
-            size=clipsize,
-            font=font,
-            method=method,
-            stroke_color=None,
-            # align='south').set_position(('center', 'bottom')),
-        ).set_position((0, clipsize[1] // 8)),
-        TextClip(
-            phone or data['phone'],
-            color=color,
-            fontsize=fontsize,
-            size=clipsize,
-            font=font,
-            method='label',
-            stroke_color=None,
-            # align='east').set_position(('right', 'center')),
-        ).set_position((0, clipsize[1] // 4)),
+        ).set_position((0, y))
+        for index, (words, size, how, y) in enumerate(lines)
+        if words or index == 0
     ]
 
     # fiag = flyInAndGrow(size=size,

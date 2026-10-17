@@ -110,7 +110,7 @@ def test_bullets_overlay_is_sized_from_the_text():
 
 @pytest.mark.render
 def test_finals_outline_is_sized_from_the_frame():
-    made = templates.final(text='x', phone='555', clipsize=FRAME, duration=3)
+    made = templates.final(text='x', clipsize=FRAME, duration=3)
     assert tuple(made.clips[0].size) == (54, 30)  # 85% of the frame
 
 
@@ -229,3 +229,23 @@ def test_bullets_without_text_are_refused():
 
     with pytest.raises(EdlException, match='bullets needs text'):
         render(template('bullets', text=' • '))
+
+
+# --- final ------------------------------------------------------------------
+
+
+@pytest.mark.render
+def test_final_renders_without_a_phone_number():
+    """It raised KeyError: the defaults it falls back on have no phone."""
+    made = render(template('final', fontsize=None))
+    made.get_frame(1)
+
+
+@pytest.mark.render
+def test_final_draws_the_lines_it_has():
+    without = templates.final(text='x', clipsize=FRAME, duration=3)
+    with_phone = templates.final(text='x', phone='555', clipsize=FRAME, duration=3)
+
+    # The outline and text, address and website; then the phone as well.
+    assert len(without.clips) == 4
+    assert len(with_phone.clips) == 5
