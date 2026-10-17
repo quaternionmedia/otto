@@ -111,16 +111,14 @@ def boxReveal(
     from gizeh import Surface, rectangle
 
     w = clipsize[0] + padding[0] * 2
+    h = clipsize[1] + padding[1] * 2
 
     def br(t):
-        surface = Surface(w, clipsize[1] + padding[1] * 2, bg_color=(0, 0, 0, 0))
+        surface = Surface(w, h, bg_color=(0, 0, 0, 0))
         x = max(w - t * (clipsize[0] + padding[0]) / duration * 6, padding[0])
-        rect = rectangle(
-            lx=x,
-            ly=clipsize[1] + padding[1] * 2,
-            xy=(x / 2, clipsize[1] / 2),
-            fill=fill,
-        )
+        # Full height, so centred on the surface's middle: centred on the
+        # clip's, it left the bottom padding uncovered.
+        rect = rectangle(lx=x, ly=h, xy=(x / 2, h / 2), fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=True)
 

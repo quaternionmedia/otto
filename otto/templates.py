@@ -91,7 +91,7 @@ def title(
         stroke_color=None,
     ).set_position(position)
     boxclip = boxReveal(
-        duration=duration, size=textsize, fill=rgbToDec(themecolor)
+        duration=duration, clipsize=textsize, fill=rgbToDec(themecolor)
     ).set_position(position)
     layers = [t, boxclip]
     if bg:
@@ -241,7 +241,7 @@ def bullets(
                 (
                     boxShrink(
                         duration=clip.duration,
-                        size=textsize,
+                        clipsize=textsize,
                         fill=rgbToDec(themecolor),
                     ).set_position(('left', 'bottom'))
                 )
@@ -338,7 +338,7 @@ def final(
     #         transparent=True)
 
     dbo = drawBoxOutline(
-        size=(int(clipsize[0] * 0.85), int(clipsize[1] * 0.85)),
+        clipsize=(int(clipsize[0] * 0.85), int(clipsize[1] * 0.85)),
         duration=duration,
         fill=rgbToDec(themecolor),
         transparent=True,
