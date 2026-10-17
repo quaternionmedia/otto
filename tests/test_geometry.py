@@ -8,8 +8,8 @@ the top left corner.
 import subprocess
 
 import pytest
-from helpers import BLACK_MP4, close_to, color_clip, ffmpeg, pixel
 
+from helpers import BLACK_MP4, close_to, color_clip, ffmpeg, pixel
 from otto.exceptions import EdlException
 from otto.models import Clip, Edl
 from otto.render import generateEdl

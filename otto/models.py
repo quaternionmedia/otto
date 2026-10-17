@@ -3,8 +3,9 @@
 Generic model classes for media and template data
 """
 
+from typing import List, Literal, Optional, Tuple, Union
+
 from pydantic import BaseModel
-from typing import List, Tuple, Optional, Union, Literal
 
 
 class FX(BaseModel):

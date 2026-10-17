@@ -6,9 +6,9 @@ This initializes the main FastAPI `app` and attaches all routes to it.
 """
 
 from fastapi import FastAPI
+
+from otto import __version__, templates
 from otto.preview import previewAPI
-from otto import templates
-from otto import __version__
 
 app = FastAPI()
 """# The main app"""

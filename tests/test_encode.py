@@ -5,10 +5,10 @@ A few real encodes, kept tiny: 64x36, a second or two, ultrafast.
 
 import numpy as np
 import pytest
-from helpers import color_clip
 from moviepy.editor import AudioFileClip, VideoFileClip
 from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
 
+from helpers import color_clip
 from otto.exceptions import EdlException
 from otto.models import Clip, Edl
 from otto.render import renderMultitrack

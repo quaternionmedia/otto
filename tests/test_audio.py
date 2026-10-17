@@ -7,9 +7,9 @@ reading `.audio` off it. The `audio` argument of renderMultitrack was dropped.
 
 import numpy as np
 import pytest
-from helpers import color_clip, pixel
 from moviepy.editor import AudioFileClip
 
+from helpers import color_clip, pixel
 from otto.exceptions import EdlException
 from otto.models import Clip, Edl
 from otto.render import AUDIO_FPS, generateEdl

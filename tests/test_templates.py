@@ -5,8 +5,8 @@ The templates that need ImageMagick (every one that draws text) are marked
 """
 
 import pytest
-from helpers import close_to, color_clip, pixel
 
+from helpers import close_to, color_clip, pixel
 from otto import templates
 from otto.colortransitions import boxReveal
 from otto.models import Clip, Edl, TemplateData

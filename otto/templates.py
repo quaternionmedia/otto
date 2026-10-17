@@ -7,17 +7,18 @@ be built from what it was given; it never returns None.
 """
 
 import numpy as np
-from moviepy.editor import TextClip, ColorClip
+from moviepy.editor import ColorClip, TextClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
+
+from otto import colortransitions as ct
 from otto.colortransitions import (
-    makeColor,
     boxReveal,
     boxShrink,
     drawBoxOutline,
+    makeColor,
     toRgb,
 )
-from otto import colortransitions as ct
 from otto.config import defaults
 from otto.utils import rgbToDec
 

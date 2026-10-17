@@ -4,16 +4,17 @@ import subprocess
 from typing import NamedTuple
 
 import numpy as np
+from moviepy.audio.AudioClip import AudioClip, CompositeAudioClip
 from moviepy.config import get_setting
-from moviepy.editor import VideoFileClip, AudioFileClip, ColorClip, ImageClip
+from moviepy.editor import AudioFileClip, ColorClip, ImageClip, VideoFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
-from moviepy.audio.AudioClip import AudioClip, CompositeAudioClip
 from PIL import Image
-from otto.templates import TEMPLATES
+
+from otto.exceptions import DownloadException, EdlException, EmptyClipsException
 from otto.getdata import download
 from otto.models import Edl
-from otto.exceptions import DownloadException, EmptyClipsException, EdlException
+from otto.templates import TEMPLATES
 
 CLIP_TYPES = ('template', 'video', 'image', 'audio')
 """The values a clip's `type` may take."""

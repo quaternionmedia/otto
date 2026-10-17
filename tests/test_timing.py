@@ -6,9 +6,9 @@ whatever the clip asked for.
 """
 
 import pytest
-from helpers import SECONDS, close_to, color_clip, pixel
 from moviepy.video.VideoClip import VideoClip
 
+from helpers import SECONDS, close_to, color_clip, pixel
 from otto.exceptions import EdlException
 from otto.models import Clip, Edl, TemplateData
 from otto.render import Timing, clipTiming, generateEdl

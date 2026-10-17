@@ -1,5 +1,6 @@
-from PIL.ImageColor import getcolor
 import urllib.request
+
+from PIL.ImageColor import getcolor
 from tqdm import tqdm
 
 

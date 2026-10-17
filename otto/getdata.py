@@ -1,9 +1,11 @@
-from os import path
 from csv import reader
-from json import loads
-from time import strftime
-from requests import head
 from hashlib import sha256
+from json import loads
+from os import path
+from time import strftime
+
+from requests import head
+
 from otto.exceptions import DownloadException
 from otto.utils import download_url
 
