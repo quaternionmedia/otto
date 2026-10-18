@@ -125,7 +125,7 @@ def test_a_video_shorter_than_its_clip_holds_its_last_frame(media):
 
 
 def test_an_inpoint_past_the_end_of_a_video_is_refused(media):
-    with pytest.raises(EdlException, match=r"clip 0 .*inpoint 9"):
+    with pytest.raises(EdlException, match=r"clip 1 .*inpoint 9"):
         render(clock(media['clock'], inpoint=9, duration=1))
 
 
@@ -161,7 +161,7 @@ def test_timing_is_available_to_callers():
     ],
 )
 def test_timing_that_describes_no_clip_is_refused(attrs, problem):
-    with pytest.raises(EdlException, match=rf"clip 1 \('makeColor'\): {problem}"):
+    with pytest.raises(EdlException, match=rf"clip 2 \('makeColor'\): {problem}"):
         render(still(), still(**attrs))
 
 

@@ -7,8 +7,8 @@ class OttoException(Exception):
 class EdlException(OttoException):
     """An Edl the engine cannot render.
 
-    When one clip is the cause, the message names it by its index in the Edl
-    and its name, e.g. `clip 2 ('title'): ...`.
+    When one clip is the cause, the message names it by its place in the Edl,
+    counted from 1, and its name: `clip 2 ('title'): ...` is the second clip.
     """
 
     pass

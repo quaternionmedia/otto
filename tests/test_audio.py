@@ -127,7 +127,7 @@ def test_an_edl_of_sound_alone_plays_over_black(media):
 
 
 def test_an_inpoint_past_the_end_of_the_sound_is_refused(media):
-    with pytest.raises(EdlException, match=r"clip 0 .*inpoint 5.*seconds long"):
+    with pytest.raises(EdlException, match=r"clip 1 .*inpoint 5.*seconds long"):
         render(sound(media['tone'], inpoint=5, duration=1))
 
 

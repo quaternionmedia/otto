@@ -114,7 +114,7 @@ def test_a_rotated_video_is_fitted_upright(media, tmp_path):
 
 
 def test_a_file_with_no_picture_is_refused(media):
-    with pytest.raises(EdlException, match=r"clip 0 .*no video stream"):
+    with pytest.raises(EdlException, match=r"clip 1 .*no video stream"):
         render(video(media['tone']))
 
 
@@ -163,7 +163,7 @@ def test_resize_scales_the_fitted_image(media):
 
 
 def test_a_file_that_is_not_an_image_is_refused(media):
-    with pytest.raises(EdlException, match=r"clip 0 .*could not be opened"):
+    with pytest.raises(EdlException, match=r"clip 1 .*could not be opened"):
         render(image(media['tone']))
 
 

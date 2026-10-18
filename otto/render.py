@@ -31,8 +31,9 @@ DEFAULT_FPS = 30.0
 
 
 def _describe(index, clip):
-    """How an error names a clip: its index in the Edl, and its name."""
-    return f'clip {index} ({clip.name!r})'
+    """How an error names a clip: its place in the Edl, counted from 1 as
+    alfred counts them, and its name. `index` counts from 0."""
+    return f'clip {index + 1} ({clip.name!r})'
 
 
 def _frame_size(moviesize):
@@ -294,11 +295,12 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     `position` is centred in the frame.
 
     **Errors.** Raises EdlException naming the clip -- `clip 2 ('title'):
-    ...` -- for a clip that cannot be rendered: a missing or unknown `type`, a
-    template name that is not in `otto.templates.TEMPLATES`, a template clip
-    without `data`, a template that fails, media that cannot be fetched or
-    opened, timing that describes no clip, a negative fade, an opacity outside
-    0..1, a resize that is not positive.
+    ...` is the second clip, counting from 1 -- for a clip that cannot be
+    rendered: a missing or unknown `type`, a template name that is not in
+    `otto.templates.TEMPLATES`, a template clip without `data`, a template
+    that fails, media that cannot be fetched or opened, timing that describes
+    no clip, a negative fade, an opacity outside 0..1, a resize that is not
+    positive.
     """
     if len(edl.clips) == 0:
         raise EmptyClipsException('There were no clips in the Edl')

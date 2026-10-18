@@ -184,7 +184,7 @@ def test_a_bad_effect_fails_the_clip_by_name():
     from otto.exceptions import EdlException
 
     clip = template('textBox', fxs=[{'name': 'bezier2'}])
-    with pytest.raises(EdlException, match=r"clip 0 \('textBox'\): .*needs data"):
+    with pytest.raises(EdlException, match=r"clip 1 \('textBox'\): .*needs data"):
         render(clip)
 
 

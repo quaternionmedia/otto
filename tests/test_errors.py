@@ -5,6 +5,8 @@ silently duplicated the previous layer on any later one; template names were
 resolved against the whole module namespace; templates swallowed their own
 errors and returned None; a refused download returned None and became the
 clip's filename.
+
+Clips are counted from 1, as alfred counts them in its own refusals.
 """
 
 import shutil
@@ -29,13 +31,20 @@ def render(*clips):
 
 @pytest.mark.parametrize('kind', ['bogus', 'Video', '', None])
 def test_an_unknown_or_missing_type_is_refused(kind):
-    with pytest.raises(EdlException, match=r"clip 0 \('x'\): unknown clip type"):
+    with pytest.raises(EdlException, match=r"clip 1 \('x'\): unknown clip type"):
         render(Clip(type=kind, name='x', duration=1))
 
 
 def test_an_unknown_type_after_a_good_clip_is_refused_not_duplicated():
-    with pytest.raises(EdlException, match=r"clip 1 \('x'\)"):
+    with pytest.raises(EdlException, match=r"clip 2 \('x'\)"):
         render(color_clip(), Clip(type='bogus', name='x', duration=4))
+
+
+def test_clips_are_counted_from_one():
+    """They were counted from 0, so otto's `clip 1` was alfred's clip 2."""
+    with pytest.raises(EdlException) as raised:
+        render(color_clip(), color_clip(), Clip(type='bogus', name='x', duration=1))
+    assert str(raised.value).startswith("clip 3 ('x'): ")
 
 
 # --- templates --------------------------------------------------------------
@@ -59,7 +68,7 @@ def test_an_unknown_type_after_a_good_clip_is_refused_not_duplicated():
 )
 def test_only_registered_templates_can_be_named(name):
     clip = Clip(type='template', name=name, duration=1, data=TemplateData(text='x'))
-    with pytest.raises(EdlException, match=rf"clip 0 \('{name}'\): no template"):
+    with pytest.raises(EdlException, match=rf"clip 1 \('{name}'\): no template"):
         render(clip)
 
 
@@ -85,14 +94,14 @@ def test_the_registry_holds_templates_and_nothing_else():
 
 
 def test_a_template_clip_needs_data():
-    with pytest.raises(EdlException, match=r"clip 0 \('makeColor'\): .*needs `data`"):
+    with pytest.raises(EdlException, match=r"clip 1 \('makeColor'\): .*needs `data`"):
         render(Clip(type='template', name='makeColor', duration=1))
 
 
 def test_a_failing_template_raises_with_its_cause():
     """`title` needs text. It used to print the TypeError and return None."""
     clip = Clip(type='template', name='title', duration=1, data=TemplateData())
-    with pytest.raises(EdlException, match=r"clip 0 \('title'\): template") as raised:
+    with pytest.raises(EdlException, match=r"clip 1 \('title'\): template") as raised:
         render(clip)
     assert isinstance(raised.value.__cause__, TypeError)
 
@@ -107,12 +116,12 @@ def test_templates_raise_rather_than_return_none(name):
 
 
 def test_a_media_clip_needs_a_name():
-    with pytest.raises(EdlException, match=r"clip 0 \(None\): a video clip needs"):
+    with pytest.raises(EdlException, match=r"clip 1 \(None\): a video clip needs"):
         render(Clip(type='video', duration=1))
 
 
 def test_a_missing_file_names_the_clip():
-    with pytest.raises(EdlException, match=r"clip 0 \('/no/such/file.mp4'\)"):
+    with pytest.raises(EdlException, match=r"clip 1 \('/no/such/file.mp4'\)"):
         render(Clip(type='video', name='/no/such/file.mp4', duration=1))
 
 
@@ -200,6 +209,6 @@ def test_a_refused_download_fails_the_render_naming_the_clip(fake_head, monkeypa
         render(clip)
 
     message = str(raised.value)
-    assert message.startswith("clip 0 ('https://example.test/bad'):")
+    assert message.startswith("clip 1 ('https://example.test/bad'):")
     assert 'not allowed' in message
     assert isinstance(raised.value.__cause__, DownloadException)
