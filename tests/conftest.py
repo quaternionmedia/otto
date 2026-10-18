@@ -3,12 +3,47 @@
 Media is synthesised once per session with the ffmpeg moviepy itself uses
 (imageio-ffmpeg's), so the suite needs no media beyond the two files checked
 in, and no network.
+
+Every test downloads into a directory of its own (OTTO_DOWNLOAD_DIR), so none
+fetches into, or reuses a file from, the real download cache.
 """
 
 import pytest
 from PIL import Image
 
 from helpers import SECONDS, ffmpeg
+from otto import getdata
+
+
+@pytest.fixture(autouse=True)
+def download_dir(monkeypatch, tmp_path):
+    """The directory remote media is fetched into during this test."""
+    directory = tmp_path / 'downloads'
+    monkeypatch.setenv(getdata.DOWNLOAD_DIR_ENV, str(directory))
+    return directory
+
+
+class FakeHead:
+    """What `requests.head` answers, as far as `download` reads it."""
+
+    def __init__(self, content_type='video/mp4', content_length='1000'):
+        self.headers = {}
+        if content_type is not None:
+            self.headers['content-type'] = content_type
+        if content_length is not None:
+            self.headers['content-length'] = content_length
+
+
+@pytest.fixture
+def fake_head(monkeypatch):
+    """Answer `download`'s HEAD requests; call the result to change the answer."""
+    state = {'response': FakeHead()}
+    monkeypatch.setattr(getdata, 'head', lambda url, allow_redirects: state['response'])
+
+    def serve(**kwargs):
+        state['response'] = FakeHead(**kwargs)
+
+    return serve
 
 
 @pytest.fixture(scope='session')

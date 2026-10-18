@@ -123,10 +123,8 @@ def test_the_clip_name_is_left_as_the_caller_wrote_it():
     assert edl.clips[0].name == BLACK_MP4
 
 
-def test_a_downloaded_clip_keeps_its_url(fake_head, monkeypatch, tmp_path):
+def test_a_downloaded_clip_keeps_its_url(fake_head, monkeypatch):
     """It used to be overwritten with the downloaded file's path."""
-    monkeypatch.chdir(tmp_path)
-    (tmp_path / 'data').mkdir()
     monkeypatch.setattr(
         getdata, 'download_url', lambda url, filename: shutil.copy(BLACK_MP4, filename)
     )
@@ -138,26 +136,8 @@ def test_a_downloaded_clip_keeps_its_url(fake_head, monkeypatch, tmp_path):
 
 
 # --- download ---------------------------------------------------------------
-
-
-class FakeHead:
-    def __init__(self, content_type='video/mp4', content_length='1000'):
-        self.headers = {}
-        if content_type is not None:
-            self.headers['content-type'] = content_type
-        if content_length is not None:
-            self.headers['content-length'] = content_length
-
-
-@pytest.fixture
-def fake_head(monkeypatch):
-    state = {'response': FakeHead()}
-    monkeypatch.setattr(getdata, 'head', lambda url, allow_redirects: state['response'])
-
-    def serve(**kwargs):
-        state['response'] = FakeHead(**kwargs)
-
-    return serve
+#
+# `fake_head` (conftest.py) answers the HEAD request a download starts with.
 
 
 @pytest.mark.parametrize(

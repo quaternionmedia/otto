@@ -112,6 +112,13 @@ constraints in `build-constraints.txt`:
 BEZIER_NO_EXTENSION=true PIP_BUILD_CONSTRAINT=build-constraints.txt pip install .[render]
 ```
 
+#### Remote media
+
+A clip whose `name` is an `http(s)` URL is fetched before it is rendered: into
+the directory `OTTO_DOWNLOAD_DIR` names, or else into a cache of the user's own
+under the system temporary directory -- never the working directory. Each file
+is named by a hash of its URL and is fetched once.
+
 #### `docs`
 
 Includes documentation building tool. Run with:
