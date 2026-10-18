@@ -99,6 +99,10 @@ except NoSoundException:
   or no audio clip and no video clip with sound where it plays, `renderSound`
   raises `NoSoundException`, an `EdlException`, and writes nothing. A `rate`
   that is not a positive whole number is an `EdlException` too.
+- **A file it cannot write is an error, not a length.** moviepy never asks how
+  ffmpeg exited, so the length is read back from the file: a WAV that was not
+  written is an `OSError` naming it, where it would otherwise have gone
+  unnoticed.
 
 ## Each video is probed once per version of its file
 

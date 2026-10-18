@@ -633,7 +633,8 @@ def renderSound(edl: Edl, filename, rate=AUDIO_FPS, logger=None):
     a sound: it has no video or audio clip, or no audio clip and no video clip
     with sound where it plays. Raises EdlException, as generateEdl does, for a
     clip that cannot be heard, and for a `rate` that is not a positive whole
-    number.
+    number. A file that cannot be written is an OSError: moviepy's, carrying
+    ffmpeg's complaint, or the read-back's when moviepy did not notice.
     """
     rate = _sample_rate(rate)
     if len(edl.clips) == 0:
