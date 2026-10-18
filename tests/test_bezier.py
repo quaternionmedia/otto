@@ -1,0 +1,212 @@
+"""Effect curves are evaluated with numpy, to the bit what bezier gave.
+
+otto used the `bezier` package for one thing: the quadratic curve that
+`bezier2` effects move a template along (and `makeBezier` draws). bezier has
+no wheel for current Pythons, and its build imports pkg_resources, which
+setuptools 81 removed, so installing otto's `render` extra needed an old
+setuptools pinned for the build. `bezier2` now evaluates the curve itself.
+
+RECORDED is what `bezier2(**CURVES[name]).evaluate(s)` returned with bezier
+2021.2.12 (pure Python, BEZIER_NO_EXTENSION) and numpy 1.24.4, before the
+change: every point, compared exactly.
+"""
+
+import numpy as np
+import pytest
+
+from otto import templates
+from otto.colortransitions import QuadraticBezier, bezier2
+
+CURVES = {
+    'seeded fly-in': {'c1x': 1, 'c1y': 0, 'ax': 0, 'ay': 0, 'c2x': 0, 'c2y': 1},
+    'still': {'c1x': 0.25, 'c1y': 0.1, 'ax': 0.25, 'ay': 0.1, 'c2x': 0.25, 'c2y': 0.1},
+    'makeBezier demo': {'c1x': 0, 'c1y': 0, 'ax': 0, 'ay': 0, 'c2x': 1, 'c2y': 1},
+    'arbitrary': {
+        'c1x': -0.7,
+        'c1y': 2.5,
+        'ax': 3.25,
+        'ay': -1.125,
+        'c2x': 0.1,
+        'c2y': 0.3,
+    },
+    'large ints': {
+        'c1x': 1920,
+        'c1y': -1080,
+        'ax': 17,
+        'ay': 4,
+        'c2x': -3,
+        'c2y': 1081,
+    },
+    'thirds': {
+        'c1x': 0.3333333333333333,
+        'c1y': 0.6666666666666666,
+        'ax': 0.1,
+        'ay': 0.2,
+        'c2x': 1e-09,
+        'c2y': 1000000000.0,
+    },
+}
+
+RECORDED = {
+    'seeded fly-in': [
+        (0.0, (1.0, 0.0)),
+        (1e-06, (0.9999980000009999, 1e-12)),
+        (0.1, (0.81, 0.010000000000000002)),
+        (0.25, (0.5625, 0.0625)),
+        (0.3333333333333333, (0.44444444444444453, 0.1111111111111111)),
+        (0.5, (0.25, 0.25)),
+        (0.6, (0.16000000000000003, 0.36)),
+        (0.6666666666666666, (0.11111111111111113, 0.4444444444444444)),
+        (0.75, (0.0625, 0.5625)),
+        (0.9, (0.009999999999999995, 0.81)),
+        (0.999999, (1.0000000000575112e-12, 0.9999980000009999)),
+        (1.0, (0.0, 1.0)),
+        (-0.5, (2.25, 0.25)),
+        (1.5, (0.25, 2.25)),
+        (2.0, (1.0, 4.0)),
+        (4.9, (15.210000000000003, 24.010000000000005)),
+    ],
+    'still': [
+        (0.0, (0.25, 0.1)),
+        (1e-06, (0.24999999999999997, 0.1)),
+        (0.1, (0.25, 0.10000000000000002)),
+        (0.25, (0.25, 0.1)),
+        (0.3333333333333333, (0.25000000000000006, 0.10000000000000003)),
+        (0.5, (0.25, 0.1)),
+        (0.6, (0.25, 0.1)),
+        (0.6666666666666666, (0.25, 0.1)),
+        (0.75, (0.25, 0.1)),
+        (0.9, (0.25, 0.10000000000000002)),
+        (0.999999, (0.25, 0.1)),
+        (1.0, (0.25, 0.1)),
+        (-0.5, (0.25, 0.10000000000000003)),
+        (1.5, (0.25, 0.09999999999999998)),
+        (2.0, (0.25, 0.09999999999999998)),
+        (4.9, (0.25, 0.10000000000000009)),
+    ],
+    'makeBezier demo': [
+        (0.0, (0.0, 0.0)),
+        (1e-06, (1e-12, 1e-12)),
+        (0.1, (0.010000000000000002, 0.010000000000000002)),
+        (0.25, (0.0625, 0.0625)),
+        (0.3333333333333333, (0.1111111111111111, 0.1111111111111111)),
+        (0.5, (0.25, 0.25)),
+        (0.6, (0.36, 0.36)),
+        (0.6666666666666666, (0.4444444444444444, 0.4444444444444444)),
+        (0.75, (0.5625, 0.5625)),
+        (0.9, (0.81, 0.81)),
+        (0.999999, (0.9999980000009999, 0.9999980000009999)),
+        (1.0, (1.0, 1.0)),
+        (-0.5, (0.25, 0.25)),
+        (1.5, (2.25, 2.25)),
+        (2.0, (4.0, 4.0)),
+        (4.9, (24.010000000000005, 24.010000000000005)),
+    ],
+    'arbitrary': [
+        (0.0, (-0.7, 2.5)),
+        (1e-06, (-0.6999921000070999, 2.4999927500050503)),
+        (0.1, (0.019000000000000017, 1.8255)),
+        (0.25, (0.83125, 1.003125)),
+        (0.3333333333333333, (1.1444444444444444, 0.6444444444444447)),
+        (0.5, (1.4749999999999999, 0.1375)),
+        (0.6, (1.4840000000000002, -0.03199999999999996)),
+        (0.6666666666666666, (1.4111111111111112, -0.08888888888888888)),
+        (0.75, (1.23125, -0.09687500000000002)),
+        (0.9, (0.6589999999999998, 0.06550000000000003)),
+        (0.999999, (0.10000629999290019, 0.2999971500050499)),
+        (1.0, (0.1, 0.3)),
+        (-0.5, (-6.424999999999999, 7.3875)),
+        (1.5, (-4.825, 2.9875)),
+        (2.0, (-13.299999999999999, 8.2)),
+        (4.9, (-132.46099999999998, 88.22550000000001)),
+    ],
+    'large ints': [
+        (0.0, (1920.0, -1080.0)),
+        (1e-06, (1919.9961940018827, -1079.997832000007)),
+        (0.1, (1558.2300000000002, -863.27)),
+        (0.25, (1086.1875, -538.4375)),
+        (0.3333333333333333, (860.5555555555558, -358.1111111111113)),
+        (0.5, (487.75, 2.25)),
+        (0.6, (314.28000000000003, 218.27999999999997)),
+        (0.6666666666666666, (219.5555555555556, 362.2222222222222)),
+        (0.75, (124.6875, 542.0625)),
+        (0.9, (19.829999999999988, 865.53)),
+        (0.999999, (-2.999959998116999, 1080.997845999993)),
+        (1.0, (-3.0, 1081.0)),
+        (-0.5, (4293.75, -2165.75)),
+        (1.5, (447.75, 2156.25)),
+        (2.0, (1840.0, 3228.0)),
+        (4.9, (28481.430000000008, 9375.130000000005)),
+    ],
+    'thirds': [
+        (0.0, (0.3333333333333333, 0.6666666666666666)),
+        (1e-06, (0.3333328666668, 0.6676657333336)),
+        (0.1, (0.28800000001000003, 10000000.576000001)),
+        (0.25, (0.22500000006249998, 62500000.45)),
+        (0.3333333333333333, (0.19259259270370374, 111111111.49629629)),
+        (0.5, (0.13333333358333332, 250000000.26666668)),
+        (0.6, (0.10133333369333333, 360000000.20266664)),
+        (0.6666666666666666, (0.08148148192592594, 444444444.6074074)),
+        (0.75, (0.05833333389583333, 562500000.1166667)),
+        (0.9, (0.02133333414333333, 810000000.0426667)),
+        (0.999999, (2.0100013133908549e-07, 999998000.0010003)),
+        (1.0, (1e-09, 1000000000.0)),
+        (-0.5, (0.6000000002500001, 250000001.2)),
+        (1.5, (-0.06666666441666669, 2249999999.866667)),
+        (2.0, (-0.06666666266666671, 3999999999.866667)),
+        (4.9, (1.24800002401, 24010000002.496002)),
+    ],
+}
+"""(s, (x, y)) along each of CURVES, as bezier evaluated them.
+
+s runs past 0..1 as well: makeBezier evaluates its curve at t in seconds.
+"""
+
+
+@pytest.mark.parametrize('name', CURVES)
+def test_bezier2_evaluates_to_exactly_what_bezier_did(name):
+    curve = bezier2(**CURVES[name])
+    for s, (x, y) in RECORDED[name]:
+        point = curve.evaluate(s)
+        assert point.shape == (2, 1)
+        assert (point[0][0], point[1][0]) == (x, y), f'at s={s!r}'
+
+
+def test_bezier2_still_takes_the_seeded_effects_data():
+    """alfred's seeds pass ints, and the data holds keys the curve ignores."""
+    curve = bezier2(c1x=1, c1y=0, ax=0, ay=0, c2x=0, c2y=1, axes='x')
+    assert curve.degree == 2
+    assert curve.nodes.tolist() == [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]
+
+
+@pytest.mark.parametrize('point', [None, 'a', [1, 2]], ids=repr)
+def test_a_point_that_is_not_a_number_is_refused_when_the_curve_is_made(point):
+    """bezier took it, and failed when the curve was first evaluated -- on
+    whichever frame came first."""
+    with pytest.raises((TypeError, ValueError)):
+        bezier2(c1x=point, c1y=0, ax=0, ay=0, c2x=0, c2y=1)
+
+
+def test_a_bad_point_fails_the_effect_before_any_frame_is_drawn():
+    with pytest.raises(ValueError, match='needs data'):
+        templates._motion(
+            [{'name': 'bezier2', 'data': {**CURVES['seeded fly-in'], 'ax': 'a'}}]
+        )
+
+
+def test_a_curve_is_three_points_in_the_plane():
+    with pytest.raises(ValueError, match='3 points of 2 coordinates'):
+        QuadraticBezier([[0, 1], [0, 1]])
+
+
+def test_bezier2_matches_the_bezier_package_wherever_it_is_installed():
+    """The recorded table, checked again across many curves, when bezier is
+    there to check against."""
+    bezier = pytest.importorskip('bezier')
+    rng = np.random.default_rng(2021)
+    for _ in range(5000):
+        nodes = rng.choice([0.0, 1.0, -1.0, 1e-9, 1e9]) * rng.standard_normal((2, 3))
+        s = float(rng.choice([rng.random(), rng.uniform(-3, 6), 0.0, 0.5, 1.0]))
+        expected = bezier.Curve(np.asfortranarray(nodes), degree=2).evaluate(s)
+        actual = QuadraticBezier(nodes).evaluate(s)
+        assert np.array_equal(actual, expected), (nodes.tolist(), s)
