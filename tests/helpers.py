@@ -46,3 +46,15 @@ def ffmpeg(*args):
         + list(args),
         check=True,
     )
+
+
+def rotated_copy(source, target):
+    """`source`, marked as turned a quarter, the way this ffmpeg marks it.
+
+    ffmpeg 6 and later write a display matrix (`-display_rotation`); earlier
+    ones write a `rotate` tag, and know no `-display_rotation`.
+    """
+    try:
+        ffmpeg('-display_rotation', '90', '-i', source, '-c', 'copy', target)
+    except subprocess.CalledProcessError:
+        ffmpeg('-i', source, '-c', 'copy', '-metadata:s:v:0', 'rotate=90', target)

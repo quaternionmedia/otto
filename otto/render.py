@@ -1,3 +1,4 @@
+import functools
 import os
 import re
 import subprocess
@@ -59,15 +60,8 @@ def _fit(size, box):
 _DISPLAY_MATRIX = re.compile(r'displaymatrix: rotation of (-?\d+(?:\.\d+)?) degrees')
 
 
-def _rotation(path, infos):
-    """How far the file says its picture is turned, in degrees.
-
-    moviepy reads the `rotate` tag that ffmpeg 4 prints. ffmpeg 5 and later
-    print only a display matrix -- imageio-ffmpeg 0.6 bundles ffmpeg 7 -- so
-    without asking ffmpeg again, a portrait phone video looked unrotated.
-    """
-    if infos.get('video_rotation'):
-        return infos['video_rotation']
+def _display_matrix_rotation(path):
+    """The rotation ffmpeg reports for `path` as a display matrix, or 0."""
     probe = subprocess.run(
         [get_setting('FFMPEG_BINARY'), '-hide_banner', '-i', path],
         stdin=subprocess.DEVNULL,
@@ -79,17 +73,63 @@ def _rotation(path, infos):
     return float(match.group(1)) if match else 0
 
 
-def _open_video(path, box):
-    """A video file, scaled by ffmpeg as it decodes to fit inside `box`."""
+def _rotation(path, infos):
+    """How far the file says its picture is turned, in degrees.
+
+    moviepy reads the `rotate` tag that ffmpeg 4 prints. ffmpeg 5 and later
+    print only a display matrix -- imageio-ffmpeg 0.6 bundles ffmpeg 7 -- so
+    without asking ffmpeg again, a portrait phone video looked unrotated.
+    """
+    return infos.get('video_rotation') or _display_matrix_rotation(path)
+
+
+class _VideoProbe(NamedTuple):
+    """What otto reads from a video file before it opens it."""
+
+    size: tuple
+    """The picture's (width, height) as stored."""
+
+    rotation: float
+    """How far the file says the picture is turned, in degrees."""
+
+    @property
+    def upright_size(self):
+        """The picture's (width, height) once ffmpeg has turned it upright."""
+        width, height = self.size
+        return (height, width) if round(self.rotation) % 180 == 90 else (width, height)
+
+
+PROBE_CACHE_SIZE = 256
+"""How many probes are kept; past that, the least recently used are forgotten."""
+
+
+@functools.lru_cache(maxsize=PROBE_CACHE_SIZE)
+def _probe(path, mtime_ns, size):
+    """Probe the video at absolute `path`; `mtime_ns` and `size` key the cache."""
     infos = ffmpeg_parse_infos(path)
     if not infos.get('video_found'):
         raise ValueError('it has no video stream')
-    width, height = infos['video_size']
-    if round(_rotation(path, infos)) % 180 == 90:
-        # ffmpeg turns the frames upright as it decodes them, so the picture
-        # has the displayed proportions rather than the stored ones.
-        width, height = height, width
-    fitted = _fit((width, height), box)
+    return _VideoProbe(tuple(infos['video_size']), _rotation(path, infos))
+
+
+def _probe_video(path):
+    """`path`'s _VideoProbe, from ffmpeg once for each version of the file.
+
+    A preview builds the whole Edl again for every frame it shows, and each
+    build asked ffmpeg about each video before opening it -- twice for one
+    that is not turned, since moviepy then reports no rotation and ffmpeg was
+    asked again for a display matrix. A file is asked about again only once
+    its modification time or its size has changed.
+    """
+    info = os.stat(path)
+    return _probe(os.path.abspath(path), info.st_mtime_ns, info.st_size)
+
+
+def _open_video(path, box):
+    """A video file, scaled by ffmpeg as it decodes to fit inside `box`."""
+    # ffmpeg turns the frames upright as it decodes them, so the picture has
+    # the displayed proportions rather than the stored ones.
+    fitted = _fit(_probe_video(path).upright_size, box)
     source = VideoFileClip(path, target_resolution=fitted[::-1], audio_fps=AUDIO_FPS)
     # Past its end a video holds its last frame. Left to itself the reader
     # returns whichever frame it read last: the last one when a render reads

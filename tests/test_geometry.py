@@ -9,7 +9,7 @@ import subprocess
 
 import pytest
 
-from helpers import BLACK_MP4, close_to, color_clip, ffmpeg, pixel
+from helpers import BLACK_MP4, close_to, color_clip, pixel, rotated_copy
 from otto.exceptions import EdlException
 from otto.models import Clip, Edl
 from otto.render import generateEdl
@@ -87,18 +87,6 @@ def test_a_wide_video_is_letterboxed_rather_than_cropped(media):
 def test_a_video_fits_its_clipsize_when_it_has_one(media):
     made = render(video(media['wide'], clipsize=(32, 18)))
     assert tuple(made.clips[0].size) == (32, 18)
-
-
-def rotated_copy(source, target):
-    """`source`, marked as turned a quarter, the way this ffmpeg marks it.
-
-    ffmpeg 6 and later write a display matrix (`-display_rotation`); earlier
-    ones write a `rotate` tag, and know no `-display_rotation`.
-    """
-    try:
-        ffmpeg('-display_rotation', '90', '-i', source, '-c', 'copy', target)
-    except subprocess.CalledProcessError:
-        ffmpeg('-i', source, '-c', 'copy', '-metadata:s:v:0', 'rotate=90', target)
 
 
 def test_a_rotated_video_is_fitted_upright(media, tmp_path):
