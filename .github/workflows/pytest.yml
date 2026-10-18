@@ -25,10 +25,10 @@ jobs:
 
     steps:
       - name: 📰 Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: 🐍 Setup Python
-        uses: actions/setup-python@main
+        uses: actions/setup-python@v7
         id: setup-python
         with:
           python-version: ${{ inputs.python_version }}
@@ -63,6 +63,6 @@ jobs:
         # always run this step, even if the tests fail
         # putting always() would cause the function to run even if the build is canceled
         if: success() || failure()
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

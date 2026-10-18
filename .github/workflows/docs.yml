@@ -11,7 +11,9 @@ on:
 jobs:
   deploy:
     name: 🖋 Build and deploy docs
-    uses: quaternionmedia/.github/.github/workflows/docs.yml@pdm
+    # The org's main branch, as every other workflow here: its docs.yml is the
+    # same pdm workflow as the `pdm` branch's, and the one that is maintained.
+    uses: quaternionmedia/.github/.github/workflows/docs.yml@main
     with:
       # The reusable workflow defaults to the newest Python, which is outside
       # otto's requires-python, so pdm would refuse to install.
