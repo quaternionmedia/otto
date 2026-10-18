@@ -28,7 +28,9 @@ def sound(path, **attrs):
 
 
 def video(path, **attrs):
-    return Clip(type='video', name=path, fadeIn=0, fadeOut=0, **attrs)
+    attrs.setdefault('fadeIn', 0)
+    attrs.setdefault('fadeOut', 0)
+    return Clip(type='video', name=path, **attrs)
 
 
 def samples(track, start, end):
@@ -110,6 +112,45 @@ def test_a_videos_sound_stops_where_its_source_does(media):
 
     assert loudness(made.audio, 1, 1.9) > LOUD
     assert loudness(made.audio, 2.1, 3) < QUIET
+
+
+def test_a_videos_sound_fades_with_its_picture(media):
+    """Only its picture faded: the sound played at full volume through both
+    fades, and so started and stopped dead at every cut."""
+    made = render(video(media['wide'], duration=2, fadeIn=0.5, fadeOut=0.5))
+
+    full = loudness(made.audio, 0.7, 1.3)
+    assert full > LOUD
+    assert loudness(made.audio, 0, 0.025) < full / 5
+    assert loudness(made.audio, 0.24, 0.26) == pytest.approx(full / 2, rel=0.2)
+    assert loudness(made.audio, 1.74, 1.76) == pytest.approx(full / 2, rel=0.2)
+    assert loudness(made.audio, 1.975, 2) < full / 5
+
+
+def test_an_unfaded_videos_sound_is_loud_from_end_to_end(media):
+    made = render(video(media['wide'], duration=2))
+
+    assert loudness(made.audio, 0, 0.025) > LOUD
+    assert loudness(made.audio, 1.975, 2) > LOUD
+
+
+def test_a_videos_sound_that_stops_early_fades_out_where_it_stops(media):
+    """As an audio clip's does: the 2-second sound of a 3-second clip."""
+    made = render(video(media['wide'], duration=3, fadeOut=1))
+
+    full = loudness(made.audio, 0.4, 0.6)
+    assert loudness(made.audio, 1.49, 1.51) == pytest.approx(full / 2, rel=0.2)
+    assert loudness(made.audio, 1.975, 2) < full / 5
+    assert loudness(made.audio, 2.1, 3) < QUIET
+
+
+def test_a_videos_fades_follow_its_inpoint(media):
+    """The sound fades in from where the clip starts in its source."""
+    made = render(video(media['wide'], inpoint=0.5, outpoint=2, duration=1.5, fadeIn=1))
+
+    full = loudness(made.audio, 1.2, 1.4)
+    assert loudness(made.audio, 0, 0.025) < full / 5
+    assert loudness(made.audio, 0.49, 0.51) == pytest.approx(full / 2, rel=0.2)
 
 
 def test_video_sound_is_decoded_at_the_output_rate(media):

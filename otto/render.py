@@ -224,6 +224,16 @@ def _fade(clip, field, where):
     return seconds
 
 
+def _fade_sound(sound, fade_in, fade_out):
+    """`sound` faded in over its first `fade_in` seconds and out over its last
+    `fade_out`: the fades of the clip it belongs to, whatever kind of clip."""
+    if fade_in > 0:
+        sound = sound.audio_fadein(fade_in)
+    if fade_out > 0:
+        sound = sound.audio_fadeout(fade_out)
+    return sound
+
+
 def _place_sound(source, timing, fade_in, fade_out, where):
     """An audio clip's sound, cut to its timing and faded, ready to mix."""
     if timing.inpoint >= source.duration:
@@ -234,12 +244,7 @@ def _place_sound(source, timing, fade_in, fade_out, where):
     # Past the end of its source a sound is silence; moviepy raises when asked
     # to read there, so stop at the end instead.
     sound = source.subclip(timing.inpoint, min(timing.outpoint, source.duration))
-    sound = sound.set_start(timing.start)
-    if fade_in > 0:
-        sound = sound.audio_fadein(fade_in)
-    if fade_out > 0:
-        sound = sound.audio_fadeout(fade_out)
-    return sound
+    return _fade_sound(sound.set_start(timing.start), fade_in, fade_out)
 
 
 def _soundtrack(audio):
@@ -322,11 +327,13 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     built with enough duration to cover `outpoint`.
 
     **Sound.** Audio clips are mixed, never drawn: their timing works as
-    above, and their fades fade the volume. The sound of video clips is mixed
-    with them, as is `audio` -- a soundtrack, given as an AudioClip or a path
-    or URL to an audio file -- from the start of the output. Sound that ends
-    before its clip does is followed by silence. An Edl of audio clips alone
-    renders over black.
+    above. The sound of video clips is mixed with them, as is `audio` -- a
+    soundtrack, given as an AudioClip or a path or URL to an audio file --
+    from the start of the output. A clip's fades fade its sound, an audio
+    clip's or a video clip's own: in over its first `fadeIn` seconds and out
+    over the last `fadeOut` seconds of the sound it plays. Sound that ends
+    before its clip does is followed by silence, and fades out where it ends.
+    An Edl of audio clips alone renders over black.
 
     **Geometry.** The result is `moviesize` (width, height), whatever size its
     clips are. Video and image clips are scaled to fit inside the frame -- or
@@ -406,6 +413,11 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
             ) from exc
         if sound_end is not None and sound_end - timing.inpoint < timing.length:
             c = c.set_audio(c.audio.set_duration(sound_end - timing.inpoint))
+        # The clip's fades below fade its picture -- a crossfade is a fade of
+        # its mask -- and not its sound, which played at full volume through
+        # them; it fades here, as an audio clip's does.
+        if c.audio is not None:
+            c = c.set_audio(_fade_sound(c.audio, fade_in, fade_out))
 
         if clip.resize:
             c = c.resize(clip.resize)
