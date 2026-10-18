@@ -24,3 +24,11 @@ class DownloadException(EdlException):
     """A clip's remote media was refused, or could not be fetched."""
 
     pass
+
+
+class NoSoundException(EdlException):
+    """Nothing in the Edl makes a sound, so `renderSound` has nothing to write:
+    it has no video or audio clip, or no audio clip and no video clip with
+    sound where it plays."""
+
+    pass

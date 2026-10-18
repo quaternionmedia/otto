@@ -34,6 +34,14 @@ pip install .[test]
 pdm install -G test
 ```
 
+## Rendering
+
+`otto.render.generateEdl` builds an Edl into a moviepy clip, `renderMultitrack`
+encodes it to a video file, and `renderSound` writes only its sound: a mono
+16-bit WAV at the rate asked for, as long as the video would be, or
+`NoSoundException` when nothing in the Edl makes a sound.
+[docs/rendering.md](docs/rendering.md) says more.
+
 ## Development
 
 0. Install pdm

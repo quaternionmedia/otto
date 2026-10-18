@@ -24,3 +24,8 @@ poetry install
 ```bash
 pip3 install -e .
 ```
+
+## Rendering
+
+[Rendering](rendering.md) says what otto does with an Edl, and how it writes a
+timeline's sound alone. The [reference](reference/render.md) has each function.

@@ -4,6 +4,7 @@ import numbers
 import os
 import re
 import subprocess
+import wave
 from typing import NamedTuple
 
 import numpy as np
@@ -14,13 +15,21 @@ from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
 from PIL import Image
 
-from otto.exceptions import DownloadException, EdlException, EmptyClipsException
+from otto.exceptions import (
+    DownloadException,
+    EdlException,
+    EmptyClipsException,
+    NoSoundException,
+)
 from otto.getdata import download
 from otto.models import Edl
 from otto.templates import TEMPLATES
 
 CLIP_TYPES = ('template', 'video', 'image', 'audio')
 """The values a clip's `type` may take."""
+
+SOUND_TYPES = ('video', 'audio')
+"""The clip types that can make a sound. Templates and images are only seen."""
 
 AUDIO_FPS = 48000
 """The sample rate sound is decoded at, mixed at and encoded at.
@@ -391,7 +400,8 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     clip's or a video clip's own: in over its first `fadeIn` seconds and out
     over the last `fadeOut` seconds of the sound it plays. Sound that ends
     before its clip does is followed by silence, and fades out where it ends.
-    An Edl of audio clips alone renders over black.
+    An Edl of audio clips alone renders over black. `renderSound` writes the
+    sound alone, as a WAV.
 
     **Geometry.** The result is `moviesize` (width, height), whatever size its
     clips are. Video and image clips are scaled to fit inside the frame -- or
@@ -413,18 +423,40 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     if len(edl.clips) == 0:
         raise EmptyClipsException('There were no clips in the Edl')
     moviesize = _frame_size(moviesize)
+    _check_duration(edl)
+    return _compose(enumerate(edl.clips), moviesize, edl.duration, audio)
+
+
+def _check_duration(edl):
+    """Refuse an `Edl.duration` that is not positive."""
     if edl.duration is not None and edl.duration <= 0:
         raise EdlException(f'Edl duration must be positive, not {edl.duration}')
+
+
+def _check_type(clip, where):
+    """Refuse a clip whose `type` is not one of CLIP_TYPES."""
+    if clip.type not in CLIP_TYPES:
+        raise EdlException(
+            f'{where}: unknown clip type {clip.type!r}; '
+            f'a clip is one of {", ".join(CLIP_TYPES)}'
+        )
+
+
+def _compose(numbered, moviesize, duration, audio):
+    """generateEdl's composite of the clips `numbered`, at `moviesize`.
+
+    `numbered` holds (index, clip) pairs, the index counting from 0 in the Edl
+    the clips belong to, so that an error names a clip by its place there
+    even when only some of the Edl's clips are built. The result is `duration`
+    seconds long, or ends with its last clip when that is None; `audio` is the
+    soundtrack.
+    """
     clips = []
     sounds = []
     ends = []
-    for index, clip in enumerate(edl.clips):
+    for index, clip in numbered:
         where = _describe(index, clip)
-        if clip.type not in CLIP_TYPES:
-            raise EdlException(
-                f'{where}: unknown clip type {clip.type!r}; '
-                f'a clip is one of {", ".join(CLIP_TYPES)}'
-            )
+        _check_type(clip, where)
         timing = clipTiming(clip, where)
         fade_in = _fade(clip, 'fadeIn', where)
         fade_out = _fade(clip, 'fadeOut', where)
@@ -509,7 +541,7 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
         tracks.append(soundtrack)
     if tracks:
         video = video.set_audio(CompositeAudioClip(tracks))
-    return video.set_duration(edl.duration if edl.duration is not None else max(ends))
+    return video.set_duration(duration if duration is not None else max(ends))
 
 
 def renderMultitrack(
@@ -553,3 +585,93 @@ def renderMultitrack(
         bitrate=bitrate,
         ffmpeg_params=ffmpeg_params,
     )
+
+
+_SOUND_FRAME = (64, 36)
+"""The frame renderSound builds an Edl at. Nothing looks at the picture, but a
+video still opens with one and decodes a frame as it opens: this small, that
+costs next to nothing."""
+
+
+def _sample_rate(rate):
+    """`rate` as a positive whole number of samples a second."""
+    if (
+        isinstance(rate, numbers.Real)
+        and not isinstance(rate, bool)
+        and math.isfinite(rate)
+        and rate == int(rate)
+        and rate > 0
+    ):
+        return int(rate)
+    raise EdlException(
+        f'rate must be a positive whole number of samples a second, not {rate!r}'
+    )
+
+
+def renderSound(edl: Edl, filename, rate=AUDIO_FPS, logger=None):
+    """Write what `edl` sounds like to `filename`, a mono 16-bit PCM WAV at
+    `rate` samples a second, and return its length in seconds.
+
+    The sound is the one renderMultitrack encodes for the same Edl, less any
+    soundtrack: every clip timed, faded and mixed as generateEdl describes.
+    It runs from 0 to the end of the output -- `Edl.duration`, or where the
+    last clip ends, a template or an image included -- with silence wherever
+    nothing sounds, so a moment in the WAV is the same moment in the render.
+    It is mixed at AUDIO_FPS, and ffmpeg folds it into one channel and
+    resamples it to `rate` as it writes. Resampling filters out what is too
+    high for `rate` to carry; sampling the mix at `rate` instead would fold it
+    back down among what is heard. The file is a WAV whatever `filename` is
+    called. `logger` is moviepy's: None is silent, 'bar' shows progress.
+
+    Only the clips that can sound (SOUND_TYPES) are built. A template or an
+    image is never heard, and building one can cost an ImageMagick run, so
+    only its type and timing are read, for the length; the rest of it is left
+    for a render to check. An error still names a clip by its place in the
+    whole Edl, counted from 1.
+
+    Raises NoSoundException, and writes nothing, when nothing in the Edl makes
+    a sound: it has no video or audio clip, or no audio clip and no video clip
+    with sound where it plays. Raises EdlException, as generateEdl does, for a
+    clip that cannot be heard, and for a `rate` that is not a positive whole
+    number.
+    """
+    rate = _sample_rate(rate)
+    if len(edl.clips) == 0:
+        raise EmptyClipsException('There were no clips in the Edl')
+    _check_duration(edl)
+    ends = []
+    sounding = []
+    for index, clip in enumerate(edl.clips):
+        where = _describe(index, clip)
+        _check_type(clip, where)
+        timing = clipTiming(clip, where)
+        ends.append(timing.start + timing.length)
+        if clip.type in SOUND_TYPES:
+            sounding.append((index, clip))
+    if not sounding:
+        raise NoSoundException('the Edl makes no sound: it has no video or audio clip')
+    length = edl.duration if edl.duration is not None else max(ends)
+    video = _compose(sounding, _SOUND_FRAME, length, None)
+    try:
+        if video.audio is None:
+            raise NoSoundException(
+                'the Edl makes no sound: it has no audio clip, and none of its '
+                'video clips has sound where it plays'
+            )
+        video.audio.write_audiofile(
+            os.fspath(filename),
+            fps=AUDIO_FPS,
+            nbytes=2,
+            codec='pcm_s16le',
+            # Output options, after moviepy's own: one channel, resampled to
+            # `rate` (the last -ar given is the one ffmpeg uses), and a WAV
+            # rather than whatever the file's name suggests.
+            ffmpeg_params=['-ac', '1', '-ar', str(rate), '-f', 'wav'],
+            logger=logger,
+        )
+    finally:
+        video.close()
+    # The length of what was written, read back from the file. moviepy never
+    # asks how ffmpeg exited, so a file ffmpeg could not write is found here.
+    with wave.open(os.fspath(filename), 'rb') as written:
+        return written.getnframes() / written.getframerate()
