@@ -12,6 +12,47 @@ into media:
 `generateEdl`'s docstring is the full account of how a clip's fields combine.
 The [reference](reference/render.md) has it, and every other function.
 
+## A clip is checked before its media is opened
+
+Whatever otto can tell is wrong with a clip from the Edl alone is refused as
+the clip is built, before its media is fetched or opened, rather than part way
+through a render or on whichever preview frame happens to show it: a type
+that is missing or unknown, timing that describes no clip, a negative fade, an
+opacity outside 0 to 1, a `resize` that is not positive, and a position
+moviepy cannot place a clip at.
+
+A position is one of `center`, `left`, `right`, `top` or `bottom`, or an
+`(x, y)` pair whose x is a finite number or `left`, `center` or `right`, and
+whose y is a finite number or `top`, `center` or `bottom`. A template clip's
+`data.position` is checked the same way, since the template hands it to
+moviepy too. A function of time is left for moviepy to call, and a boolean is
+not a number here. An empty position, `''` or `()`, is no position: a video or
+an image is then centred, and a template places itself.
+
+moviepy reads a position only when it draws a frame. Unchecked, `'middle'` or
+`('top', 'left')` would build without complaint and then raise there, as a
+KeyError naming neither the clip nor the field.
+
+## A clip is named by its place, counted from 1
+
+What otto cannot render raises `EdlException`. When one clip is the cause, the
+message starts with the clip's place in the Edl, counted from 1, and its name:
+`clip 2 ('title'): ...` is the second clip. alfred counts the clips of a
+timeline it refuses from 1 as well, so a message from either names the same
+clip the same way.
+
+## A clip's fades reach its sound
+
+A clip's `fadeIn` and `fadeOut` are seconds of fade, and the only fades it
+gets: templates add none of their own. They fade its picture, as a crossfade
+of its mask, and its sound -- an audio clip's, and a video clip's own -- in
+over the first `fadeIn` seconds and out over the last `fadeOut` seconds of the
+sound it plays. That is where the clip ends, or where its source's sound runs
+out when that is sooner. 0 or null is no fade.
+
+The model's default is a second of each, so a video clip that sets no fades of
+its own fades its sound in and out over a second, along with its picture.
+
 ## A timeline's sound, alone
 
 `renderSound` writes what an Edl sounds like to a mono, 16-bit PCM WAV at the
@@ -58,3 +99,14 @@ except NoSoundException:
   or no audio clip and no video clip with sound where it plays, `renderSound`
   raises `NoSoundException`, an `EdlException`, and writes nothing. A `rate`
   that is not a positive whole number is an `EdlException` too.
+
+## Each video is probed once per version of its file
+
+Before it opens a video, otto asks ffmpeg for its stored size and how far it
+is turned -- a `rotate` tag, or on ffmpeg 5 and later a display matrix -- so
+that it can be decoded already fitted to its box, at the proportions it is
+shown at: ffmpeg turns it upright as it decodes. A preview builds the whole
+Edl again for every frame it shows, so the answer is kept: per file, keyed by
+its absolute path, its modification time and its size, for the last
+`PROBE_CACHE_SIZE` (256) probes in the process. A file that changes is asked
+about again, and a probe that fails is not kept.
