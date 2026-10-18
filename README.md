@@ -12,6 +12,12 @@ an ottomatic video creator
 pip install al-otto
 ```
 
+otto runs on Python 3.8.1 up to, but not including, 3.12 (`requires-python` in
+[pyproject.toml](pyproject.toml)). The cap is pydantic's: otto allows
+`pydantic~=1.10`, and the oldest releases that admits support no Python newer
+than 3.11, so the cap rises only with the pydantic floor. CI and the
+Dockerfile run 3.11.
+
 ## Optional packages
 
 Otto ships with several optional packages, which can be installed with `pip` or `pdm`

@@ -2,27 +2,40 @@
 
 The Ottomatic video engine
 
-## install
+## Install
 
-Clone the repository
+otto runs on Python 3.8.1 up to, but not including, 3.12: pyproject.toml
+declares `requires-python = ">=3.8.1,<3.12"`. The cap is pydantic's. otto
+allows `pydantic~=1.10`, and the oldest releases that admits support no
+Python newer than 3.11, so the cap rises only with the pydantic floor. CI and
+the Dockerfile run 3.11.
+
+```bash
+pip install al-otto
+```
+
+Drawing text and shapes needs the `render` extra (`pip install
+al-otto[render]`) and, from the system, ImageMagick with a policy that lets it
+read text from a file, fonts, and cairo. The README says why; the Dockerfile's
+`test` target has all of it.
+
+### From a clone
+
+otto is packaged with [pdm](https://pdm-project.org), not Poetry:
+`pyproject.toml` declares the dependencies and the optional groups (`render`,
+`test`, `docs`), and `pdm.lock` pins all of them.
 
 ```bash
 git clone https://github.com/quaternionmedia/otto.git
 cd otto/
+pdm install -G render -G test
 ```
 
-### Poetry (Recommended)
-
-Install with poetry
-
-```bash
-poetry install
-```
-
-### Pip
+pip installs from a clone too, resolving `pyproject.toml`'s ranges rather than
+the lock:
 
 ```bash
-pip3 install -e .
+pip install -e .[render,test]
 ```
 
 ## Rendering
