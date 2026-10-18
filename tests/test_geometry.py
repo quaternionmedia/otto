@@ -11,7 +11,7 @@ import pytest
 
 from helpers import BLACK_MP4, close_to, color_clip, pixel, rotated_copy
 from otto.exceptions import EdlException
-from otto.models import Clip, Edl
+from otto.models import Clip, Edl, TemplateData
 from otto.render import generateEdl
 
 FRAME = (64, 36)
@@ -153,6 +153,88 @@ def test_resize_scales_the_fitted_image(media):
 def test_a_file_that_is_not_an_image_is_refused(media):
     with pytest.raises(EdlException, match=r"clip 1 .*could not be opened"):
         render(image(media['tone']))
+
+
+# --- positions --------------------------------------------------------------
+#
+# moviepy reads a position only when it draws a frame, so one it cannot place
+# a clip at was accepted when the clip was built and raised later -- part way
+# through a render, or on whichever preview frame showed the clip -- as a
+# KeyError naming neither the clip nor the field.
+
+PLACEABLE = [
+    *('center', 'left', 'right', 'top', 'bottom'),
+    ('left', 'top'),
+    ('center', 'bottom'),
+    ('right', 'center'),
+    (0, 0),
+    (0.25, -0.5),
+    ('right', 0.5),
+    (0.1, 'top'),
+]
+
+UNPLACEABLE = [
+    'middle',
+    'Center',
+    'top-left',
+    5,  # the model takes it as the string '5'
+    ('middle', 'top'),
+    ('top', 'left'),  # words on the wrong axes
+    ('left', 'left'),
+    (0.1,),
+    (0.1, 0.2, 0.3),
+    (0.1, float('nan')),
+    (True, 0),
+]
+
+
+@pytest.mark.parametrize('position', PLACEABLE, ids=repr)
+def test_every_position_moviepy_can_place_a_clip_at_is_accepted(position, media):
+    made = render(background(), image(media['grey_png'], position=position))
+    made.get_frame(T)
+
+
+@pytest.mark.parametrize('position', UNPLACEABLE, ids=repr)
+def test_a_position_moviepy_cannot_place_a_clip_at_is_refused_when_built(
+    position, media
+):
+    with pytest.raises(EdlException, match=r"clip 2 \('.*grey.png'\): position"):
+        render(background(), image(media['grey_png'], position=position))
+
+
+@pytest.mark.parametrize('position', UNPLACEABLE, ids=repr)
+def test_a_templates_position_is_checked_as_well(position):
+    clip = Clip(
+        type='template',
+        name='makeColor',
+        duration=2,
+        data=TemplateData(color='#00ff00', position=position),
+    )
+    with pytest.raises(EdlException, match=r"clip 1 \('makeColor'\): data.position"):
+        render(clip)
+
+
+@pytest.mark.parametrize('empty', ['', ()], ids=repr)
+def test_an_empty_position_is_no_position(empty, media):
+    made = render(image(media['grey_png'], position=empty))
+
+    assert pixel(made, T, 32, 18) == (200, 200, 200), 'centred, as with none'
+    assert pixel(made, T, 5, 18) == BLACK
+
+
+@pytest.mark.render
+@pytest.mark.parametrize('empty', ['', ()], ids=repr)
+def test_an_empty_template_position_is_the_templates_own(empty):
+    """textBox placed its text at '' and raised when the frame was drawn."""
+    clip = Clip(
+        type='template',
+        name='textBox',
+        duration=3,
+        fadeIn=0,
+        fadeOut=0,
+        data=TemplateData(text='x', fontsize=8, position=empty),
+    )
+    render(clip).get_frame(T)
 
 
 def test_ffmpeg_is_available_for_these_tests():

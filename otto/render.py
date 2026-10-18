@@ -1,4 +1,6 @@
 import functools
+import math
+import numbers
 import os
 import re
 import subprocess
@@ -214,6 +216,55 @@ def _check_resize(clip, where):
         )
 
 
+POSITIONS = ('center', 'left', 'right', 'top', 'bottom')
+"""The words a position may be on its own; otherwise it is an (x, y) pair."""
+
+_X_WORDS = ('left', 'center', 'right')
+_Y_WORDS = ('top', 'center', 'bottom')
+
+
+def _coordinate(value, words):
+    """Whether moviepy can place a clip at `value` along one axis."""
+    if isinstance(value, str):
+        return value in words
+    return (
+        isinstance(value, numbers.Real)
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+    )
+
+
+def _check_position(position, where, field='position'):
+    """Refuse a position moviepy cannot place a clip at.
+
+    moviepy reads a position only when it draws a frame, so 'middle' -- or an
+    (x, y) with a third value, or a word on the wrong axis -- was accepted
+    here and raised part way through a render, or on whichever preview frame
+    showed the clip, as a KeyError naming neither the clip nor the field.
+    No position -- None, or an empty one -- and a function of time pass.
+    """
+    if position is None or callable(position):
+        return
+    if isinstance(position, (str, tuple, list)) and not position:
+        return
+    if isinstance(position, str):
+        if position in POSITIONS:
+            return
+    else:
+        try:
+            x, y = position
+        except (TypeError, ValueError):
+            pass
+        else:
+            if _coordinate(x, _X_WORDS) and _coordinate(y, _Y_WORDS):
+                return
+    raise EdlException(
+        f'{where}: {field} must be {", ".join(POSITIONS)}, or (x, y) where x is '
+        f'a number, left, center or right and y a number, top, center or '
+        f'bottom; not {position!r}'
+    )
+
+
 def _fade(clip, field, where):
     """Seconds of fade asked for: 0 (no fade) when the field is 0 or null."""
     seconds = getattr(clip, field)
@@ -272,9 +323,16 @@ def _make_template(clip, where, moviesize, duration):
         )
     if clip.data is None:
         raise EdlException(f'{where}: a template clip needs `data`')
+    data = clip.data.dict(exclude_none=True)
+    if 'position' in data:
+        _check_position(data['position'], where, 'data.position')
+        if not data['position']:
+            # No position, as for a clip: the template's own. An empty one
+            # reached moviepy, which raised when the first frame was drawn.
+            del data['position']
     try:
         made = template(
-            **clip.data.dict(exclude_none=True),
+            **data,
             clipsize=clip.clipsize or moviesize,
             duration=duration,
         )
@@ -339,7 +397,10 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     clips are. Video and image clips are scaled to fit inside the frame -- or
     inside their `clipsize`, when they have one -- keeping their proportions,
     and `resize` then scales them further. A video or image clip with no
-    `position` is centred in the frame.
+    `position` is centred in the frame. A position is one of POSITIONS, or an
+    (x, y) pair of numbers or words -- left, center or right for x, top,
+    center or bottom for y -- and an empty one is no position, for a clip and
+    for a template's `data` alike.
 
     **Errors.** Raises EdlException naming the clip -- `clip 2 ('title'):
     ...` is the second clip, counting from 1 -- for a clip that cannot be
@@ -347,7 +408,7 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
     `otto.templates.TEMPLATES`, a template clip without `data`, a template
     that fails, media that cannot be fetched or opened, timing that describes
     no clip, a negative fade, an opacity outside 0..1, a resize that is not
-    positive.
+    positive, a position moviepy cannot place a clip at.
     """
     if len(edl.clips) == 0:
         raise EmptyClipsException('There were no clips in the Edl')
@@ -372,6 +433,7 @@ def generateEdl(edl: Edl, moviesize=(1920, 1080), audio=None, **kwargs):
                 f'{where}: opacity must be between 0 and 1, not {clip.opacity}'
             )
         _check_resize(clip, where)
+        _check_position(clip.position, where)
         box = clip.clipsize or moviesize
         try:
             if clip.type == 'template':
