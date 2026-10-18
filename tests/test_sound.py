@@ -123,6 +123,20 @@ def test_the_file_is_a_wav_whatever_it_is_called(media, tmp_path):
     assert [p.name for p in tmp_path.iterdir()] == ['timeline.sound']
 
 
+@pytest.mark.parametrize('seconds', [2, 0.05])
+def test_a_file_that_cannot_be_written_is_an_error_not_a_length(
+    media, tmp_path, seconds
+):
+    """moviepy never asks how ffmpeg exited. With ffmpeg 7 nothing is raised
+    while writing into a directory that does not exist, and with any ffmpeg a
+    sound short enough to fit the pipe never finds out; reading the length
+    back from the file does."""
+    edl = Edl(clips=[sound(media['tone'], duration=seconds)])
+
+    with pytest.raises(OSError):
+        renderSound(edl, tmp_path / 'missing' / 'sound.wav', 16000)
+
+
 # --- what it sounds like ----------------------------------------------------
 
 
