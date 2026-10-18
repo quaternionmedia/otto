@@ -104,12 +104,10 @@ Includes the python dependencies needed for rendering and effects.
 
 **NOTE** Requires a working installation of [imagemagick](https://imagemagick.org/)
 whose security policy allows reading text from a file (moviepy passes text as
-`@file`; Debian and Ubuntu forbid it), fonts, and cairo. Building `bezier`
-needs `BEZIER_NO_EXTENSION=true` and, with a current pip, the build
-constraints in `build-constraints.txt`:
+`@file`; Debian and Ubuntu forbid it), fonts, and cairo.
 
 ```bash
-BEZIER_NO_EXTENSION=true PIP_BUILD_CONSTRAINT=build-constraints.txt pip install .[render]
+pip install .[render]
 ```
 
 #### Remote media

@@ -18,12 +18,10 @@ RUN for policy in /etc/ImageMagick-6/policy.xml /etc/ImageMagick-7/policy.xml; d
         if [ -f "$policy" ]; then sed -i '/pattern="@\*"/d' "$policy"; fi; \
     done
 
-ENV BEZIER_NO_EXTENSION=true \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
 WORKDIR /app
 RUN pip install -U pip uvicorn
-COPY build-constraints.txt ./
 
 
 # The test suite, against this image's system dependencies:
@@ -32,8 +30,7 @@ FROM base AS test
 COPY pyproject.toml pdm.lock README.md ./
 COPY otto otto
 COPY tests tests
-RUN PIP_BUILD_CONSTRAINT=build-constraints.txt PIP_CONSTRAINT=build-constraints.txt \
-    pip install -e .[render,test] && mkdir -p data
+RUN pip install -e .[render,test] && mkdir -p data
 CMD ["pytest", "-v"]
 
 
@@ -41,6 +38,5 @@ CMD ["pytest", "-v"]
 FROM base AS app
 COPY pyproject.toml pdm.lock README.md ./
 COPY otto otto
-RUN PIP_BUILD_CONSTRAINT=build-constraints.txt PIP_CONSTRAINT=build-constraints.txt \
-    pip install .[render]
+RUN pip install .[render]
 CMD ["uvicorn", "otto.main:app", "--host", "0.0.0.0", "--reload"]

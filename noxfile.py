@@ -21,11 +21,6 @@ def lint(session):
 
 @nox.session(tags=['test'])
 def coverage(session):
-    # See build-constraints.txt: bezier cannot be built with setuptools 81+.
-    constraints = 'build-constraints.txt'
-    session.install(
-        '.[test,render]',
-        env={'PIP_BUILD_CONSTRAINT': constraints, 'PIP_CONSTRAINT': constraints},
-    )
+    session.install('.[test,render]')
     session.run('mkdir', '-p', 'data', external=True)
     session.run('pytest', '-vv', '-n', 'auto')

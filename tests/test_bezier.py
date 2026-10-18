@@ -8,10 +8,10 @@ setuptools pinned for the build. `bezier2` now evaluates the curve itself.
 
 RECORDED is what `bezier2(**CURVES[name]).evaluate(s)` returned with bezier
 2021.2.12 (pure Python, BEZIER_NO_EXTENSION) and numpy 1.24.4, before the
-change: every point, compared exactly.
+change: every point, compared exactly. Until bezier was dropped, this module
+also compared 5000 random curves against bezier itself, exactly.
 """
 
-import numpy as np
 import pytest
 
 from otto import templates
@@ -197,16 +197,3 @@ def test_a_bad_point_fails_the_effect_before_any_frame_is_drawn():
 def test_a_curve_is_three_points_in_the_plane():
     with pytest.raises(ValueError, match='3 points of 2 coordinates'):
         QuadraticBezier([[0, 1], [0, 1]])
-
-
-def test_bezier2_matches_the_bezier_package_wherever_it_is_installed():
-    """The recorded table, checked again across many curves, when bezier is
-    there to check against."""
-    bezier = pytest.importorskip('bezier')
-    rng = np.random.default_rng(2021)
-    for _ in range(5000):
-        nodes = rng.choice([0.0, 1.0, -1.0, 1e-9, 1e9]) * rng.standard_normal((2, 3))
-        s = float(rng.choice([rng.random(), rng.uniform(-3, 6), 0.0, 0.5, 1.0]))
-        expected = bezier.Curve(np.asfortranarray(nodes), degree=2).evaluate(s)
-        actual = QuadraticBezier(nodes).evaluate(s)
-        assert np.array_equal(actual, expected), (nodes.tolist(), s)

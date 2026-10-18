@@ -22,11 +22,6 @@ jobs:
     name: 🐍 pytest
     runs-on: ubuntu-latest
     environment: codecov
-    env:
-      BEZIER_NO_EXTENSION: true
-      # bezier cannot be built with setuptools 81+; see build-constraints.txt.
-      PIP_BUILD_CONSTRAINT: build-constraints.txt
-      PIP_CONSTRAINT: build-constraints.txt
 
     steps:
       - name: 📰 Checkout

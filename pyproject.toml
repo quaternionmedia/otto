@@ -39,7 +39,6 @@ repository = "https://github.com/quaternionmedia/otto"
 [project.optional-dependencies]
 render = [
     "gizeh~=0.1",
-    "bezier~=2021.2",
 ]
 test = [
     "pytest~=7.3",
