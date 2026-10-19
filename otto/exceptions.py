@@ -32,3 +32,14 @@ class NoSoundException(EdlException):
     sound where it plays."""
 
     pass
+
+
+class FFmpegException(OttoException):
+    """ffmpeg ran, and did not write what otto asked it for.
+
+    `stderr` is everything ffmpeg said; the message ends with the last of it.
+    """
+
+    def __init__(self, message, stderr=''):
+        super().__init__(message)
+        self.stderr = stderr
