@@ -544,6 +544,66 @@ def _compose(numbered, moviesize, duration, audio):
     return video.set_duration(duration if duration is not None else max(ends))
 
 
+class EncodingPreset(NamedTuple):
+    """How renderMultitrack encodes a video, under one name."""
+
+    x264_preset: str
+    """libx264's `-preset`: how long it spends compressing. Slower is smaller
+    at the same quality."""
+
+    crf: int
+    """libx264's constant-rate factor: lower is better, and larger. It holds
+    quality steady across easy and difficult footage, which a fixed bitrate
+    does not."""
+
+    audio_bitrate: str
+    """The AAC sound's bitrate."""
+
+
+PRESETS = {
+    'draft': EncodingPreset('ultrafast', 30, '128k'),
+    'standard': EncodingPreset('medium', 23, '192k'),
+    'high': EncodingPreset('slow', 18, '320k'),
+}
+"""The encodings renderMultitrack's `preset` can name: `draft` encodes fastest
+at the lowest quality, `high` slowest at the highest, and `standard` sits
+between them."""
+
+_ENCODER_ARGUMENTS = ('bitrate', 'audio_bitrate', 'ffmpeg_params')
+"""renderMultitrack's arguments a preset decides."""
+
+
+def _encoding(preset, codec, **given):
+    """write_videofile's encoder arguments: `preset`'s when it names one, else
+    those `given` (bitrate, audio_bitrate, ffmpeg_params), as they are."""
+    if preset is None:
+        if given['audio_bitrate'] is None:
+            given['audio_bitrate'] = '320k'
+        return given
+    chosen = PRESETS.get(preset)
+    if chosen is None:
+        raise EdlException(
+            f'preset must be one of {", ".join(PRESETS)}, not {preset!r}'
+        )
+    if codec != 'libx264':
+        raise EdlException(
+            f"a preset is libx264's settings, and cannot encode with {codec!r}"
+        )
+    clashing = [name for name in _ENCODER_ARGUMENTS if given[name] is not None]
+    if clashing:
+        raise EdlException(
+            f'a preset decides {", ".join(_ENCODER_ARGUMENTS)}; '
+            f'{" and ".join(clashing)} cannot be given with one'
+        )
+    return dict(
+        # moviepy's own `preset` is libx264's, and is `medium` by default.
+        preset=chosen.x264_preset,
+        bitrate=None,
+        audio_bitrate=chosen.audio_bitrate,
+        ffmpeg_params=['-crf', str(chosen.crf)],
+    )
+
+
 def renderMultitrack(
     edl: Edl,
     audio=None,
@@ -553,8 +613,9 @@ def renderMultitrack(
     fps=30.0,
     codec='libx264',
     bitrate=None,
-    audio_bitrate='320k',
+    audio_bitrate=None,
     ffmpeg_params=None,
+    preset=None,
     **kwargs,
 ):
     """Render v2: renders a multitrack Edl as seperate layers
@@ -562,9 +623,24 @@ def renderMultitrack(
     Writes `filename` at `moviesize` and `fps` frames per second. `audio` is a
     soundtrack mixed under the Edl's own sound; see `generateEdl`. An `fps` of
     None takes the fastest clip's frame rate, or DEFAULT_FPS.
+
+    `preset` names how it is encoded, one of PRESETS: libx264's speed and
+    constant-rate factor, and the sound's bitrate. A preset decides those, so
+    `bitrate`, `audio_bitrate` and `ffmpeg_params` cannot be given with one,
+    nor a `codec` other than libx264; either is an EdlException, as is a name
+    that is not a preset. Without a preset they are as given: libx264 at
+    moviepy's `medium` and its own default rate factor, ffmpeg_params added
+    to moviepy's options, and the sound at `audio_bitrate`, or 320k.
     """
     if fps is not None and not fps > 0:
         raise EdlException(f'fps must be positive, not {fps}')
+    encoding = _encoding(
+        preset,
+        codec,
+        bitrate=bitrate,
+        audio_bitrate=audio_bitrate,
+        ffmpeg_params=ffmpeg_params,
+    )
     video = generateEdl(edl, moviesize, audio=audio, **kwargs)
     if fps is None:
         fps = video.fps or DEFAULT_FPS
@@ -575,15 +651,13 @@ def renderMultitrack(
         threads=8,
         audio_fps=AUDIO_FPS,
         audio_codec='aac',
-        audio_bitrate=audio_bitrate,
         # Beside the output. moviepy otherwise writes the sound to the working
         # directory, named after the output's basename alone, so two renders
         # to the same name in different directories wrote the same file, and
         # a render from a read-only working directory failed.
         temp_audiofile=os.path.splitext(filename)[0] + '.audio.m4a',
         codec=codec,
-        bitrate=bitrate,
-        ffmpeg_params=ffmpeg_params,
+        **encoding,
     )
 
 
