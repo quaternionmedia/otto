@@ -43,10 +43,19 @@ pdm install -G test
 ## Rendering
 
 `otto.render.generateEdl` builds an Edl into a moviepy clip, `renderMultitrack`
-encodes it to a video file, and `renderSound` writes only its sound: a mono
-16-bit WAV at the rate asked for, as long as the video would be, or
-`NoSoundException` when nothing in the Edl makes a sound.
-[docs/rendering.md](docs/rendering.md) says more.
+encodes it to a video file -- by a named preset, `draft`, `standard` or
+`high`, if asked -- `renderFrame` writes one moment of it as a JPEG, and
+`renderSound` writes only its sound: a mono 16-bit WAV at the rate asked for,
+as long as the video would be, or `NoSoundException` when nothing in the Edl
+makes a sound. [docs/rendering.md](docs/rendering.md) says more.
+
+## Media files
+
+`otto.media.probe` says what a media file holds: its duration, its picture's
+size as shown, its frame rate, and whether it has a sound. `otto.demo.demoClip`
+makes a short clip from nothing -- colour bars, a test card or a plain colour,
+silent or with a tone -- for an install that has no media yet. Both run the
+ffmpeg otto encodes with. [docs/media.md](docs/media.md) says more.
 
 ## Development
 

@@ -6,11 +6,16 @@ into media:
 
 - `generateEdl(edl, moviesize)` builds it into a moviepy clip, picture and
   sound, and writes nothing;
-- `renderMultitrack(edl, filename=..., fps=...)` encodes that as a video file;
+- `renderMultitrack(edl, filename=..., fps=..., preset=...)` encodes that as
+  a video file;
+- `renderFrame(edl, t, filename, moviesize)` writes one moment of it, as a
+  JPEG;
 - `renderSound(edl, filename, rate)` writes only its sound, as a WAV.
 
 `generateEdl`'s docstring is the full account of how a clip's fields combine.
 The [reference](reference/render.md) has it, and every other function.
+[Media files](media.md) says how otto describes a file, and how it makes demo
+clips from nothing.
 
 ## A clip is checked before its media is opened
 
@@ -52,6 +57,60 @@ out when that is sooner. 0 or null is no fade.
 
 The model's default is a second of each, so a video clip that sets no fades of
 its own fades its sound in and out over a second, along with its picture.
+
+## An encoding, by name
+
+`renderMultitrack` encodes with libx264 and AAC. `preset` names how, one of
+`PRESETS`, so a caller says how good a render should be and otto says how to
+get it:
+
+| preset | libx264 `-preset` | rate factor (`-crf`) | sound |
+|---|---|---|---|
+| `draft` | `ultrafast` | 30 | 128k |
+| `standard` | `medium` | 23 | 192k |
+| `high` | `slow` | 18 | 320k |
+
+```python
+from otto.render import renderMultitrack
+
+renderMultitrack(edl, filename='out.mp4', moviesize=(1280, 720), preset='draft')
+```
+
+A constant-rate factor holds quality steady across easy and difficult
+footage, which a fixed bitrate does not; lower is better, and larger. A slower
+`-preset` is smaller at the same quality.
+
+- **A preset decides, alone.** With one, `bitrate`, `audio_bitrate` and
+  `ffmpeg_params` cannot be given too, nor a `codec` other than libx264, whose
+  settings a preset is. Either is an `EdlException`, raised before anything is
+  built, as is a name that is not a preset.
+- **Without one, the encoding is as given.** libx264 at moviepy's own
+  `medium` and its default rate factor, with any `ffmpeg_params` added to
+  moviepy's options, and the sound at `audio_bitrate`, or 320k.
+
+## One frame, as a JPEG
+
+`renderFrame` draws what an Edl looks like `t` seconds into the output and
+writes it as a JPEG, whatever the file is called, at `moviesize`. It returns
+the file's name. A preview is made of these.
+
+```python
+from otto.exceptions import EdlException
+from otto.render import renderFrame
+
+try:
+    renderFrame(edl, 2.5, 'frame.jpg', moviesize=(640, 360))
+except EdlException as refused:
+    ...  # names the clip that cannot be rendered
+```
+
+- **It is the frame a render encodes at `t`.** The whole Edl is built, as
+  `generateEdl` builds it, so a clip that cannot be rendered is refused with
+  the `EdlException` naming it, wherever it is on the timeline and not only
+  when the frame shows it -- and nothing is written. A moment that no clip
+  covers, before the first or after the last, is black.
+- **Pillow's JPEG, at quality 75** (`FRAME_QUALITY`), with no transparency:
+  the same image moviepy's `save_frame` writes for a `.jpg`.
 
 ## A timeline's sound, alone
 

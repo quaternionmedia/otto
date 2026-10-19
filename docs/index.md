@@ -40,5 +40,12 @@ pip install -e .[render,test]
 
 ## Rendering
 
-[Rendering](rendering.md) says what otto does with an Edl, and how it writes a
-timeline's sound alone. The [reference](reference/render.md) has each function.
+[Rendering](rendering.md) says what otto does with an Edl: how it encodes one
+by a named preset, draws one frame of it, and writes a timeline's sound alone.
+The [reference](reference/render.md) has each function.
+
+## Media files
+
+[Media files](media.md) says how otto describes a file -- how long it runs,
+how big its picture is, whether it has a sound -- and how it makes demo clips
+from nothing, for an install with no media yet.
