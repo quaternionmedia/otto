@@ -587,6 +587,34 @@ def renderMultitrack(
     )
 
 
+FRAME_QUALITY = 75
+"""The JPEG quality renderFrame writes at: Pillow's own default, and what
+moviepy's `save_frame` wrote a `.jpg` at."""
+
+
+def renderFrame(edl: Edl, t, filename, moviesize=(1920, 1080)):
+    """Draw `edl` as it looks `t` seconds into the output, write it to
+    `filename` as a JPEG, and return `filename`.
+
+    The frame is the one renderMultitrack would encode at `t`, at `moviesize`
+    (width, height): the whole Edl is built as generateEdl builds it, so a
+    clip that cannot be rendered is refused, with the EdlException naming it,
+    wherever it sits on the timeline -- not only when the frame shows it. A
+    moment that no clip covers, before the first or past the last, is black.
+
+    The file is a JPEG at FRAME_QUALITY whatever `filename` is called, with no
+    transparency: what a clip leaves uncovered is black, as in a render.
+    Nothing is written when the Edl is refused.
+    """
+    video = generateEdl(edl, moviesize)
+    try:
+        picture = np.asarray(video.get_frame(t)).astype('uint8')
+    finally:
+        video.close()
+    Image.fromarray(picture).save(filename, format='JPEG', quality=FRAME_QUALITY)
+    return filename
+
+
 _SOUND_FRAME = (64, 36)
 """The frame renderSound builds an Edl at. Nothing looks at the picture, but a
 video still opens with one and decodes a frame as it opens: this small, that
