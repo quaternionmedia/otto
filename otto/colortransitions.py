@@ -1,4 +1,5 @@
 import moviepy.editor as e
+import numpy as np
 
 defaultClipsize = (800, 600)
 defaultdur = 5
@@ -30,26 +31,48 @@ def makeClip(f):
     return clip
 
 
+def toRgb(color):
+    """Normalise the three colour spellings used across this package.
+
+    `makeColor` previously accepted only a '#rrggbb' string, and passed it
+    straight to PIL's getcolor, which calls .lower() on it. Its callers do not
+    all pass strings:
+
+    - `templates.title` passes the tuple (0, 0, 0) when no background colour is
+      given, and `rgbToDec(bg)` -- a list of 0-1 floats -- when one is. Both
+      raise "'tuple'/'list' object has no attribute 'lower'", so `title`
+      returned None on every call, for every argument, and had done for as long
+      as the traceback was being swallowed by its own `except`.
+
+    Accepting all three here fixes every caller at once rather than patching
+    the one that was noticed.
+    """
+    from PIL.ImageColor import getcolor
+
+    if isinstance(color, str):
+        return getcolor(color, 'RGB')
+    channels = tuple(color)
+    # rgbToDec returns 0-1 floats; ColorClip wants 0-255 ints. A tuple of ints
+    # is already in the right space -- (0, 0, 0) is black either way, which is
+    # harmless, and any non-zero int makes the distinction unambiguous.
+    if channels and all(isinstance(c, float) and 0.0 <= c <= 1.0 for c in channels):
+        return tuple(int(round(c * 255)) for c in channels)
+    return tuple(int(c) for c in channels)
+
+
 def makeColor(
     clipsize: tuple = defaultClipsize,  # tuple (x,y)
-    color: str = '#0000bb',  # rrggbb
+    color='#0000bb',  # '#rrggbb', an (r,g,b) tuple, or 0-1 floats
     position=(0, 0),  # tuple (x,y) from top left
     start=0,
     duration=5,
     **kwargs,
 ):
-    from PIL.ImageColor import getcolor
-
     position = position or (0, 0)
-    color = getcolor(color, 'RGB')
+    color = toRgb(color)
     clip = e.ColorClip(clipsize, color=color)
     composite = (
-        clip.set_position(position)
-        .set_start(start)
-        .set_duration(duration)
-        .set_fps(30)
-        .crossfadein(1)
-        .crossfadeout(1)
+        clip.set_position(position).set_start(start).set_duration(duration).set_fps(30)
     )
     return composite
 
@@ -89,16 +112,14 @@ def boxReveal(
     from gizeh import Surface, rectangle
 
     w = clipsize[0] + padding[0] * 2
+    h = clipsize[1] + padding[1] * 2
 
     def br(t):
-        surface = Surface(w, clipsize[1] + padding[1] * 2, bg_color=(0, 0, 0, 0))
+        surface = Surface(w, h, bg_color=(0, 0, 0, 0))
         x = max(w - t * (clipsize[0] + padding[0]) / duration * 6, padding[0])
-        rect = rectangle(
-            lx=x,
-            ly=clipsize[1] + padding[1] * 2,
-            xy=(x / 2, clipsize[1] / 2),
-            fill=fill,
-        )
+        # Full height, so centred on the surface's middle: centred on the
+        # clip's, it left the bottom padding uncovered.
+        rect = rectangle(lx=x, ly=h, xy=(x / 2, h / 2), fill=fill)
         rect.draw(surface)
         return surface.get_npimage(transparent=True)
 
@@ -140,13 +161,51 @@ def flyInAndGrow(
     return makeClip(fiag).set_duration(duration)
 
 
-def bezier2(c1x, c1y, ax, ay, c2x, c2y, **kwargs):
-    import bezier
-    import numpy as np
+class QuadraticBezier:
+    """A second-order Bézier curve in the plane, evaluated with numpy.
 
-    # return 2nd order bezier of parameters
-    nodes = np.asfortranarray([[c1x, ax, c2x], [c1y, ay, c2y]])
-    return bezier.Curve(nodes, degree=2)
+    This is all otto used the `bezier` package for: `bezier.Curve(nodes,
+    degree=2)` and its `evaluate`. bezier has no wheel for current Pythons and
+    its build imports pkg_resources, which setuptools 81 removed. `evaluate`
+    does bezier's own arithmetic, operation for operation, so it returns the
+    same floats it did.
+    """
+
+    degree = 2
+
+    def __init__(self, nodes):
+        nodes = np.asfortranarray(nodes)
+        if nodes.shape != (2, 3):
+            raise ValueError(
+                f'a quadratic curve is 3 points of 2 coordinates, not {nodes.shape}'
+            )
+        if not (np.issubdtype(nodes.dtype, np.number) or nodes.dtype == bool):
+            raise TypeError(f'its points must be numbers, not {nodes.tolist()}')
+        self.nodes = nodes.astype(float)
+        """The control points, one to a column: start, control, end."""
+
+    def evaluate(self, s):
+        """The point at parameter `s`, as a (2, 1) array like bezier's.
+
+        0 is the start and 1 the end; past either, the curve carries on, as
+        bezier's did.
+        """
+        # bezier's evaluate_multi_barycentric for degree 2, in its order:
+        # ((1 - s) * P0 + (2 * s) * P1) * (1 - s) + (s * s) * P2.
+        s = float(s)
+        r = 1.0 - s
+        point = np.zeros((2, 1), order='F')
+        point += r * self.nodes[:, [0]]
+        point += (2.0 * s) * self.nodes[:, [1]]
+        point *= r
+        point += (s * s) * self.nodes[:, [2]]
+        return point
+
+
+def bezier2(c1x, c1y, ax, ay, c2x, c2y, **kwargs):
+    """The quadratic Bézier from (c1x, c1y), pulled towards (ax, ay), to
+    (c2x, c2y)."""
+    return QuadraticBezier([[c1x, ax, c2x], [c1y, ay, c2y]])
 
 
 def makeBezier(

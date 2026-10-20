@@ -3,8 +3,9 @@
 Generic model classes for media and template data
 """
 
+from typing import List, Literal, Optional, Tuple, Union
+
 from pydantic import BaseModel
-from typing import List, Tuple, Optional, Union, Literal
 
 
 class FX(BaseModel):
@@ -33,35 +34,43 @@ class TemplateData(BaseModel):
 class Clip(BaseModel):
     """Generic Clip properties
 
-    A Clip is a single element of an EDL.
+    A Clip is a single element of an EDL. `otto.render.generateEdl` documents
+    how the timing fields combine.
     """
 
     duration: float = 5
-    """The length of the clip, in seconds"""
+    """How long the clip plays, in seconds, when it has no `outpoint`"""
 
     type: Optional[str]
-    """The source type: video, image, template"""
+    """The source type: template, video, image or audio"""
 
     name: Optional[str]
-    """The name of the template, or the url of the media"""
+    """The name of the template, or the path or URL of the media"""
 
     inpoint: Optional[float]
-    """The start time of the clip"""
+    """Where playback begins in the source, in seconds. Default 0"""
 
     outpoint: Optional[float]
-    """The end time of the clip, relative to the beginning of the clip"""
+    """Where playback ends in the source, in seconds.
+
+    When given, the clip plays for `outpoint - inpoint` seconds and `duration`
+    is not consulted."""
 
     offset: Optional[float]
-    """Offset the start time of the clip. **Depricated. Use start**"""
+    """**Deprecated: use `start` or `inpoint`.**
+
+    A positive offset is added to `start`, a negative one to `inpoint`."""
 
     start: Optional[float]
-    """Offset the start time of the clip"""
+    """Where the clip begins in the output, in seconds. Absent is 0"""
 
     position: Optional[Union[Tuple, str]]
-    """Change the (x, y) position of the clip"""
+    """The (x, y) position of the clip in the frame.
+
+    Video and image clips without one are centred."""
 
     resize: Optional[Union[float, tuple]]
-    """Scale the clip by (x, y)"""
+    """Scale the clip by a factor, or to (width, height), after it is fitted"""
 
     relative: Optional[bool] = True
     """Use relative positioning. Default = True"""
@@ -73,9 +82,18 @@ class Clip(BaseModel):
         0: transparent
         1.0: opaque"""
     fadeOut: Optional[float] = 1
+    """Seconds of fade at the end of the clip; 0 or null for none"""
+
     fadeIn: Optional[float] = 1
+    """Seconds of fade at the start of the clip; 0 or null for none"""
+
     clipsize: Optional[tuple]
+    """The size a template is drawn at, or the box media is fitted into.
+
+    Defaults to the frame."""
+
     data: Optional[TemplateData]
+    """What a template clip draws. Required for template clips"""
 
 
 class Edl(BaseModel):

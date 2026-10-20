@@ -12,8 +12,11 @@ def blacken(session):
 
 @nox.session
 def lint(session):
-    session.install('flake8')
-    session.run('flake8', '-v', '.')
+    # The project moved from flake8 to ruff, but this session did not, so it
+    # checked the code with a linter nothing else used. The rules ruff applies
+    # are in pyproject.toml.
+    session.install('ruff')
+    session.run('ruff', 'check', '.')
 
 
 @nox.session(tags=['test'])

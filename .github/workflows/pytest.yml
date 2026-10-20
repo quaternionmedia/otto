@@ -22,15 +22,13 @@ jobs:
     name: 🐍 pytest
     runs-on: ubuntu-latest
     environment: codecov
-    env:
-      BEZIER_NO_EXTENSION: true
 
     steps:
       - name: 📰 Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: 🐍 Setup Python
-        uses: actions/setup-python@main
+        uses: actions/setup-python@v7
         id: setup-python
         with:
           python-version: ${{ inputs.python_version }}
@@ -39,14 +37,24 @@ jobs:
       - name: 🏗️ Install dependencies
         run: pip install .${{ inputs.pip_extras }}
 
-      - name: 🖼️ Install Imagemagick
-        uses: mfinelli/setup-imagemagick@v2
+      # ImageMagick from apt, not the AppImage this used: that needed libfuse2,
+      # which ubuntu-24.04 renamed libfuse2t64, and was installed without an
+      # apt-get update. The policy file it then deleted was ImageMagick 6's,
+      # which the runner image no longer ships, so `rm` failed the job.
+      #
+      # moviepy hands text to ImageMagick as `@file`, which the distribution
+      # policy forbids; that one rule is removed rather than the whole policy.
+      - name: 🖼️ Install ImageMagick, fonts and cairo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            imagemagick libcairo2 fonts-open-sans fonts-urw-base35
+          for policy in /etc/ImageMagick-6/policy.xml /etc/ImageMagick-7/policy.xml; do
+            if [ -f "$policy" ]; then sudo sed -i '/pattern="@\*"/d' "$policy"; fi
+          done
 
       - name: 🛸 Configure extra test dependencies
-        run: |
-          sudo apt install -y libfuse2 fonts-open-sans
-          mkdir -p data
-          sudo rm /etc/ImageMagick-6/policy.xml
+        run: mkdir -p data
 
       - name: 🧪 Run pytest suite
         run: pytest -v --cov --cov-report lcov ${{ inputs.pytest_args }}
@@ -55,6 +63,6 @@ jobs:
         # always run this step, even if the tests fail
         # putting always() would cause the function to run even if the build is canceled
         if: success() || failure()
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

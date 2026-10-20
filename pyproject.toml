@@ -12,10 +12,22 @@ authors = [
 ]
 dependencies = [
     "fastapi~=0.95",
-    "moviepy~=1.0",
+    # moviepy 2 is another API (no moviepy.editor, renamed methods); otto is
+    # written against 1.0.3.
+    "moviepy>=1.0.3,<2",
+    # Imported by otto directly, not only through moviepy.
+    "numpy>=1.17.3",
+    # 9.5 is what alfred pins; 10 and later need the shim in otto/__init__.py.
+    "Pillow>=9.5",
     "pydantic~=1.10",
+    "requests~=2.28",
+    "tqdm~=4.65",
 ]
-requires-python = ">=3.8.1,<4.0"
+# Capped at the newest Python every allowed pydantic supports: `pydantic~=1.10`
+# admits 1.10.0-1.10.15, whose last supported Python is 3.11 (3.12 needs
+# 1.10.17, 3.13 needs 1.10.21, 3.14 needs 1.10.25). Raise the cap together with
+# the pydantic floor.
+requires-python = ">=3.8.1,<3.12"
 readme = "README.md"
 license = {text = "MIT"}
 
@@ -27,8 +39,6 @@ repository = "https://github.com/quaternionmedia/otto"
 [project.optional-dependencies]
 render = [
     "gizeh~=0.1",
-    "bezier~=2021.2",
-    "tqdm~=4.65",
 ]
 test = [
     "pytest~=7.3",
@@ -61,3 +71,20 @@ version = { source = "file", path = "otto/_version.py" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "render: draws text or shapes; needs ImageMagick (with fonts and a policy allowing @file text) and cairo",
+]
+
+[tool.black]
+skip-string-normalization = true
+
+[tool.ruff]
+# Explicit, because without it ruff applies its own default rule set, which
+# has grown to report style (unneeded `pass`, executable bits, `int(round())`)
+# far more than mistakes. These are ruff's long-standing defaults plus import
+# sorting and bugbear. Layout is Black's (`-S`).
+target-version = "py38"
+src = [".", "tests"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "B"]
