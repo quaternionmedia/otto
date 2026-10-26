@@ -126,7 +126,7 @@ from otto.exceptions import NoSoundException
 from otto.models import Edl
 from otto.render import renderSound
 
-edl = Edl.parse_obj({
+edl = Edl.model_validate({
     'clips': [
         {'type': 'template', 'name': 'makeColor', 'duration': 7,
          'data': {'color': '#203040'}},
