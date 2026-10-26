@@ -332,7 +332,7 @@ def _make_template(clip, where, moviesize, duration):
         )
     if clip.data is None:
         raise EdlException(f'{where}: a template clip needs `data`')
-    data = clip.data.dict(exclude_none=True)
+    data = clip.data.model_dump(exclude_none=True)
     if 'position' in data:
         _check_position(data['position'], where, 'data.position')
         if not data['position']:
