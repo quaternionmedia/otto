@@ -1,8 +1,10 @@
-from fastapi import APIRouter
-from otto.models import Edl, Render
-from otto.render import generateEdl
-from otto.getdata import timestr
 from os.path import join
+
+from fastapi import APIRouter
+
+from otto.getdata import timestr
+from otto.models import Edl, Render
+from otto.render import renderFrame
 
 previewAPI = APIRouter()
 
@@ -19,10 +21,8 @@ async def previewFrame(t: float, render: Render):
         c for c in render.edl.clips if t >= (c.start or 0) + (c.offset or 0)
     ]
     print('generating active clips', active_clips, t)
-    video = generateEdl(
-        Edl(clips=active_clips), moviesize=(render.width, render.height)
-    )
     frame_name = join('data', timestr() + '.jpg')
-    print(f'saving frame {t} as: {frame_name}', video)
-    video.save_frame(frame_name, t=t, withmask=False)
-    return frame_name
+    print(f'saving frame {t} as: {frame_name}')
+    return renderFrame(
+        Edl(clips=active_clips), t, frame_name, moviesize=(render.width, render.height)
+    )

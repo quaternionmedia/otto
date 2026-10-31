@@ -53,4 +53,12 @@ parser.add_argument(
     help='size of rendered movie',
 )
 
-args = parser.parse_args()
+
+def parse_args(argv=None):
+    """The parsed command line: `argv`, or sys.argv when it is None.
+
+    Parsing used to happen when this module was imported, so importing it
+    from any other program -- a test runner, a worker -- read that program's
+    arguments, and exited it on any it did not recognise.
+    """
+    return parser.parse_args(argv)

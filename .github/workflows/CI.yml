@@ -6,6 +6,9 @@ jobs:
   tests:
     name: ⚗️ Application Tests
     uses: ./.github/workflows/pytest.yml
+    # codecov-action v4 and later upload with a token (CODECOV_TOKEN), which a
+    # called workflow only sees when it is passed on.
+    secrets: inherit
     with:
       pip_extras: '[test,render]'
 

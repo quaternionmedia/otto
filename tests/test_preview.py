@@ -1,10 +1,11 @@
-from fastapi.testclient import TestClient
-from otto.main import app
-from otto.models import Edl, Clip, TemplateData
-from otto.exceptions import EmptyClipsException
-from pytest import raises
 from os import path
-from pytest import mark
+
+from fastapi.testclient import TestClient
+from pytest import mark, raises
+
+from otto.exceptions import EmptyClipsException
+from otto.main import app
+from otto.models import Clip, Edl, TemplateData
 
 TEST_DIR = path.dirname(path.realpath(__file__))
 

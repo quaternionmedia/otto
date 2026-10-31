@@ -17,6 +17,10 @@ otto/examples/*
 # pip files
 otto.egg*
 
+# bytecode, written wherever otto is imported from
+__pycache__/
+*.py[cod]
+
 # test
 .nox
 
