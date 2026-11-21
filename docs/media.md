@@ -77,3 +77,31 @@ demoClip('videos/bars-and-tone.mp4', 'bars', tone=1000)
   `ValueError` before ffmpeg runs. ffmpeg failing is an `FFmpegException`
   (`otto.exceptions`), whose `stderr` is everything ffmpeg said. An ffmpeg
   that cannot be started is an `OSError`.
+
+## Motion
+
+`otto.media.motion(path, rate=4, size=(32, 18))` returns a `Motion`: how much
+the picture of a video changes over time, `rate` values a second, each 0 to 1.
+
+```python
+from otto.media import motion
+
+moved = motion('videos/talk.mp4')
+moved.rate          # 4.0
+moved.values[:3]    # [0.0, 0.0127, 0.0098]
+```
+
+- **Decoded small, in grey.** ffmpeg decodes the picture at `rate` frames a
+  second, reduced to `size` pixels and to one grey channel; each value is the
+  mean absolute change from the frame before, over every pixel, as a fraction
+  of black to white. A still picture is 0 throughout; a cut from one shot to
+  another is one high value; a camera that moves or a figure that crosses the
+  frame raises the values while it lasts. The measure says how much, not
+  which.
+- **The whole recording is decoded**, so hours of picture cost minutes. A
+  caller keeps the answer, keyed as it keys a probe.
+- **Errors.** A `rate` or `size` that is not positive is a `ValueError`
+  before ffmpeg runs. A file whose picture ffmpeg cannot read -- not a video,
+  not there, a sound with no picture -- is an `FFmpegException`
+  (`otto.exceptions`) carrying what ffmpeg said; `timeout` seconds passed is a
+  `TimeoutError`; an ffmpeg that cannot be started is an `OSError`.
