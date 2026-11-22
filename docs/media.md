@@ -105,3 +105,31 @@ moved.values[:3]    # [0.0, 0.0127, 0.0098]
   not there, a sound with no picture -- is an `FFmpegException`
   (`otto.exceptions`) carrying what ffmpeg said; `timeout` seconds passed is a
   `TimeoutError`; an ffmpeg that cannot be started is an `OSError`.
+
+## Scene changes
+
+`otto.media.scenes(path, threshold=0.4, rate=4, size=(64, 36))` returns a
+`Scenes`: where the picture of a video cuts from one shot to another, as the
+seconds each new shot begins at, with the `threshold` they passed.
+
+```python
+from otto.media import scenes
+
+cuts = scenes('videos/talk.mp4')
+cuts.threshold      # 0.4
+cuts.seconds[:3]    # [12.25, 47.5, 48.0]
+```
+
+- **ffmpeg's own score.** The picture is decoded at `rate` frames a second,
+  reduced to `size` pixels in grey, and ffmpeg's `select` filter scores each
+  frame by how much of the picture changed from the frame before, 0 to 1;
+  the frames whose score passes `threshold` are the answer, each to the
+  rate's precision. A hard cut passes at any rate; a slow dissolve, a flash
+  or a camera swung fast may pass or not, and the measure does not say which
+  happened. The first frame begins no shot.
+- **The whole recording is decoded**, as for motion, so a caller keeps the
+  answer.
+- **Errors.** As motion's: a `threshold` outside 0 to 1, or a `rate` or
+  `size` that is not positive, is a `ValueError` before ffmpeg runs; a file
+  whose picture ffmpeg cannot read is an `FFmpegException`; `timeout` passed
+  is a `TimeoutError`; an ffmpeg that cannot be started is an `OSError`.

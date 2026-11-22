@@ -272,3 +272,107 @@ def motion(path, rate=MOTION_RATE, size=MOTION_SIZE, timeout=None) -> Motion:
     changes = np.abs(frames[1:].astype(np.int16) - frames[:-1].astype(np.int16))
     values = [0.0] + [round(float(v), 4) for v in changes.mean(axis=1) / 255.0]
     return Motion(rate=rate, values=values)
+
+
+# --- scene changes -----------------------------------------------------------------
+
+# ffmpeg's scene score, 0 to 1, above which a frame begins a new shot: how
+# much of the picture changed from the frame before, as ffmpeg's `select`
+# filter scores it.
+SCENE_THRESHOLD = 0.4
+# How many frames a second are looked at for a change of shot, and the size
+# they are looked at. A cut shows at any rate; a dissolve spreads over frames.
+SCENE_RATE = 4
+SCENE_SIZE = (64, 36)
+
+_PTS_TIME = re.compile(r'pts_time:\s*(-?\d+(?:\.\d+)?)')
+
+
+class Scenes(NamedTuple):
+    """Where a video's picture cuts from one shot to another."""
+
+    threshold: float
+    """The scene score a frame had to pass, 0 to 1."""
+
+    seconds: List[float]
+    """Each the moment a new shot begins, from the start of the file, in
+    order; the first frame begins no shot, having none before it."""
+
+
+def _check_threshold(threshold):
+    if (
+        isinstance(threshold, bool)
+        or not isinstance(threshold, (int, float))
+        or not 0 < threshold <= 1
+    ):
+        raise ValueError(
+            f'threshold must be a scene score above 0 and at most 1, not {threshold!r}'
+        )
+    return float(threshold)
+
+
+def _scene_log(path, threshold, rate, size, timeout) -> Tuple[str, int]:
+    """What ffmpeg says of the frames at `path` that pass `threshold`, looked at
+    `rate` a second at `size` in grey: its log, with `showinfo`'s line per
+    frame selected, and how it ended."""
+    width, height = size
+    result = subprocess.run(
+        [
+            get_setting('FFMPEG_BINARY'),
+            '-hide_banner',
+            '-nostdin',
+            '-loglevel',
+            'info',
+            '-i',
+            f'file:{os.fspath(path)}',
+            '-map',
+            '0:v:0',
+            '-vf',
+            f'fps={rate:g},scale={width}:{height}:flags=area,format=gray,'
+            f"select='gt(scene,{threshold:g})',showinfo",
+            '-f',
+            'null',
+            '-',
+        ],
+        capture_output=True,
+        timeout=timeout,
+    )
+    return result.stderr.decode('utf-8', errors='replace'), result.returncode
+
+
+def scenes(
+    path, threshold=SCENE_THRESHOLD, rate=SCENE_RATE, size=SCENE_SIZE, timeout=None
+) -> Scenes:
+    """Where the picture of the video at `path` cuts from one shot to another.
+
+    ffmpeg decodes the picture at `rate` frames a second, reduced to `size`
+    pixels in grey, scores each frame by how much of the picture changed
+    from the frame before (its `select` filter's `scene` score, 0 to 1), and
+    the moments whose score passes `threshold` are the answer, each to the
+    rate's precision. A hard cut passes at any rate; a slow dissolve, a flash
+    or a camera swung fast may pass or not, and the measure does not say
+    which happened. `timeout` bounds ffmpeg in seconds; None waits for it. A
+    whole recording is decoded, so the measure costs minutes for hours of
+    picture: a caller keeps the answer.
+
+    Raises ValueError, before ffmpeg is asked anything, for a `threshold`
+    outside 0 to 1 or a `rate` or `size` that is not positive;
+    FFmpegException, carrying what ffmpeg said, for a file whose picture
+    ffmpeg cannot read; TimeoutError past `timeout`; and OSError when ffmpeg
+    cannot be started.
+    """
+    threshold = _check_threshold(threshold)
+    rate, size = _check_motion(rate, size)
+    try:
+        said, status = _scene_log(path, threshold, rate, size, timeout)
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError(
+            f'ffmpeg took longer than {timeout}s to read the picture of {os.fspath(path)}'
+        ) from exc
+    if status != 0:
+        raise FFmpegException(
+            f'ffmpeg could not read the picture of {os.fspath(path)}: {said[-400:].strip()}',
+            stderr=said,
+        )
+    seconds = sorted({round(float(t), 3) for t in _PTS_TIME.findall(said)})
+    return Scenes(threshold=threshold, seconds=[t for t in seconds if t > 0])
