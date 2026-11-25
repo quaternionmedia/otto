@@ -26,13 +26,13 @@ def test_empty_post():
 
 def test_without_t():
     """POST an Edl with no t content. Should give validation error"""
-    edl = {'edl': Edl(clips=[]).dict()}
+    edl = {'edl': Edl(clips=[]).model_dump()}
     response = client.post('/preview', json=edl)
     assert response.status_code == 422, 'Route requires t parameter'
     error = response.json()
     assert len(error['detail']) == 1, 'There should only be one error here'
     assert error['detail'][0]['loc'] == ['query', 't']
-    assert error['detail'][0]['type'] == 'value_error.missing'
+    assert error['detail'][0]['type'] == 'missing'
 
 
 def test_empty_edl():
@@ -40,7 +40,7 @@ def test_empty_edl():
 
     Should validate sucessfully, but raise a rendering exception"""
     with raises(EmptyClipsException):
-        edl = {'edl': Edl(clips=[]).dict()}
+        edl = {'edl': Edl(clips=[]).model_dump()}
         client.post('/preview?t=0', json=edl)
 
 
@@ -56,9 +56,11 @@ def check_rendered_image(edl: Edl):
 def test_color_clip():
     """Test an Edl with one Black video clip"""
     clip = Clip(
-        type='template', name='makeColor', data=TemplateData(color='#000000').dict()
-    ).dict()
-    edl = {'edl': Edl(clips=[clip]).dict()}
+        type='template',
+        name='makeColor',
+        data=TemplateData(color='#000000').model_dump(),
+    ).model_dump()
+    edl = {'edl': Edl(clips=[clip]).model_dump()}
     check_rendered_image(edl)
 
 
@@ -71,8 +73,8 @@ def test_text_clip():
         duration=2,
         start=0,
         data=TemplateData(text='test', color='#FFFFFF'),
-    ).dict()
-    edl = {'edl': Edl(clips=[clip], duration=2).dict()}
+    ).model_dump()
+    edl = {'edl': Edl(clips=[clip], duration=2).model_dump()}
     check_rendered_image(edl)
 
 
@@ -83,8 +85,8 @@ def test_image_clip():
         type='image',
         name=path.join(TEST_DIR, 'black.png'),
         duration=1,
-    ).dict()
-    edl = {'edl': Edl(clips=[clip], duration=1).dict()}
+    ).model_dump()
+    edl = {'edl': Edl(clips=[clip], duration=1).model_dump()}
     check_rendered_image(edl)
 
 
@@ -95,8 +97,8 @@ def test_video_clip():
         type='video',
         name=path.join(TEST_DIR, 'black.mp4'),
         duration=1,
-    ).dict()
-    edl = {'edl': Edl(clips=[clip], duration=1).dict()}
+    ).model_dump()
+    edl = {'edl': Edl(clips=[clip], duration=1).model_dump()}
     check_rendered_image(edl)
 
 

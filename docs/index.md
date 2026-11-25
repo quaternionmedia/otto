@@ -9,9 +9,9 @@ pip install al-otto
 ```
 
 otto runs on Python `>=3.8.1,<3.12` (`requires-python` in pyproject.toml);
-CI and the Dockerfile run 3.11. The cap is pydantic's: otto allows
-`pydantic~=1.10`, whose oldest releases support no Python newer than 3.11, so
-the cap rises only with the pydantic floor.
+CI and the Dockerfile run 3.11. pydantic no longer sets the cap. Every release
+`pydantic~=2.5` allows ships wheels for 3.12; a floor of 2.8 adds 3.13, and
+2.12 adds 3.14. Raising the cap waits on the suite passing on the newer Python.
 
 Drawing text and shapes needs the `render` extra (`pip install
 al-otto[render]`) and, from the system, fonts, cairo, and ImageMagick with a

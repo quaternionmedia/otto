@@ -13,8 +13,8 @@ pip install al-otto
 ```
 
 otto runs on Python `>=3.8.1,<3.12` (`requires-python` in
-[pyproject.toml](pyproject.toml)); CI and the Dockerfile run 3.11. The cap is
-pydantic's; [docs/index.md](docs/index.md#install) says why.
+[pyproject.toml](pyproject.toml)); CI and the Dockerfile run 3.11.
+[docs/index.md](docs/index.md#install) says what raising the cap takes.
 
 ## Optional packages
 
