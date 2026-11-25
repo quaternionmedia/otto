@@ -7,9 +7,11 @@ for a display matrix.
 """
 
 import shutil
+import subprocess
 
 import pytest
 
+from ffmpeg_samples import ROTATED_7, ROTATED_9
 from helpers import rotated_copy
 from otto import render
 from otto.models import Clip, Edl
@@ -84,6 +86,21 @@ def test_a_turned_video_is_upright_from_the_cache_too(media, probes, tmp_path):
 
     assert tuple(first.size) == tuple(second.size) == (20, 36)
     assert len(probes) == asked
+
+
+@pytest.mark.parametrize(
+    'description', [ROTATED_7, ROTATED_9], ids=['ffmpeg-7.0', 'ffmpeg-9']
+)
+def test_a_display_matrix_is_read_in_either_spelling(monkeypatch, description):
+    """The installed ffmpeg prints one spelling, so the suite's own files test
+    only that one; this reads each, whichever ffmpeg is installed."""
+
+    def described(args, **kwargs):
+        return subprocess.CompletedProcess(args, 1, stdout='', stderr=description)
+
+    monkeypatch.setattr(render.subprocess, 'run', described)
+
+    assert abs(render._display_matrix_rotation('turned.mp4')) == 90
 
 
 def test_how_many_probes_are_kept_is_bounded():

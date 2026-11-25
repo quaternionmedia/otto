@@ -25,7 +25,8 @@ found.sound     # True
   `otto.media.parse` reads the description. The file is named to ffmpeg as
   `file:<path>`, so a name is only ever a file, never another protocol.
 - **Size as shown.** A `rotate` tag or a display matrix of a quarter turn
-  swaps width and height.
+  swaps width and height. `otto.media.rotation(description)` is the angle
+  itself, read from each form ffmpeg prints; rendering reads it there too.
 - **`type` is the clip the file is for:** `video`, `image` or `audio`; None
   reads everything ffmpeg describes. An image is a still, with no duration,
   frame rate or sound whatever ffmpeg says (it gives a still a nominal 25
