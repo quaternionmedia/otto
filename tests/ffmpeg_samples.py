@@ -1,9 +1,10 @@
 """What ffmpeg prints about an input, for test_media.py to read.
 
 Not a test module (no `test_` prefix). Real output: the 4.2 build an older
-imageio-ffmpeg shipped, describing files it made, and a current build's
-(stream ids in brackets, rotation as side data only). They came from alfred,
-whose probe they pinned until otto probed media.
+imageio-ffmpeg shipped, describing files it made, and later builds' (stream
+ids in brackets, rotation as side data only). They came from alfred, whose
+probe they pinned until otto probed media, but for ROTATED_9: imageio-ffmpeg
+0.8.1's ffmpeg 9 describing a turned copy of the suite's `wide` file.
 """
 
 MP4_WITH_SOUND = """\
@@ -59,12 +60,37 @@ ROTATED_42 = """\
       displaymatrix: rotation of 90.00 degrees
 """
 
-# A current ffmpeg: stream ids in brackets, no `rotate` tag, side data only.
-ROTATED_CURRENT = """\
+# ffmpeg 7.0's form: stream ids in brackets, no `rotate` tag, side data only,
+# spelt `displaymatrix:`.
+ROTATED_7 = """\
   Duration: 00:01:02.50, start: 0.000000, bitrate: 2000 kb/s
   Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), \
 yuv420p(tv, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 1800 kb/s, \
 59.94 fps, 59.94 tbr, 60k tbn (default)
       Side data:
         displaymatrix: rotation of -90.00 degrees
+"""
+
+# ffmpeg 9's: the same form, the side data spelt `Display Matrix:`.
+ROTATED_9 = """\
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'file:rotated.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf63.1.102
+  Duration: 00:00:02.00, start: 0.000000, bitrate: 88 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), \
+yuv420p(progressive), 160x90 [SAR 1:1 DAR 16:9], 5 kb/s, 25 fps, 25 tbr, \
+12800 tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      encoder         : Lavc63.1.102 libx264
+    Side data:
+      Display Matrix: rotation of 90.00 degrees
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, mono, \
+fltp, 70 kb/s (default)
+    Metadata:
+      handler_name    : SoundHandler
+At least one output file must be specified
 """
