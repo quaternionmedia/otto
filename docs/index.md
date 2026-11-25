@@ -40,6 +40,8 @@ pip install -e .[render,test]
 
 ## Guides
 
+- [The timeline](timeline.md): an Edl and its clips, field by field, with how
+  a clip is timed and what a template clip draws.
 - [Rendering](rendering.md): encoding an Edl by a named preset, drawing one
   frame of it, and writing its sound alone. The
   [reference](reference/render.md) has each function.
