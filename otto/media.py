@@ -73,6 +73,18 @@ def _check_type(type):
         )
 
 
+def rotation(description: str) -> float:
+    """How far `ffmpeg -i`'s description of an input says its picture is
+    turned, in degrees, or 0 when it says nothing of it.
+
+    ffmpeg says it as a `rotate` tag (ffmpeg 4) or as a display matrix, which
+    it spells `displaymatrix:` (ffmpeg 7.0) or `Display Matrix:` (ffmpeg 9).
+    Each is read; the first one ffmpeg printed is the answer.
+    """
+    match = _ROTATION.search(description)
+    return float(match[1] or match[2]) if match else 0.0
+
+
 def parse(description: str, type=None) -> MediaInfo:
     """Read what `ffmpeg -i` said about an input, on its standard error.
 
@@ -82,8 +94,8 @@ def parse(description: str, type=None) -> MediaInfo:
     still a nominal 25 fps, and an animated GIF its own); `audio` has no
     picture, so an MP3's cover art is not one. None reads everything.
 
-    The picture's size is as it is shown: a `rotate` tag (ffmpeg 4) or a
-    display matrix (ffmpeg 5 and later) of a quarter turn swaps its sides.
+    The picture's size is as it is shown: a quarter turn, as `rotation` reads
+    it, swaps its sides.
     `sound` is None when ffmpeg described no stream at all.
     """
     _check_type(type)
@@ -99,12 +111,9 @@ def parse(description: str, type=None) -> MediaInfo:
         size = _SIZE.search(stream['description'])
         if size:
             width, height = int(size[1]), int(size[2])
-            rotation = _ROTATION.search(description)
-            if rotation:
-                angle = float(rotation[1] or rotation[2])
-                # A quarter turn shows the picture the other way round.
-                if round(angle) % 180 == 90:
-                    width, height = height, width
+            # A quarter turn shows the picture the other way round.
+            if round(rotation(description)) % 180 == 90:
+                width, height = height, width
         rate = _FPS.search(stream['description'])
         if rate and type != 'image':
             fps = float(rate[1]) * (1000 if rate[2] else 1)

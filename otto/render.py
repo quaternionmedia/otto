@@ -2,7 +2,6 @@ import functools
 import math
 import numbers
 import os
-import re
 import subprocess
 import wave
 from typing import NamedTuple
@@ -15,6 +14,7 @@ from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
 from PIL import Image
 
+from otto import media
 from otto.exceptions import (
     DownloadException,
     EdlException,
@@ -68,11 +68,9 @@ def _fit(size, box):
     return max(1, round(width * scale)), max(1, round(height * scale))
 
 
-_DISPLAY_MATRIX = re.compile(r'displaymatrix: rotation of (-?\d+(?:\.\d+)?) degrees')
-
-
 def _display_matrix_rotation(path):
-    """The rotation ffmpeg reports for `path` as a display matrix, or 0."""
+    """The rotation ffmpeg reports for `path`, as `otto.media.rotation` reads
+    it, or 0."""
     probe = subprocess.run(
         [get_setting('FFMPEG_BINARY'), '-hide_banner', '-i', path],
         stdin=subprocess.DEVNULL,
@@ -80,16 +78,16 @@ def _display_matrix_rotation(path):
         text=True,
         errors='replace',
     )
-    match = _DISPLAY_MATRIX.search(probe.stderr)
-    return float(match.group(1)) if match else 0
+    return media.rotation(probe.stderr)
 
 
 def _rotation(path, infos):
     """How far the file says its picture is turned, in degrees.
 
-    moviepy reads the `rotate` tag that ffmpeg 4 prints. ffmpeg 5 and later
-    print only a display matrix -- imageio-ffmpeg 0.6 bundles ffmpeg 7 -- so
-    without asking ffmpeg again, a portrait phone video looked unrotated.
+    moviepy reads the `rotate` tag that ffmpeg 4 prints, and no display
+    matrix, which is all later ffmpegs print. For a file moviepy finds no tag
+    in, ffmpeg is asked again and `otto.media.rotation` reads the answer, in
+    each spelling ffmpeg gives a display matrix.
     """
     return infos.get('video_rotation') or _display_matrix_rotation(path)
 

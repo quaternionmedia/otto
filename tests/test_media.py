@@ -17,13 +17,14 @@ from ffmpeg_samples import (
     MP3_WITH_COVER_ART,
     MP4_WITH_SOUND,
     PNG,
+    ROTATED_7,
+    ROTATED_9,
     ROTATED_42,
-    ROTATED_CURRENT,
     WEBM_NTSC,
 )
 from helpers import rotated_copy
 from otto import media
-from otto.media import UNKNOWN, MediaInfo, parse, probe
+from otto.media import UNKNOWN, MediaInfo, parse, probe, rotation
 
 
 class TestParsing:
@@ -63,16 +64,47 @@ class TestParsing:
         )
         assert parse(MP3_WITH_COVER_ART).size == (500, 500)
 
-    @pytest.mark.parametrize('description', [ROTATED_42, ROTATED_CURRENT])
+    @pytest.mark.parametrize(
+        'description',
+        [ROTATED_42, ROTATED_7, ROTATED_9],
+        ids=['ffmpeg-4.2', 'ffmpeg-7.0', 'ffmpeg-9'],
+    )
     def test_a_quarter_turn_swaps_the_picture_s_sides(self, description):
         """What is shown, which is what an editor lays out."""
         found = parse(description, 'video')
         assert found.height > found.width
 
-    def test_a_current_ffmpeg_s_output(self):
-        assert parse(ROTATED_CURRENT, 'video') == MediaInfo(
-            duration=62.5, width=1080, height=1920, fps=59.94, sound=False
-        )
+    @pytest.mark.parametrize(
+        'description, found',
+        [
+            (
+                ROTATED_7,
+                MediaInfo(
+                    duration=62.5, width=1080, height=1920, fps=59.94, sound=False
+                ),
+            ),
+            (
+                ROTATED_9,
+                MediaInfo(duration=2.0, width=90, height=160, fps=25.0, sound=True),
+            ),
+        ],
+        ids=['ffmpeg-7.0', 'ffmpeg-9'],
+    )
+    def test_a_display_matrix_alone(self, description, found):
+        assert parse(description, 'video') == found
+
+    @pytest.mark.parametrize(
+        'description, angle',
+        [(ROTATED_42, 270.0), (ROTATED_7, -90.0), (ROTATED_9, 90.0)],
+        ids=['ffmpeg-4.2', 'ffmpeg-7.0', 'ffmpeg-9'],
+    )
+    def test_rotation_is_read_in_each_form_ffmpeg_prints(self, description, angle):
+        """A `rotate` tag, and a display matrix in either spelling. With both,
+        as ffmpeg 4.2 prints them, the tag comes first."""
+        assert rotation(description) == angle
+
+    def test_a_picture_that_is_not_turned_is_at_0(self):
+        assert rotation(MP4_WITH_SOUND) == 0.0
 
     def test_nothing_recognisable_is_unknown(self):
         assert parse('file: Invalid data found when processing input', 'video') == (
