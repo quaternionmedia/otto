@@ -1,19 +1,25 @@
 """What a media file holds: how long it runs, how big its picture is, how
-fast its frames come, and whether it has a sound.
+fast its frames come, and whether it has a sound; and how much its picture
+moves over time.
 
 `probe` asks the ffmpeg otto encodes with to describe a file -- `ffmpeg -i`,
 which reads the file's headers, prints what it found and exits, decoding
-nothing -- and `parse` reads that description. Each call starts ffmpeg once:
-a caller that asks about the same files often keeps the answers itself, keyed
-by whatever says a file has changed.
+nothing -- and `parse` reads that description. `motion` has the same ffmpeg
+decode the picture small and measures how much it changes from one moment
+to the next. Each call starts ffmpeg once: a caller that asks about the same
+files often keeps the answers itself, keyed by whatever says a file has
+changed.
 """
 
 import os
 import re
 import subprocess
-from typing import NamedTuple, Optional
+from typing import List, NamedTuple, Optional, Tuple
 
+import numpy as np
 from moviepy.config import get_setting
+
+from .exceptions import FFmpegException
 
 PROBE_TIMEOUT = 10
 """Seconds `probe` gives ffmpeg to describe a file. Long enough for a large
@@ -166,3 +172,112 @@ def probe(path, type=None, timeout=PROBE_TIMEOUT) -> MediaInfo:
             f'ffmpeg took longer than {timeout}s to describe {os.fspath(path)}'
         ) from exc
     return parse(description, type)
+
+
+# --- motion -----------------------------------------------------------------------
+
+MOTION_RATE = 4
+"""How many times a second `motion` measures the picture, unless asked
+otherwise: enough to place a burst of movement to the quarter second."""
+
+MOTION_SIZE = (32, 18)
+"""The size, in pixels, the picture is reduced to before it is measured:
+enough to see a camera move or a figure cross the frame, at a fraction of
+the cost of the full picture."""
+
+
+class Motion(NamedTuple):
+    """How much a picture changes over time."""
+
+    rate: float
+    """How many values a second."""
+
+    values: List[float]
+    """Each 0 to 1: the mean change of the picture from the moment before,
+    over every pixel of the reduced grey picture, 1 being black to white
+    everywhere. The first value is 0, there being no moment before it."""
+
+
+def _check_motion(rate, size):
+    if not isinstance(rate, (int, float)) or isinstance(rate, bool) or not rate > 0:
+        raise ValueError(
+            f'rate must be a positive number of values a second, not {rate!r}'
+        )
+    try:
+        width, height = size
+    except (TypeError, ValueError):
+        raise ValueError(
+            f'size must be (width, height) in pixels, not {size!r}'
+        ) from None
+    for side in (width, height):
+        if isinstance(side, bool) or not isinstance(side, int) or not side > 0:
+            raise ValueError(f'size must be (width, height) in pixels, not {size!r}')
+    return float(rate), (int(width), int(height))
+
+
+def _frames(path, rate, size, timeout) -> Tuple[bytes, str, int]:
+    """The picture at `path`, `rate` frames a second at `size` in grey, as raw
+    bytes: what ffmpeg wrote, what it said, and how it ended."""
+    width, height = size
+    result = subprocess.run(
+        [
+            get_setting('FFMPEG_BINARY'),
+            '-hide_banner',
+            '-nostdin',
+            '-loglevel',
+            'error',
+            '-i',
+            f'file:{os.fspath(path)}',
+            '-vf',
+            f'fps={rate:g},scale={width}:{height}:flags=area,format=gray',
+            '-f',
+            'rawvideo',
+            '-',
+        ],
+        capture_output=True,
+        timeout=timeout,
+    )
+    return (
+        result.stdout,
+        result.stderr.decode('utf-8', errors='replace'),
+        result.returncode,
+    )
+
+
+def motion(path, rate=MOTION_RATE, size=MOTION_SIZE, timeout=None) -> Motion:
+    """How much the picture of the video at `path` changes over time.
+
+    ffmpeg decodes the picture at `rate` frames a second, reduced to `size`
+    pixels in grey; each value is the mean absolute change from the frame
+    before, over every pixel, as a fraction of black to white, so a still
+    picture measures 0 throughout and a cut from one shot to another
+    measures high for one value. A camera that moves, a figure that crosses
+    the frame and a scene change all show; what the values do not say is
+    which. `timeout` bounds ffmpeg in seconds; None waits for it. A whole
+    recording is decoded, so the measure costs minutes for hours of picture:
+    a caller keeps the answer.
+
+    Raises ValueError, before ffmpeg is asked anything, for a `rate` or `size`
+    that is not positive; FFmpegException, carrying what ffmpeg said, for a
+    file whose picture ffmpeg cannot read -- not a video, not there, a sound
+    with no picture; TimeoutError past `timeout`; and OSError when ffmpeg
+    cannot be started.
+    """
+    rate, size = _check_motion(rate, size)
+    try:
+        raw, said, status = _frames(path, rate, size, timeout)
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError(
+            f'ffmpeg took longer than {timeout}s to read the picture of {os.fspath(path)}'
+        ) from exc
+    pixels = size[0] * size[1]
+    count = len(raw) // pixels
+    if status != 0 or count == 0:
+        raise FFmpegException(
+            f'ffmpeg could not read the picture of {os.fspath(path)}: {said[-400:].strip()}',
+            stderr=said,
+        )
+    frames = np.frombuffer(raw[: count * pixels], dtype=np.uint8).reshape(count, pixels)
+    changes = np.abs(frames[1:].astype(np.int16) - frames[:-1].astype(np.int16))
+    values = [0.0] + [round(float(v), 4) for v in changes.mean(axis=1) / 255.0]
+    return Motion(rate=rate, values=values)
